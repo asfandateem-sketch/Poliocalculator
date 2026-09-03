@@ -1,0 +1,7 @@
+{
+  "name": "Polio Campaign Calculator",
+  "description": "Mobile-friendly field calculator for polio campaign workers, vaccinators, supervisors, and UC staff.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
