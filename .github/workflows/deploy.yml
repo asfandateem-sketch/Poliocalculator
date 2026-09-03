@@ -1,56 +1,62 @@
-name: Deploy Polio Calculator to GitHub Pages
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+export default defineConfig({
+  base: '/Poliocalculator/',
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+  plugins: [
+    react(),
+    tailwindcss(),
 
-concurrency:
-  group: pages
-  cancel-in-progress: true
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['icon.svg'],
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+      manifest: {
+        id: '/Poliocalculator/',
+        name: 'Polio Campaign Calculator',
+        short_name: 'PolioCalc',
+        description:
+          'Mobile-friendly field calculator for polio campaign workers, vaccinators, supervisors, and UC staff.',
+        theme_color: '#0d9488',
+        background_color: '#f8fafc',
+        display: 'standalone',
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+        start_url: '/Poliocalculator/',
+        scope: '/Poliocalculator/',
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+        icons: [
+          {
+            src: '/Poliocalculator/icon.svg',
+            sizes: '512x512 192x192',
+            type: 'image/svg+xml',
+            purpose: 'any',
+          },
+        ],
+      },
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+      },
 
-      - name: Build application
-        run: bun run build
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
+    }),
+  ],
 
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v5
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, '.'),
+    },
+  },
 
-      - name: Upload build artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: ./dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+  server: {
+    hmr: process.env.DISABLE_HMR !== 'true',
+    watch: process.env.DISABLE_HMR === 'true' ? null : {},
+  },
+});
