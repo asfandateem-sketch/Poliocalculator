@@ -684,3 +684,158 @@ export function calculateRefusal(
   };
 }
 
+export interface MissedChildrenCoverageResult {
+  reportedMissed: number;
+  coveredMissed: number;
+  coveragePercent: number | null; // null represents 'N/A' when reportedMissed == 0
+  remainingMissed: number;
+  stillMissed: number; // alias for remainingMissed
+  vialsRequiredForRemaining: number;
+  dropsRequiredForRemaining: number;
+  totalDropsForRemaining: number; // alias for dropsRequiredForRemaining
+  status: 'OPTIMAL' | 'ACCEPTABLE' | 'ACTION NEEDED';
+}
+
+/**
+ * Missed Children Coverage % Calculator
+ * In Polio campaigns, Missed Children = NA (Not Available) + Refusals
+ * Coverage % = (Covered Missed / Reported Missed) × 100
+ * Remaining Missed = Reported Missed - Covered Missed
+ * Vials Required = CEILING(Remaining Missed ÷ 20)
+ * Drops Required = Remaining Missed × 2
+ */
+export function calculateMissedChildrenCoverage(
+  reportedMissed: number,
+  coveredMissed: number
+): MissedChildrenCoverageResult {
+  if (reportedMissed < 0 || coveredMissed < 0) {
+    throw new Error('Values cannot be negative.');
+  }
+  if (coveredMissed > reportedMissed) {
+    throw new Error('Covered missed children cannot exceed Reported missed children.');
+  }
+
+  const rep = Math.round(reportedMissed);
+  const cov = Math.round(coveredMissed);
+
+  const coveragePercent = rep > 0 ? Math.round(((cov / rep) * 100) * 10) / 10 : null;
+  const remainingMissed = Math.max(0, rep - cov);
+  const vialsRequiredForRemaining = Math.ceil(remainingMissed / BOPV_CONSTANTS.CHILDREN_PER_VIAL);
+  const dropsRequiredForRemaining = remainingMissed * BOPV_CONSTANTS.DROPS_PER_CHILD;
+  const status: 'OPTIMAL' | 'ACCEPTABLE' | 'ACTION NEEDED' =
+    coveragePercent === null
+      ? 'OPTIMAL'
+      : coveragePercent >= 90
+      ? 'OPTIMAL'
+      : coveragePercent >= 80
+      ? 'ACCEPTABLE'
+      : 'ACTION NEEDED';
+
+  return {
+    reportedMissed: rep,
+    coveredMissed: cov,
+    coveragePercent,
+    remainingMissed,
+    stillMissed: remainingMissed,
+    vialsRequiredForRemaining,
+    dropsRequiredForRemaining,
+    totalDropsForRemaining: dropsRequiredForRemaining,
+    status,
+  };
+}
+
+export interface CombinedMissedChildrenResult {
+  // NA part
+  reportedNA: number;
+  coveredNA: number;
+  remainingNA: number;
+  naCoveragePercent: number | null;
+
+  // Refusal part
+  reportedRefusals: number;
+  coveredRefusals: number;
+  remainingRefusals: number;
+  refusalCoveragePercent: number | null;
+
+  // Combined totals
+  totalReportedMissed: number;
+  totalCoveredMissed: number;
+  totalRemainingMissed: number;
+  combinedCoveragePercent: number | null;
+  vialsRequiredForRemaining: number;
+  dropsRequiredForRemaining: number;
+  status: 'OPTIMAL' | 'ACCEPTABLE' | 'ACTION NEEDED';
+}
+
+/**
+ * Combined Missed Children Calculator
+ * Combines Reported NA, Covered NA, Reported Refusals, and Covered Refusals
+ * Calculates combined total missed children, recovery percentage, and required bOPV vials.
+ */
+export function calculateCombinedMissedChildren(
+  reportedNA: number,
+  coveredNA: number,
+  reportedRefusals: number,
+  coveredRefusals: number
+): CombinedMissedChildrenResult {
+  if (reportedNA < 0 || coveredNA < 0 || reportedRefusals < 0 || coveredRefusals < 0) {
+    throw new Error('Values cannot be negative.');
+  }
+  if (coveredNA > reportedNA) {
+    throw new Error('Covered NA cannot exceed Reported NA.');
+  }
+  if (coveredRefusals > reportedRefusals) {
+    throw new Error('Covered Refusals cannot exceed Reported Refusals.');
+  }
+
+  const rNa = Math.round(reportedNA);
+  const cNa = Math.round(coveredNA);
+  const remNa = Math.max(0, rNa - cNa);
+  const naCoveragePercent = rNa > 0 ? Math.round(((cNa / rNa) * 100) * 10) / 10 : null;
+
+  const rRef = Math.round(reportedRefusals);
+  const cRef = Math.round(coveredRefusals);
+  const remRef = Math.max(0, rRef - cRef);
+  const refusalCoveragePercent = rRef > 0 ? Math.round(((cRef / rRef) * 100) * 10) / 10 : null;
+
+  const totalReportedMissed = rNa + rRef;
+  const totalCoveredMissed = cNa + cRef;
+  const totalRemainingMissed = remNa + remRef;
+  const combinedCoveragePercent =
+    totalReportedMissed > 0
+      ? Math.round(((totalCoveredMissed / totalReportedMissed) * 100) * 10) / 10
+      : null;
+
+  const vialsRequiredForRemaining = Math.ceil(
+    totalRemainingMissed / BOPV_CONSTANTS.CHILDREN_PER_VIAL
+  );
+  const dropsRequiredForRemaining = totalRemainingMissed * BOPV_CONSTANTS.DROPS_PER_CHILD;
+
+  const status: 'OPTIMAL' | 'ACCEPTABLE' | 'ACTION NEEDED' =
+    combinedCoveragePercent === null
+      ? 'OPTIMAL'
+      : combinedCoveragePercent >= 90
+      ? 'OPTIMAL'
+      : combinedCoveragePercent >= 80
+      ? 'ACCEPTABLE'
+      : 'ACTION NEEDED';
+
+  return {
+    reportedNA: rNa,
+    coveredNA: cNa,
+    remainingNA: remNa,
+    naCoveragePercent,
+    reportedRefusals: rRef,
+    coveredRefusals: cRef,
+    remainingRefusals: remRef,
+    refusalCoveragePercent,
+    totalReportedMissed,
+    totalCoveredMissed,
+    totalRemainingMissed,
+    combinedCoveragePercent,
+    vialsRequiredForRemaining,
+    dropsRequiredForRemaining,
+    status,
+  };
+}
+

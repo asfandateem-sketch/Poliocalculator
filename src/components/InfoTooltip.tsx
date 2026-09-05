@@ -47,8 +47,8 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
 
   return (
     <div ref={containerRef} className="relative inline-flex flex-col">
-      <div className="flex items-center gap-1.5">
-        <span className="truncate">{label}</span>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="font-extrabold text-slate-800 text-xs">{label}</span>
         <button
           id={id ? `info-btn-${id}` : undefined}
           type="button"
@@ -56,10 +56,10 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
           aria-expanded={isOpen}
           aria-label={`View formula and logic for ${label}`}
           title={isUrdu ? 'فارمولا اور حسابی اصول دیکھیں' : 'Click to view calculation formula and logic'}
-          className={`p-0.5 rounded-full transition-all duration-150 cursor-pointer flex-shrink-0 focus:outline-hidden focus:ring-2 focus:ring-teal-500/40 ${
+          className={`p-1 rounded-full transition-all duration-150 cursor-pointer flex-shrink-0 focus:outline-hidden ${
             isOpen
-              ? 'bg-teal-600 text-white shadow-2xs'
-              : 'text-slate-400 hover:text-teal-600 hover:bg-teal-50'
+              ? 'clay-btn-teal text-white'
+              : 'clay-badge bg-white text-slate-500 hover:text-teal-700'
           }`}
         >
           <Info className="w-3.5 h-3.5" />
@@ -71,11 +71,11 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
         <div
           role="dialog"
           aria-label={label}
-          className="absolute z-30 top-full mt-1.5 w-64 sm:w-72 p-2.5 bg-slate-900 text-slate-100 rounded-xl shadow-xl border border-slate-700/80 text-left ltr:left-0 rtl:right-0 animate-in fade-in zoom-in-95 duration-150"
+          className="absolute z-30 top-full mt-2 w-72 max-w-[calc(100vw-32px)] p-3.5 clay-dark-box text-slate-100 text-left ltr:left-0 rtl:right-0 animate-in fade-in zoom-in-95 duration-150"
           dir={isUrdu ? 'rtl' : 'ltr'}
         >
           {/* Header */}
-          <div className="flex items-center justify-between gap-1.5 pb-1.5 border-b border-slate-800 mb-2">
+          <div className="flex items-center justify-between gap-1.5 pb-2 border-b border-slate-700/80 mb-2.5">
             <div className="flex items-center gap-1.5 text-teal-300 font-bold text-[11px]">
               <Calculator className="w-3.5 h-3.5 text-teal-400 flex-shrink-0" />
               <span>{isUrdu ? 'حسابی اصول و فارمولا' : 'Calculation Logic & Rule'}</span>
@@ -92,13 +92,13 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
 
           {/* Formula badge */}
           {formula && (
-            <div className="mb-2">
-              <span className="text-[10px] text-slate-400 block mb-0.5 font-medium">
+            <div className="mb-2.5">
+              <span className="text-[11px] text-slate-400 block mb-1 font-semibold">
                 {isUrdu ? 'فارمولا:' : 'Formula:'}
               </span>
               <div
                 dir="ltr"
-                className="font-mono text-[11px] font-bold bg-slate-800/90 text-teal-300 px-2 py-1 rounded-md border border-slate-700/60 break-all select-all"
+                className="font-mono text-xs font-bold clay-dark-cell text-teal-300 px-2.5 py-1.5 break-all select-all"
               >
                 {formula}
               </div>
@@ -107,25 +107,25 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
 
           {/* Field Rule note if applicable */}
           {fieldRule && (
-            <div className="mb-1.5 inline-block text-[10px] font-semibold text-amber-300 bg-amber-950/50 border border-amber-800/50 px-1.5 py-0.5 rounded">
+            <div className="mb-2 inline-block text-[11px] font-bold text-amber-300 bg-amber-950/60 border border-amber-700/60 px-2 py-0.5 rounded-lg shadow-inner">
               {fieldRule}
             </div>
           )}
 
           {/* Explanation text */}
-          <p className="text-[11px] text-slate-300 leading-relaxed">
+          <p className="text-xs text-slate-300 leading-relaxed font-medium">
             {explanation}
           </p>
 
           {/* Close hint */}
-          <div className="mt-2 pt-1.5 border-t border-slate-800 text-[10px] text-slate-500 flex justify-between items-center">
+          <div className="mt-3 pt-2 border-t border-slate-700/80 text-[10px] text-slate-400 flex justify-between items-center">
             <span>{isUrdu ? 'نئے فیلڈ اسٹاف کی رہنمائی' : 'Guidance for Field Staff'}</span>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="text-teal-400 hover:underline font-semibold cursor-pointer"
+              className="clay-btn-light text-[10px] px-2.5 py-1 font-bold cursor-pointer"
             >
-              {isUrdu ? 'سمجھ آگیا (بند کریں)' : 'Got it (Close)'}
+              {isUrdu ? 'ٹھیک ہے' : 'Got it'}
             </button>
           </div>
         </div>

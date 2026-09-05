@@ -20,6 +20,8 @@ import {
   calculateVaccineWastageFromVials,
   calculateDailyCatchUp,
   calculateTeamRequirements,
+  calculateMissedChildrenCoverage,
+  calculateCombinedMissedChildren,
 } from './calculatorEngine.js';
 
 export interface TestCaseResult {
@@ -254,6 +256,39 @@ export function runAllTests(): { passed: boolean; results: TestCaseResult[]; tot
   assertEqual('Team Microplan', '1,000 daily target @ 100 kids/team → 10 mobile teams', tm1.mobileTeamsRequired, 10);
   assertEqual('Team Microplan', '10 mobile teams @ 4/supervisor → 3 supervisors', tm1.supervisorsRequired, 3);
   assertEqual('Team Microplan', '1,000 daily target → 50 daily vials for all teams', tm1.dailyVialsRequired, 50);
+
+  // --- MISSED CHILDREN COVERAGE % TESTS ---
+  // Missed Children = NA + Refusal
+  // 150 reported, 120 covered → 80% coverage, 30 remaining, 2 vials required, 60 drops
+  const mc1 = calculateMissedChildrenCoverage(150, 120);
+  assertEqual('Missed Children Coverage', '150 reported, 120 covered → 80% coverage', mc1.coveragePercent, 80);
+  assertEqual('Missed Children Coverage', '150 reported, 120 covered → 30 remaining', mc1.remainingMissed, 30);
+  assertEqual('Missed Children Coverage', '30 remaining → 2 vials required', mc1.vialsRequiredForRemaining, 2);
+  assertEqual('Missed Children Coverage', '30 remaining → 60 drops required', mc1.dropsRequiredForRemaining, 60);
+
+  // 100 reported, 100 covered → 100% coverage, 0 remaining, 0 vials
+  const mc2 = calculateMissedChildrenCoverage(100, 100);
+  assertEqual('Missed Children Coverage', '100 reported, 100 covered → 100% coverage', mc2.coveragePercent, 100);
+  assertEqual('Missed Children Coverage', '100 reported, 100 covered → 0 remaining', mc2.remainingMissed, 0);
+  assertEqual('Missed Children Coverage', '0 remaining → 0 vials required', mc2.vialsRequiredForRemaining, 0);
+
+  // 0 reported, 0 covered → null (N/A)
+  const mc3 = calculateMissedChildrenCoverage(0, 0);
+  assertEqual('Missed Children Coverage', '0 reported, 0 covered → null coverage', mc3.coveragePercent, null);
+  assertEqual('Missed Children Coverage', '0 reported, 0 covered → 0 remaining', mc3.remainingMissed, 0);
+
+  // --- COMBINED MISSED CHILDREN TESTS (Reported NA + Reported Refusals) ---
+  // 100 NA (80 covered) + 50 Refusals (40 covered)
+  // Total reported = 150, Total covered = 120 (80% coverage), Total remaining = 30, 2 vials required
+  const cmc1 = calculateCombinedMissedChildren(100, 80, 50, 40);
+  assertEqual('Combined Missed Children', '100 NA + 50 Refusal → 150 Total Reported', cmc1.totalReportedMissed, 150);
+  assertEqual('Combined Missed Children', '80 NA cov + 40 Ref cov → 120 Total Covered', cmc1.totalCoveredMissed, 120);
+  assertEqual('Combined Missed Children', '120/150 → 80% Combined Coverage', cmc1.combinedCoveragePercent, 80);
+  assertEqual('Combined Missed Children', '150 - 120 → 30 Remaining Missed', cmc1.totalRemainingMissed, 30);
+  assertEqual('Combined Missed Children', '30 Remaining → 2 Vials Required', cmc1.vialsRequiredForRemaining, 2);
+  assertEqual('Combined Missed Children', '30 Remaining → 60 Drops Required', cmc1.dropsRequiredForRemaining, 60);
+  assertEqual('Combined Missed Children', 'NA Recovery % → 80%', cmc1.naCoveragePercent, 80);
+  assertEqual('Combined Missed Children', 'Refusal Resolution % → 80%', cmc1.refusalCoveragePercent, 80);
 
   const passCount = results.filter(r => r.passed).length;
   const passed = passCount === results.length;

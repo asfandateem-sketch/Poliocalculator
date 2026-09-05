@@ -40,6 +40,43 @@ export interface TranslationStrings {
   calculationLogicRule: string;
   close: string;
   gotIt: string;
+  testsModalTitle: string;
+  testsModalDesc: string;
+
+  // Total Campaign Section
+  totalCampaign: string;
+  totalCampaignShort: string;
+  totalCampaignDesc: string;
+  totalTargetLabel: string;
+  totalCoveredLabel: string;
+  remainingLabel: string;
+  coveragePercentLabel: string;
+  benchmarkLabel: string;
+  benchmarkMetBadge: string;
+  benchmarkNeededBadge: string;
+  campaignProgressBarLabel: string;
+  areaBreakdownTitle: string;
+  areaBreakdownDesc: string;
+  additionalStatsTitle: string;
+  vaccineLogisticsTitle: string;
+  workforceTitle: string;
+  missedChildrenTitle: string;
+  addAreaBtn: string;
+  editAreaBtn: string;
+  saveBtn: string;
+  cancelBtn: string;
+  deleteBtn: string;
+  areaNameLabel: string;
+  actionsLabel: string;
+  copyReportBtn: string;
+  reportCopiedMsg: string;
+  quickUpdateBtn: string;
+  resetDefaultDataBtn: string;
+  vialsRequiredShort: string;
+  mobileTeamsLabel: string;
+  supervisorsLabel: string;
+  catchUpDailyTargetLabel: string;
+  daysRemainingLabel: string;
 
   // 8 Field Calculators
   childAge: CalculatorTranslations & {
@@ -145,6 +182,40 @@ export interface TranslationStrings {
     coveredRefusalTooltip: InputTooltipData;
   };
 
+  missedChildren: CalculatorTranslations & {
+    reportedMissedLabel: string;
+    coveredMissedLabel: string;
+    coverageRateLabel: string;
+    statusBadge: string;
+    remainingMissedLabel: string;
+    vialsForRemainingLabel: string;
+    dropsForRemainingLabel: string;
+    reportedMissedResult: string;
+    coveredMissedResult: string;
+    breakdownModeLabel: string;
+    directModeLabel: string;
+    naLabel: string;
+    refusalLabel: string;
+    reportedNaInputLabel: string;
+    coveredNaInputLabel: string;
+    reportedRefusalInputLabel: string;
+    coveredRefusalInputLabel: string;
+    totalMissedCombinedLabel: string;
+    totalCoveredCombinedLabel: string;
+    combinedCoveragePercentLabel: string;
+    remainingCombinedMissedLabel: string;
+    vialsForCombinedLabel: string;
+    dropsForCombinedLabel: string;
+    naRecoveryLabel: string;
+    refusalResolutionLabel: string;
+    reportedMissedTooltip: InputTooltipData;
+    coveredMissedTooltip: InputTooltipData;
+    reportedNaTooltip: InputTooltipData;
+    coveredNaTooltip: InputTooltipData;
+    reportedRefusalTooltip: InputTooltipData;
+    coveredRefusalTooltip: InputTooltipData;
+  };
+
   under5Population: CalculatorTranslations & {
     totalPopLabel: string;
     under5PctLabel: string;
@@ -161,13 +232,13 @@ export const translations: Record<Language, TranslationStrings> = {
   en: {
     appTitle: 'Polio Campaign Calculator',
     appSubtitle: 'Field Operations Suite • Union Council & Monitoring Teams',
-    roleBadge: '8 Field Tools',
+    roleBadge: '9 Field Calculators',
     fixedRuleBadge: 'Fixed bOPV Standard',
     fixedRuleHeader: 'bOPV: 1 vial = 20 doses (covers 20 kids) • 2 drops/child',
     offlineReady: 'Offline Ready',
     offline: 'Offline',
     install: 'Install',
-    allGrid: 'All 8 Grid',
+    allGrid: 'All 9 Calculators',
     prevTool: 'Prev Tool',
     nextTool: 'Next Tool',
     toolOf: (cur, total) => `Tool ${cur} of ${total}`,
@@ -176,12 +247,49 @@ export const translations: Record<Language, TranslationStrings> = {
     calculationLogicRule: 'Calculation Logic & Rule',
     close: 'Close',
     gotIt: 'Got it (Close)',
+    testsModalTitle: 'Automated Calculation Verification',
+    testsModalDesc: 'Comprehensive automated test verification against WHO/EPI poliovirus eradication standards.',
 
-    // Tool 1: Child Age
+    // Total Campaign Section
+    totalCampaign: 'Total Campaign',
+    totalCampaignShort: 'Total Campaign',
+    totalCampaignDesc: 'Consolidated Field Operations Dashboard • Complete Campaign Summary & UC Breakdown',
+    totalTargetLabel: 'Total Target',
+    totalCoveredLabel: 'Total Covered',
+    remainingLabel: 'Remaining',
+    coveragePercentLabel: 'Coverage %',
+    benchmarkLabel: 'Target Benchmark',
+    benchmarkMetBadge: '≥95% Target Met',
+    benchmarkNeededBadge: 'Gap to 95% Benchmark',
+    campaignProgressBarLabel: 'Campaign Progress & Coverage Status',
+    areaBreakdownTitle: 'Area / UC / Team Breakdown',
+    areaBreakdownDesc: 'Field performance across operational units with interactive monitoring',
+    additionalStatsTitle: 'Additional Campaign Statistics',
+    vaccineLogisticsTitle: 'bOPV Vaccine Logistics',
+    workforceTitle: 'Workforce & Supervision',
+    missedChildrenTitle: 'Missed Children & Catch-up',
+    addAreaBtn: 'Add Area / UC',
+    editAreaBtn: 'Edit',
+    saveBtn: 'Save',
+    cancelBtn: 'Cancel',
+    deleteBtn: 'Delete',
+    areaNameLabel: 'Area / UC Name',
+    actionsLabel: 'Actions',
+    copyReportBtn: 'Copy Field Report',
+    reportCopiedMsg: 'Report Copied to Clipboard!',
+    quickUpdateBtn: 'Update Totals',
+    resetDefaultDataBtn: 'Reset Sample Data',
+    vialsRequiredShort: 'bOPV Vials',
+    mobileTeamsLabel: 'Mobile Teams',
+    supervisorsLabel: 'Area Supervisors',
+    catchUpDailyTargetLabel: 'Daily Catch-Up Target',
+    daysRemainingLabel: 'Days Remaining',
+
+    // Tool 1: Child Age Calculator
     childAge: {
       num: '1',
-      title: 'Child Age / Under-5 Calculator',
-      shortTitle: 'Child Age',
+      title: 'Child Age Calculator',
+      shortTitle: 'Child Age Calculator',
       badge: 'Exact Calendar Age',
       purpose: 'Determines exact age and strict 5th birthday eligibility for bOPV administration',
       calculateBtn: 'Check Eligibility',
@@ -204,11 +312,11 @@ export const translations: Record<Language, TranslationStrings> = {
       },
     },
 
-    // Tool 2: Vaccine Demand
+    // Tool 2: Demand of Vaccine Calculator
     vaccineDemand: {
       num: '2',
-      title: 'Vaccine Demand Calculator',
-      shortTitle: 'Demand',
+      title: 'Demand of Vaccine Calculator',
+      shortTitle: 'Demand of Vaccine Calculator',
       badge: '1 Vial = 20 Doses',
       purpose: 'Calculates bOPV vials (20 doses/vial), total drops (2/child), and optional safety buffer',
       calculateBtn: 'Calculate Vaccine Demand',
@@ -233,11 +341,11 @@ export const translations: Record<Language, TranslationStrings> = {
       },
     },
 
-    // Tool 3: Vaccine Wastage
+    // Tool 3: Wastage of Vaccine Calculator
     vaccineWastage: {
       num: '3',
-      title: 'Vaccine Wastage Calculator',
-      shortTitle: 'Wastage',
+      title: 'Wastage of Vaccine Calculator',
+      shortTitle: 'Wastage of Vaccine Calculator',
       badge: '1 Vial = 20 Doses',
       purpose: '20 kids vaccinated per vial • Measures wasted doses and campaign wastage rate %',
       calculateBtn: 'Calculate Wastage Rate',
@@ -264,11 +372,143 @@ export const translations: Record<Language, TranslationStrings> = {
       },
     },
 
-    // Tool 4: Campaign Coverage
-    campaignCoverage: {
+    // Tool 4: NA Coverage Calculator
+    naCoverage: {
       num: '4',
+      title: 'NA Coverage Calculator',
+      shortTitle: 'NA Coverage Calculator',
+      badge: '(Covered ÷ NA) × 100',
+      purpose: 'NA = Not Available (absent during initial visit) • Recovery rate',
+      calculateBtn: 'Calculate NA Recovery %',
+      resetBtn: 'Reset values',
+      reportedNaLabel: 'Reported NA Children',
+      coveredNaLabel: 'Covered NA Children',
+      coverageRateLabel: 'NA Coverage Rate',
+      recoveryRateBadge: 'Recovery Rate',
+      remainingNaLabel: 'Remaining NA:',
+      reportedNaResult: 'Reported NA',
+      coveredNaResult: 'Covered NA',
+      reportedNaTooltip: {
+        label: 'Reported NA Children',
+        formula: 'NA = Children temporarily away from home or door locked',
+        fieldRule: 'Recorded on tally sheet with door marking "X"',
+        explanation: 'Children recorded by mobile teams as absent or temporarily unavailable during first-pass house visits.',
+      },
+      coveredNaTooltip: {
+        label: 'Covered NA Children',
+        formula: 'NA Recovery % = (Covered NA ÷ Reported NA) × 100',
+        fieldRule: 'Target recovery on revisit days: > 85%',
+        explanation: 'Previously absent children successfully found, vaccinated, and updated on tally sheets during evening or catch-up revisits.',
+      },
+    },
+
+    // Tool 5: Refusal Coverage Calculator
+    refusalCoverage: {
+      num: '5',
+      title: 'Refusal Coverage Calculator',
+      shortTitle: 'Refusal Coverage Calculator',
+      badge: '(Covered ÷ Reported) × 100',
+      purpose: 'Tracks refusal conversions & coverage (e.g. 50 reported, 25 covered = 50% coverage)',
+      calculateBtn: 'Calculate Refusal Coverage %',
+      resetBtn: 'Reset values',
+      reportedRefusalLabel: 'Reported Refusals',
+      coveredRefusalLabel: 'Covered / Resolved',
+      coverageRateLabel: 'Refusal Coverage Rate',
+      resolutionRateBadge: 'Resolution Rate',
+      remainingRefusalLabel: 'Remaining Refusals:',
+      reportedRefusalResult: 'Reported Refusals',
+      coveredRefusalResult: 'Covered Refusals',
+      reportedRefusalTooltip: {
+        label: 'Reported Refusals',
+        formula: 'Refusal = Caregiver initially declined bOPV',
+        fieldRule: 'Marked on house door with chalk "R"',
+        explanation: 'Children missed due to parental hesitancy, misconceptions, or refusal during the initial team visit.',
+      },
+      coveredRefusalTooltip: {
+        label: 'Covered / Resolved Refusals',
+        formula: 'Refusal Resolution % = (Covered Refusals ÷ Reported Refusals) × 100',
+        fieldRule: 'Remaining Refusals = Reported − Covered',
+        explanation: 'Refusal families convinced and vaccinated through AICs, UC Medical Officers, influencers, or religious leaders.',
+      },
+    },
+
+    // Tool 6: Missed Children Coverage % Calculator
+    missedChildren: {
+      num: '6',
+      title: 'Missed Children Coverage % Calculator',
+      shortTitle: 'Missed Children Coverage % Calculator',
+      badge: '(Covered ÷ Missed) × 100',
+      purpose: 'Combines Reported NA & Refusals, calculates total missed children recovery % and required bOPV vials',
+      calculateBtn: 'Calculate Combined Missed Coverage %',
+      resetBtn: 'Reset values',
+      reportedMissedLabel: 'Reported Missed Children',
+      coveredMissedLabel: 'Covered Missed Children',
+      coverageRateLabel: 'Combined Missed Coverage %',
+      statusBadge: 'Catch-Up Status',
+      remainingMissedLabel: 'Still Missed Children:',
+      vialsForRemainingLabel: 'bOPV Vials Required for Remaining',
+      dropsForRemainingLabel: 'Total Drops Needed',
+      reportedMissedResult: 'Total Missed',
+      coveredMissedResult: 'Total Covered',
+      breakdownModeLabel: 'Enter via NA & Refusal Breakdown',
+      directModeLabel: 'Direct Combined Input',
+      naLabel: 'Not Available (NA)',
+      refusalLabel: 'Refusals',
+      reportedNaInputLabel: 'Reported NA (Not Available)',
+      coveredNaInputLabel: 'Covered NA',
+      reportedRefusalInputLabel: 'Reported Refusals',
+      coveredRefusalInputLabel: 'Covered Refusals',
+      totalMissedCombinedLabel: 'Total Combined Missed (NA + Refusals)',
+      totalCoveredCombinedLabel: 'Total Combined Covered',
+      combinedCoveragePercentLabel: 'Combined Missed Coverage %',
+      remainingCombinedMissedLabel: 'Total Still Missed',
+      vialsForCombinedLabel: 'bOPV Vials for Remaining',
+      dropsForCombinedLabel: 'Total Drops (2/child)',
+      naRecoveryLabel: 'NA Recovery Rate',
+      refusalResolutionLabel: 'Refusal Resolution Rate',
+      reportedMissedTooltip: {
+        label: 'Reported Missed Children',
+        formula: 'Total Missed = Reported NA + Reported Refusals',
+        fieldRule: 'Tally sheet recorded missed children from initial rounds',
+        explanation: 'The combined total of children missed during regular house-to-house visits (NA children + Refusal cases).',
+      },
+      coveredMissedTooltip: {
+        label: 'Covered Missed Children',
+        formula: 'Missed Coverage % = (Covered Missed ÷ Reported Missed) × 100',
+        fieldRule: 'Target Catch-Up Coverage: ≥ 90%',
+        explanation: 'Missed children successfully tracked, persuaded, and vaccinated during evening sweeps or catch-up days.',
+      },
+      reportedNaTooltip: {
+        label: 'Reported NA Children',
+        formula: 'NA Children recorded on tally sheet',
+        fieldRule: 'Door marked with "NA" (Child Not Available)',
+        explanation: 'Children temporarily absent or away when the mobile team visited.',
+      },
+      coveredNaTooltip: {
+        label: 'Covered NA Children',
+        formula: 'Covered NA vaccinated during revisit',
+        fieldRule: 'Must be ≤ Reported NA',
+        explanation: 'Children previously recorded as NA who received drops during evening sweeps or catch-up.',
+      },
+      reportedRefusalTooltip: {
+        label: 'Reported Refusals',
+        formula: 'Refusal cases marked with "R" on door',
+        fieldRule: 'Initial parental/guardian refusal',
+        explanation: 'Children whose parents refused immunization during the team visit.',
+      },
+      coveredRefusalTooltip: {
+        label: 'Covered Refusals',
+        formula: 'Convinced & vaccinated refusal cases',
+        fieldRule: 'Must be ≤ Reported Refusals',
+        explanation: 'Refusal children vaccinated after counseling by community influencers, elders, or medical officers.',
+      },
+    },
+
+    // Tool 7: Campaign Coverage Calculator
+    campaignCoverage: {
+      num: '7',
       title: 'Campaign Coverage Calculator',
-      shortTitle: 'Coverage',
+      shortTitle: 'Campaign Coverage Calculator',
       badge: '(Vac ÷ Target) × 100',
       purpose: 'Evaluates campaign achievement % and tracking against the ≥ 95% threshold',
       calculateBtn: 'Calculate Coverage %',
@@ -295,11 +535,11 @@ export const translations: Record<Language, TranslationStrings> = {
       },
     },
 
-    // Tool 5: Daily Catch-Up
+    // Tool 8: Daily Catch-Up Calculator
     dailyCatchUp: {
-      num: '5',
-      title: 'Daily Catch-Up & Cold Chain Run Rate',
-      shortTitle: 'Catch-Up',
+      num: '8',
+      title: 'Daily Catch-Up Calculator',
+      shortTitle: 'Daily Catch-Up Calculator',
       badge: 'Remaining ÷ Days',
       purpose: 'Recalculates required daily run rate & morning bOPV vial allocation',
       calculateBtn: 'Calculate Daily Run Rate',
@@ -331,71 +571,11 @@ export const translations: Record<Language, TranslationStrings> = {
       },
     },
 
-    // Tool 6: NA Coverage
-    naCoverage: {
-      num: '6',
-      title: 'NA (Not Available) Coverage Calculator',
-      shortTitle: 'NA Coverage',
-      badge: '(Covered ÷ NA) × 100',
-      purpose: 'NA = Not Available (absent during initial visit) • Recovery rate',
-      calculateBtn: 'Calculate NA Recovery %',
-      resetBtn: 'Reset values',
-      reportedNaLabel: 'Reported NA Children',
-      coveredNaLabel: 'Covered NA Children',
-      coverageRateLabel: 'NA Coverage Rate',
-      recoveryRateBadge: 'Recovery Rate',
-      remainingNaLabel: 'Remaining NA:',
-      reportedNaResult: 'Reported NA',
-      coveredNaResult: 'Covered NA',
-      reportedNaTooltip: {
-        label: 'Reported NA Children',
-        formula: 'NA = Children temporarily away from home or door locked',
-        fieldRule: 'Recorded on tally sheet with door marking "X"',
-        explanation: 'Children recorded by mobile teams as absent or temporarily unavailable during first-pass house visits.',
-      },
-      coveredNaTooltip: {
-        label: 'Covered NA Children',
-        formula: 'NA Recovery % = (Covered NA ÷ Reported NA) × 100',
-        fieldRule: 'Target recovery on revisit days: > 85%',
-        explanation: 'Previously absent children successfully found, vaccinated, and updated on tally sheets during evening or catch-up revisits.',
-      },
-    },
-
-    // Tool 7: Refusal Coverage
-    refusalCoverage: {
-      num: '7',
-      title: 'Refusal Coverage Calculator',
-      shortTitle: 'Refusal',
-      badge: '(Covered ÷ Reported) × 100',
-      purpose: 'Tracks refusal conversions & coverage (e.g. 50 reported, 25 covered = 50% coverage)',
-      calculateBtn: 'Calculate Refusal Coverage %',
-      resetBtn: 'Reset values',
-      reportedRefusalLabel: 'Reported Refusals',
-      coveredRefusalLabel: 'Covered / Resolved',
-      coverageRateLabel: 'Refusal Coverage Rate',
-      resolutionRateBadge: 'Resolution Rate',
-      remainingRefusalLabel: 'Remaining Refusals:',
-      reportedRefusalResult: 'Reported Refusals',
-      coveredRefusalResult: 'Covered Refusals',
-      reportedRefusalTooltip: {
-        label: 'Reported Refusals',
-        formula: 'Refusal = Caregiver initially declined bOPV',
-        fieldRule: 'Marked on house door with chalk "R"',
-        explanation: 'Children missed due to parental hesitancy, misconceptions, or refusal during the initial team visit.',
-      },
-      coveredRefusalTooltip: {
-        label: 'Covered / Resolved Refusals',
-        formula: 'Refusal Resolution % = (Covered Refusals ÷ Reported Refusals) × 100',
-        fieldRule: 'Remaining Refusals = Reported − Covered',
-        explanation: 'Refusal families convinced and vaccinated through AICs, UC Medical Officers, influencers, or religious leaders.',
-      },
-    },
-
-    // Tool 8: Under-5 Population
+    // Tool 9: Under-5 Population Calculator
     under5Population: {
-      num: '8',
-      title: 'Total Population & Under-5 Cohort',
-      shortTitle: 'Population & U5',
+      num: '9',
+      title: 'Under-5 Population Calculator',
+      shortTitle: 'Under-5 Population Calculator',
       badge: 'Pop × % ÷ 100',
       purpose: 'Estimates under-5 target cohort from census / union council population',
       calculateBtn: 'Calculate Under-5 Target',
@@ -424,13 +604,13 @@ export const translations: Record<Language, TranslationStrings> = {
   ur: {
     appTitle: 'پولیو مہم کیلکولیٹر',
     appSubtitle: 'فیلڈ آپریشنز سوٹ • یونین کونسل و مانیٹرنگ ٹیمیں',
-    roleBadge: '8 فیلڈ ٹولز',
+    roleBadge: '9 فیلڈ کیلکولیٹرز',
     fixedRuleBadge: 'مقررہ bOPV اصول',
     fixedRuleHeader: 'مقررہ اصول: 1 وائل = 20 خوراکیں (20 بچے) • 2 قطرے فی بچہ',
     offlineReady: 'آف لائن تیار',
     offline: 'آف لائن',
     install: 'انسٹال کریں',
-    allGrid: 'تمام 8 گرڈ',
+    allGrid: 'تمام 9 کیلکولیٹرز',
     prevTool: 'پچھلا ٹول',
     nextTool: 'اگلا ٹول',
     toolOf: (cur, total) => `ٹول ${cur} از ${total}`,
@@ -439,12 +619,49 @@ export const translations: Record<Language, TranslationStrings> = {
     calculationLogicRule: 'حسابی اصول و فارمولا',
     close: 'بند کریں',
     gotIt: 'سمجھ آگیا (بند کریں)',
+    testsModalTitle: 'خودکار حسابی تصدیقی ٹیسٹ',
+    testsModalDesc: 'عالمی ادارہ صحت (WHO) اور ای پی آئی پولیو مہماتی اصولوں کے مطابق مکمل حسابی تصدیق۔',
 
-    // Tool 1: Child Age
+    // Total Campaign Section
+    totalCampaign: 'مکمل مہم کا جائزہ',
+    totalCampaignShort: 'مہم کا جائزہ',
+    totalCampaignDesc: 'مربوط فیلڈ آپریشنز ڈیش بورڈ • مہم کا مجموعی خلاصہ اور یوسی بریک ڈاؤن',
+    totalTargetLabel: 'کل ہدف بچے',
+    totalCoveredLabel: 'کل ویکسین شدہ',
+    remainingLabel: 'باقی بچے',
+    coveragePercentLabel: 'کوریج شرح %',
+    benchmarkLabel: 'مہماتی بینچ مارک',
+    benchmarkMetBadge: '≥95% ہدف مکمل',
+    benchmarkNeededBadge: '95% ہدف تک درکار',
+    campaignProgressBarLabel: 'مہم کی مجموعی پیش رفت و صورتحال',
+    areaBreakdownTitle: 'علاقہ و یوسی وائز جائزہ',
+    areaBreakdownDesc: 'آپریشنل یونٹس کی فیلڈ کارکردگی اور مانیٹرنگ تفصیلات',
+    additionalStatsTitle: 'اضافی مہماتی شماریات',
+    vaccineLogisticsTitle: 'bOPV ویکسین لاجسٹکس',
+    workforceTitle: 'فیلڈ ٹیمیں اور سپروائزرز',
+    missedChildrenTitle: 'رہ جانے والے بچے اور کیچ اپ',
+    addAreaBtn: 'نیا علاقہ / یوسی شامل کریں',
+    editAreaBtn: 'ترمیم',
+    saveBtn: 'محفوظ کریں',
+    cancelBtn: 'منسوخ',
+    deleteBtn: 'حذف کریں',
+    areaNameLabel: 'علاقہ / یوسی کا نام',
+    actionsLabel: 'اقدامات',
+    copyReportBtn: 'فیلڈ رپورٹ کاپی کریں',
+    reportCopiedMsg: 'رپورٹ کاپی ہو گئی!',
+    quickUpdateBtn: 'اعداد و شمار اپڈیٹ کریں',
+    resetDefaultDataBtn: 'معیاری ڈیٹا بحال کریں',
+    vialsRequiredShort: 'وائلز',
+    mobileTeamsLabel: 'موبائل ٹیمیں',
+    supervisorsLabel: 'ایریا سپروائزرز',
+    catchUpDailyTargetLabel: 'روزانہ کیچ اپ ہدف',
+    daysRemainingLabel: 'مہم کے باقی دن',
+
+    // Tool 1: Child Age Calculator
     childAge: {
       num: '1',
-      title: 'بچے کی عمر اور 5 سال سے کم اہلیت',
-      shortTitle: 'بچے کی عمر',
+      title: 'چائلڈ ایج کیلکولیٹر (عمر کی اہلیت)',
+      shortTitle: 'چائلڈ ایج کیلکولیٹر',
       badge: 'حقیقی کیلنڈر عمر',
       purpose: 'درست عمر اور پولیو ویکسین کے لیے 5 ویں سالگرہ سے کم اہلیت کا تعین',
       calculateBtn: 'اہلیت چیک کریں',
@@ -467,11 +684,11 @@ export const translations: Record<Language, TranslationStrings> = {
       },
     },
 
-    // Tool 2: Vaccine Demand
+    // Tool 2: Demand of Vaccine Calculator
     vaccineDemand: {
       num: '2',
-      title: 'ویکسین ڈیمانڈ (طلب) کیلکولیٹر',
-      shortTitle: 'ویکسین طلب',
+      title: 'ڈیمانڈ آف ویکسین کیلکولیٹر (طلب)',
+      shortTitle: 'ڈیمانڈ آف ویکسین کیلکولیٹر',
       badge: '1 وائل = 20 خوراکیں',
       purpose: 'مطلوبہ بچوں کے لیے bOPV وائلز (20 بچے/وائل)، کل قطرے (2 فی بچہ) اور حفاظتی بفر اسٹاک',
       calculateBtn: 'ویکسین کی طلب کا حساب لگائیں',
@@ -496,11 +713,11 @@ export const translations: Record<Language, TranslationStrings> = {
       },
     },
 
-    // Tool 3: Vaccine Wastage
+    // Tool 3: Wastage of Vaccine Calculator
     vaccineWastage: {
       num: '3',
-      title: 'ویکسین ضیاع (Wastage) کیلکولیٹر',
-      shortTitle: 'ویکسین ضیاع',
+      title: 'ویسٹیج آف ویکسین کیلکولیٹر (ضیاع)',
+      shortTitle: 'ویسٹیج آف ویکسین کیلکولیٹر',
       badge: '1 وائل = 20 خوراکیں',
       purpose: 'کھولی گئی وائلز کے مقابلے میں ضائع شدہ خوراکیں اور مہم کا ویسٹیج ریٹ %',
       calculateBtn: 'ضیاع کی شرح (Wastage %) معلوم کریں',
@@ -527,11 +744,143 @@ export const translations: Record<Language, TranslationStrings> = {
       },
     },
 
-    // Tool 4: Campaign Coverage
-    campaignCoverage: {
+    // Tool 4: NA Coverage Calculator
+    naCoverage: {
       num: '4',
-      title: 'مہم کی کوریج (Coverage) کیلکولیٹر',
-      shortTitle: 'مہم کوریج',
+      title: 'این اے کوریج کیلکولیٹر (غیر موجود بچے)',
+      shortTitle: 'این اے کوریج کیلکولیٹر',
+      badge: '(کور شدہ ÷ کل NA) × 100',
+      purpose: 'NA = غیر موجود بچے (پہلے دورے پر تالہ بند یا بچہ موجود نہ ہونا) • ریکوری ریٹ',
+      calculateBtn: 'غیر موجود بچوں کی ریکوری شرح معلوم کریں',
+      resetBtn: 'دوبارہ شروع کریں',
+      reportedNaLabel: 'رپورٹ شدہ غیر موجود (NA) بچے',
+      coveredNaLabel: 'کور شدہ غیر موجود (NA) بچے',
+      coverageRateLabel: 'غیر موجود بچوں کی کوریج شرح',
+      recoveryRateBadge: 'ریکوری ریٹ',
+      remainingNaLabel: 'باقی غیر موجود بچے:',
+      reportedNaResult: 'رپورٹ شدہ NA',
+      coveredNaResult: 'کور شدہ NA',
+      reportedNaTooltip: {
+        label: 'رپورٹ شدہ NA بچے',
+        formula: 'NA = بچے گھر پر غیر موجود یا تالہ بند پائے گئے',
+        fieldRule: 'ٹیلی شیٹ اور دروازے پر "X" کا نشان لگایا جاتا ہے',
+        explanation: 'پہلے مرحلے کے دوران وہ بچے جو گھر پر عارضی طور پر موجود نہیں تھے یا دروازہ بند تھا۔',
+      },
+      coveredNaTooltip: {
+        label: 'کور شدہ NA بچے',
+        formula: 'ریکوری % = (کور شدہ NA تقسیم رپورٹ شدہ NA) × 100',
+        fieldRule: 'کیچ اپ کے دنوں میں ہدف ریکوری: 85% سے زائد',
+        explanation: 'دوبارہ دورے پر ویکسین پینے والے بچے جن کی تصدیق ٹیلی شیٹ پر کی گئی ہے۔',
+      },
+    },
+
+    // Tool 5: Refusal Coverage Calculator
+    refusalCoverage: {
+      num: '5',
+      title: 'رفیوزل کوریج کیلکولیٹر (انکاری کیسز)',
+      shortTitle: 'رفیوزل کوریج کیلکولیٹر',
+      badge: '(کور شدہ ÷ رپورٹ شدہ) × 100',
+      purpose: 'انکاری کیسز کا حل اور کوریج شرح (مثلاً 50 رپورٹ، 25 حل = 50% کوریج)',
+      calculateBtn: 'انکاری حل شرح % معلوم کریں',
+      resetBtn: 'دوبارہ شروع کریں',
+      reportedRefusalLabel: 'رپورٹ شدہ انکاری کیسز',
+      coveredRefusalLabel: 'قائل شدہ / حل شدہ انکاری',
+      coverageRateLabel: 'انکاری کوریج شرح',
+      resolutionRateBadge: 'حل شرح',
+      remainingRefusalLabel: 'باقی انکاری بچے:',
+      reportedRefusalResult: 'رپورٹ شدہ انکاری',
+      coveredRefusalResult: 'کور شدہ انکاری',
+      reportedRefusalTooltip: {
+        label: 'رپورٹ شدہ انکاری بچے',
+        formula: 'انکاری = والدین نے قطرے پلانے سے انکار کیا',
+        fieldRule: 'دروازے پر چاک سے "R" کا نشان لگایا جاتا ہے',
+        explanation: 'ابتدائی دورے میں غلط فہمیوں یا ہچکچاہٹ کی بنا پر قطرے نہ پینے والے بچے جنہیں رجسٹر کیا گیا ہو۔',
+      },
+      coveredRefusalTooltip: {
+        label: 'حل شدہ انکاری بچے',
+        formula: 'انکاری حل % = (حل شدہ انکاری تقسیم رپورٹ شدہ انکاری) × 100',
+        fieldRule: 'باقی انکاری = رپورٹ شدہ منفی حل شدہ',
+        explanation: 'ایریا انچارجز، یوسی میڈیکل آفیسرز، مذہبی اور سماجی رہنماؤں کی مدد سے قائل کر کے ویکسین کیے گئے بچے۔',
+      },
+    },
+
+    // Tool 6: Missed Children Coverage % Calculator
+    missedChildren: {
+      num: '6',
+      title: 'مسڈ چلڈرن کوریج فیصد کیلکولیٹر',
+      shortTitle: 'مسڈ چلڈرن کوریج فیصد کیلکولیٹر',
+      badge: '(کور شدہ ÷ کل مسڈ) × 100',
+      purpose: 'رپورٹ شدہ غیر موجود (NA) اور انکاری (Refusals) ملا کر مجموعی مسڈ بچوں کی ریکوری شرح اور درکار وائلز',
+      calculateBtn: 'مجموعی مسڈ کوریج معلوم کریں',
+      resetBtn: 'دوبارہ شروع کریں',
+      reportedMissedLabel: 'کل رپورٹ شدہ مسڈ بچے',
+      coveredMissedLabel: 'کور شدہ مسڈ بچے',
+      coverageRateLabel: 'مجموعی مسڈ کوریج شرح %',
+      statusBadge: 'کیچ اپ صورتحال',
+      remainingMissedLabel: 'باقی مسڈ بچے:',
+      vialsForRemainingLabel: 'باقی بچوں کے لیے درکار وائلز',
+      dropsForRemainingLabel: 'کل درکار قطرے (2 فی بچہ)',
+      reportedMissedResult: 'کل مسڈ بچے',
+      coveredMissedResult: 'کل کور شدہ',
+      breakdownModeLabel: 'این اے و انکاری الگ درج کریں',
+      directModeLabel: 'براہِ راست مجموعی مسڈ درج کریں',
+      naLabel: 'غیر موجود (NA)',
+      refusalLabel: 'انکاری (Refusal)',
+      reportedNaInputLabel: 'رپورٹ شدہ غیر موجود (NA)',
+      coveredNaInputLabel: 'کور شدہ غیر موجود (Covered NA)',
+      reportedRefusalInputLabel: 'رپورٹ شدہ انکاری (Refusals)',
+      coveredRefusalInputLabel: 'کور شدہ انکاری (Covered Refusals)',
+      totalMissedCombinedLabel: 'مجموعی مسڈ بچے (NA + انکاری)',
+      totalCoveredCombinedLabel: 'مجموعی کور شدہ مسڈ بچے',
+      combinedCoveragePercentLabel: 'مجموعی مسڈ کوریج شرح %',
+      remainingCombinedMissedLabel: 'کل باقی مسڈ بچے',
+      vialsForCombinedLabel: 'باقی بچوں کے لیے درکار وائلز',
+      dropsForCombinedLabel: 'کل درکار قطرے (2 فی بچہ)',
+      naRecoveryLabel: 'این اے کوریج شرح',
+      refusalResolutionLabel: 'انکاری حل شرح',
+      reportedMissedTooltip: {
+        label: 'رپورٹ شدہ مسڈ بچے',
+        formula: 'کل مسڈ بچے = رپورٹ شدہ NA بچے + رپورٹ شدہ انکاری بچے',
+        fieldRule: 'ٹیلی شیٹ پر درج تمام مسڈ بچوں کا مجموعہ',
+        explanation: 'ابتدائی راؤنڈ کے دوران وہ تمام بچے جو قطرے پینے سے رہ گئے (غیر موجود اور انکاری کیسز)۔',
+      },
+      coveredMissedTooltip: {
+        label: 'کور شدہ مسڈ بچے',
+        formula: 'مسڈ کوریج % = (کور شدہ مسڈ بچے تقسیم کل مسڈ بچے) × 100',
+        fieldRule: 'مطلوبہ ہدف: 90% یا زائد مسڈ بچوں کی ریکوری',
+        explanation: 'شام کے راؤنڈ یا کیچ اپ کے دنوں میں ویکسین پلائے گئے مسڈ بچے۔',
+      },
+      reportedNaTooltip: {
+        label: 'رپورٹ شدہ غیر موجود بچے (NA)',
+        formula: 'ٹیلی شیٹ پر "NA" نشان شدہ بچے',
+        fieldRule: 'دروازے پر چاک سے "NA" درج کیا جاتا ہے',
+        explanation: 'موبائل ٹیم کے دورے کے وقت گھر پر غیر موجود بچے جن کی بعد میں تلاش کی جاتی ہے۔',
+      },
+      coveredNaTooltip: {
+        label: 'کور شدہ غیر موجود بچے (Covered NA)',
+        formula: 'دوبارہ دورے پر پلائے گئے NA بچے',
+        fieldRule: 'رپورٹ شدہ NA سے زائد نہیں ہو سکتا',
+        explanation: 'شام کے راؤنڈ یا کیچ اپ کے دوران ویکسین کیے گئے غیر موجود بچے۔',
+      },
+      reportedRefusalTooltip: {
+        label: 'رپورٹ شدہ انکاری بچے (Refusals)',
+        formula: 'دروازے پر چاک سے "R" کا نشان',
+        fieldRule: 'والدین یا سرپرست کا قطرے پلانے سے انکار',
+        explanation: 'شروع کے وزٹ پر ویکسین نہ پینے والے انکاری کیسز۔',
+      },
+      coveredRefusalTooltip: {
+        label: 'حل شدہ انکاری بچے (Covered Refusals)',
+        formula: 'قائل کر کے پلائے گئے انکاری کیسز',
+        fieldRule: 'رپورٹ شدہ انکاری سے زائد نہیں ہو سکتا',
+        explanation: 'معززین علاقہ اور طبی افسران کی مدد سے حل کر کے قطرے پینے والے بچے۔',
+      },
+    },
+
+    // Tool 7: Campaign Coverage Calculator
+    campaignCoverage: {
+      num: '7',
+      title: 'مہماتی کوریج کیلکولیٹر',
+      shortTitle: 'مہماتی کوریج کیلکولیٹر',
       badge: '(ویکسین شدہ ÷ ہدف) × 100',
       purpose: 'کوریج فیصد کا حساب اور 95% بین الاقوامی ہدف کے مقابلے میں پیش رفت کی نگرانی',
       calculateBtn: 'کوریج شرح % معلوم کریں',
@@ -558,11 +907,11 @@ export const translations: Record<Language, TranslationStrings> = {
       },
     },
 
-    // Tool 5: Daily Catch-Up
+    // Tool 8: Daily Catch-Up Calculator
     dailyCatchUp: {
-      num: '5',
-      title: 'روزانہ کیچ اپ اور کولڈ چین رن ریٹ',
-      shortTitle: 'روزانہ کیچ اپ',
+      num: '8',
+      title: 'روزانہ کیچ اپ کیلکولیٹر',
+      shortTitle: 'روزانہ کیچ اپ کیلکولیٹر',
       badge: 'باقی بچے ÷ باقی دن',
       purpose: 'باقی دنوں کے لیے نظرثانی شدہ روزانہ ہدف اور صبح کی bOPV وائلز کا حساب',
       calculateBtn: 'روزانہ کا ہدف معلوم کریں',
@@ -594,71 +943,11 @@ export const translations: Record<Language, TranslationStrings> = {
       },
     },
 
-    // Tool 6: NA Coverage
-    naCoverage: {
-      num: '6',
-      title: 'غیر موجود بچے (NA) کوریج کیلکولیٹر',
-      shortTitle: 'غیر موجود بچے',
-      badge: '(کور شدہ ÷ کل NA) × 100',
-      purpose: 'NA = غیر موجود بچے (پہلے دورے پر تالہ بند یا بچہ موجود نہ ہونا) • ریکوری ریٹ',
-      calculateBtn: 'غیر موجود بچوں کی ریکوری شرح معلوم کریں',
-      resetBtn: 'دوبارہ شروع کریں',
-      reportedNaLabel: 'رپورٹ شدہ غیر موجود (NA) بچے',
-      coveredNaLabel: 'کور شدہ غیر موجود (NA) بچے',
-      coverageRateLabel: 'غیر موجود بچوں کی کوریج شرح',
-      recoveryRateBadge: 'ریکوری ریٹ',
-      remainingNaLabel: 'باقی غیر موجود بچے:',
-      reportedNaResult: 'رپورٹ شدہ NA',
-      coveredNaResult: 'کور شدہ NA',
-      reportedNaTooltip: {
-        label: 'رپورٹ شدہ NA بچے',
-        formula: 'NA = بچے گھر پر غیر موجود یا تالہ بند پائے گئے',
-        fieldRule: 'ٹیلی شیٹ اور دروازے پر "X" کا نشان لگایا جاتا ہے',
-        explanation: 'پہلے مرحلے کے دوران وہ بچے جو گھر پر عارضی طور پر موجود نہیں تھے یا دروازہ بند تھا۔',
-      },
-      coveredNaTooltip: {
-        label: 'کور شدہ NA بچے',
-        formula: 'ریکوری % = (کور شدہ NA تقسیم رپورٹ شدہ NA) × 100',
-        fieldRule: 'کیچ اپ کے دنوں میں ہدف ریکوری: 85% سے زائد',
-        explanation: 'دوبارہ دورے پر ویکسین پینے والے بچے جن کی تصدیق ٹیلی شیٹ پر کی گئی ہے۔',
-      },
-    },
-
-    // Tool 7: Refusal Coverage
-    refusalCoverage: {
-      num: '7',
-      title: 'انکاری والدین (Refusal) کوریج کیلکولیٹر',
-      shortTitle: 'انکاری کوریج',
-      badge: '(کور شدہ ÷ رپورٹ شدہ) × 100',
-      purpose: 'انکاری کیسز کا حل اور کوریج شرح (مثلاً 50 رپورٹ، 25 حل = 50% کوریج)',
-      calculateBtn: 'انکاری حل شرح % معلوم کریں',
-      resetBtn: 'دوبارہ شروع کریں',
-      reportedRefusalLabel: 'رپورٹ شدہ انکاری کیسز',
-      coveredRefusalLabel: 'قائل شدہ / حل شدہ انکاری',
-      coverageRateLabel: 'انکاری کوریج شرح',
-      resolutionRateBadge: 'حل شرح',
-      remainingRefusalLabel: 'باقی انکاری بچے:',
-      reportedRefusalResult: 'رپورٹ شدہ انکاری',
-      coveredRefusalResult: 'کور شدہ انکاری',
-      reportedRefusalTooltip: {
-        label: 'رپورٹ شدہ انکاری بچے',
-        formula: 'انکاری = والدین نے قطرے پلانے سے انکار کیا',
-        fieldRule: 'دروازے پر چاک سے "R" کا نشان لگایا جاتا ہے',
-        explanation: 'ابتدائی دورے میں غلط فہمیوں یا ہچکچاہٹ کی بنا پر قطرے نہ پینے والے بچے جنہیں رجسٹر کیا گیا ہو۔',
-      },
-      coveredRefusalTooltip: {
-        label: 'حل شدہ انکاری بچے',
-        formula: 'انکاری حل % = (حل شدہ انکاری تقسیم رپورٹ شدہ انکاری) × 100',
-        fieldRule: 'باقی انکاری = رپورٹ شدہ منفی حل شدہ',
-        explanation: 'ایریا انچارجز، یوسی میڈیکل آفیسرز، مذہبی اور سماجی رہنماؤں کی مدد سے قائل کر کے ویکسین کیے گئے بچے۔',
-      },
-    },
-
-    // Tool 8: Under-5 Population
+    // Tool 9: Under-5 Population Calculator
     under5Population: {
-      num: '8',
-      title: 'کل آبادی اور 5 سال سے کم ہدف',
-      shortTitle: 'آبادی و 5 سال',
+      num: '9',
+      title: 'انڈر 5 آبادی کیلکولیٹر',
+      shortTitle: 'انڈر 5 آبادی کیلکولیٹر',
       badge: 'آبادی × فیصد ÷ 100',
       purpose: 'یونین کونسل یا مردم شماری آبادی سے 5 سال سے کم ہدف بچوں کا تخمینہ',
       calculateBtn: '5 سال سے کم ہدف معلوم کریں',
