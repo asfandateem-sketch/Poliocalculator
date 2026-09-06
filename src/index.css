@@ -136,12 +136,15 @@ body {
   border-radius: 0.625rem;
   font-weight: 700;
   font-size: 0.875rem;
-  transition: all 0.15s ease;
+  transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 1px 2px 0 rgba(15, 118, 110, 0.2);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .saas-btn-primary:hover,
@@ -153,7 +156,8 @@ body {
 .saas-btn-primary:active,
 .clay-btn-teal:active {
   background-color: #134e4a;
-  transform: translateY(1px);
+  transform: scale(0.96);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Secondary / Reset Button */
@@ -166,11 +170,14 @@ body {
   border: 1px solid #e2e8f0;
   font-weight: 600;
   font-size: 0.8125rem;
-  transition: all 0.15s ease;
+  transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .saas-btn-secondary:hover,
@@ -183,7 +190,80 @@ body {
 .saas-btn-secondary:active,
 .clay-btn-light:active {
   background-color: #cbd5e1;
-  transform: translateY(1px);
+  transform: scale(0.96);
+}
+
+/* Tactile Micro-Interactions & Sensory Animations */
+@keyframes cardCalculatePulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.5), inset 0 0 0 0 rgba(20, 184, 166, 0.25);
+    border-color: #0d9488;
+  }
+  30% {
+    transform: scale(1.012);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.4), inset 0 0 16px rgba(20, 184, 166, 0.2);
+    border-color: #14b8a6;
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0), inset 0 0 0 0 rgba(20, 184, 166, 0);
+    border-color: #1e293b;
+  }
+}
+
+.animate-calculate-pulse {
+  animation: cardCalculatePulse 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes numberPop {
+  0% {
+    transform: scale(0.94);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-number-pop {
+  animation: numberPop 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-block;
+  transform-origin: left center;
+}
+
+[dir="rtl"] .animate-number-pop {
+  transform-origin: right center;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.animate-error-shake {
+  animation: errorShake 0.32s ease-in-out;
+}
+
+@keyframes microFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-micro-fade-in {
+  animation: microFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Standardized Result Container (Dark Navy Public Health Dashboard Box) */
@@ -238,8 +318,15 @@ body {
 }
 
 .saas-nav-item {
-  transition: all 0.15s ease;
+  transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
   border-radius: 0.5rem;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.saas-nav-item:active {
+  transform: scale(0.98);
 }
 
 .saas-nav-item-active {

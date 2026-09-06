@@ -3,6 +3,7 @@ import { Calendar, RotateCcw, CheckCircle2, XCircle } from 'lucide-react';
 import { calculateChildAge, ChildAgeResult } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
+import { useCalculationFeedback } from '../useCalculationFeedback';
 
 interface Props {
   compact?: boolean;
@@ -11,6 +12,7 @@ interface Props {
 export const ChildAgeCalculator: React.FC<Props> = () => {
   const { isUrdu, t } = useLanguage();
   const strings = t.childAge;
+  const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
   const today = new Date();
   const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -34,6 +36,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
     if (!dobVal) {
       setError(isUrdu ? 'براہ کرم درست تاریخِ پیدائش منتخب کریں' : 'Please select a valid date of birth');
       setResult(null);
+      triggerError();
       return;
     }
 
@@ -41,6 +44,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
     if (parts.length !== 3 || parts.some(isNaN)) {
       setError(isUrdu ? 'براہ کرم درست تاریخِ پیدائش منتخب کریں' : 'Please select a valid date of birth');
       setResult(null);
+      triggerError();
       return;
     }
 
@@ -50,10 +54,12 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
     try {
       const res = calculateChildAge(selectedDate, new Date());
       setResult(res);
+      triggerFeedback('calculate');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : isUrdu ? 'تاریخِ پیدائش درست نہیں' : 'Invalid date of birth';
       setError(msg);
       setResult(null);
+      triggerError();
     }
   };
 
@@ -64,6 +70,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
     } else {
       setResult(null);
       setError('');
+      triggerReset();
     }
   };
 
@@ -71,10 +78,11 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
     setDob('');
     setResult(null);
     setError('');
+    triggerReset();
   };
 
   return (
-    <div className={`saas-card p-5 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
+    <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
       {/* Header */}
       <div>
         <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 mb-3.5">
@@ -122,7 +130,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
                 className="saas-input w-full px-3.5 text-sm sm:text-base cursor-pointer"
               />
               {error && (
-                <p className="text-xs text-rose-600 mt-2 font-semibold">{error}</p>
+                <p className="text-xs text-rose-600 mt-2 font-semibold animate-error-shake">{error}</p>
               )}
             </div>
 
@@ -151,20 +159,37 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
 
           {/* Results Column */}
           <div className="md:col-span-6">
-            <div className="saas-result-card p-4 sm:p-5 flex flex-col justify-between h-full min-h-[170px]">
+            <div
+              className={`saas-result-card p-4 sm:p-5 flex flex-col justify-between h-full min-h-[170px] transition-all duration-300 ${
+                isCalculated
+                  ? 'ring-2 ring-teal-400/60 shadow-[0_0_20px_rgba(20,184,166,0.25)] animate-calculate-pulse'
+                  : ''
+              }`}
+            >
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
                   <span className="flex items-center gap-1.5 font-semibold text-slate-300">
                     <Calendar className="w-3.5 h-3.5 text-teal-400" />
                     {strings.under5Status}
                   </span>
-                  <span className="text-[10px] text-slate-400">{strings.strictRuleNotice}</span>
+                  {isCalculated ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-500/40 animate-micro-fade-in">
+                      ✓ {isUrdu ? 'حساب شدہ' : 'Updated'}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-400">{strings.strictRuleNotice}</span>
+                  )}
                 </div>
 
                 {/* Hero Under-5 Status Display */}
                 <div className="flex items-center gap-2.5 my-2">
                   {result ? (
-                    <div className="flex items-center gap-2.5 flex-wrap">
+                    <div
+                      key={calculationKey}
+                      className={`flex items-center gap-2.5 flex-wrap ${
+                        isCalculated ? 'animate-number-pop' : ''
+                      }`}
+                    >
                       <span
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-black tracking-wide ${
                           result.isUnder5

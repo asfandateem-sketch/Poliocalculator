@@ -3,6 +3,7 @@ import { AlertCircle, RotateCcw } from 'lucide-react';
 import { calculateVaccineWastageFromVials, VialWastageResult, BOPV_CONSTANTS } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
+import { useCalculationFeedback } from '../useCalculationFeedback';
 
 interface Props {
   compact?: boolean;
@@ -11,6 +12,7 @@ interface Props {
 export const VaccineWastageCalculator: React.FC<Props> = () => {
   const { isUrdu, t } = useLanguage();
   const strings = t.vaccineWastage;
+  const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
   const [vialsSupplied, setVialsSupplied] = useState<string>('50');
   const [childrenVaccinated, setChildrenVaccinated] = useState<string>('950');
@@ -30,10 +32,12 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
 
     if (isNaN(vials) || vials < 0) {
       setError(isUrdu ? 'براہ کرم فراہم کردہ درست وائلز درج کریں (≥ 0)' : 'Please enter valid vials supplied (≥ 0)');
+      triggerError();
       return;
     }
     if (isNaN(vaccinated) || vaccinated < 0) {
       setError(isUrdu ? 'براہ کرم ویکسین شدہ درست بچے درج کریں (≥ 0)' : 'Please enter valid children vaccinated (≥ 0)');
+      triggerError();
       return;
     }
 
@@ -44,16 +48,19 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
           ? `ویکسین شدہ بچے (${vaccinated}) فراہم کردہ کل خوراکوں (${totalCapacity}) سے زیادہ نہیں ہو سکتے`
           : `Children vaccinated (${vaccinated}) cannot exceed total doses supplied (${totalCapacity} doses from ${vials} vials)`
       );
+      triggerError();
       return;
     }
 
     try {
       const res = calculateVaccineWastageFromVials(vials, vaccinated);
       setResult(res);
+      triggerFeedback('calculate');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : isUrdu ? 'حسابی خرابی' : 'Invalid calculation parameters';
       setError(msg);
       setResult(null);
+      triggerError();
     }
   };
 
@@ -62,13 +69,14 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
     setChildrenVaccinated('');
     setResult(null);
     setError('');
+    triggerReset();
   };
 
   const currentVials = Number(vialsSupplied.replace(/,/g, '')) || 0;
   const potentialDoses = currentVials * BOPV_CONSTANTS.CHILDREN_PER_VIAL;
 
   return (
-    <div className={`saas-card p-5 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
+    <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
       {/* Header */}
       <div>
         <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 mb-3.5">
@@ -157,7 +165,7 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
             </div>
 
             {error && (
-              <p className="text-xs text-rose-600 font-semibold">{error}</p>
+              <p className="text-xs text-rose-600 font-semibold animate-error-shake">{error}</p>
             )}
 
             {/* Action Buttons */}
@@ -185,19 +193,36 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
 
           {/* Results Column */}
           <div className="md:col-span-6">
-            <div className="saas-result-card p-4 sm:p-5 flex flex-col justify-between h-full min-h-[170px]">
+            <div
+              className={`saas-result-card p-4 sm:p-5 flex flex-col justify-between h-full min-h-[170px] transition-all duration-300 ${
+                isCalculated
+                  ? 'ring-2 ring-teal-400/60 shadow-[0_0_20px_rgba(20,184,166,0.25)] animate-calculate-pulse'
+                  : ''
+              }`}
+            >
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
                   <span className="flex items-center gap-1.5 font-semibold text-slate-300">
                     <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
                     {strings.wastedDosesLabel}
                   </span>
-                  <span className="text-[10px] text-slate-400">{strings.targetWastageNotice}</span>
+                  {isCalculated ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-500/40 animate-micro-fade-in">
+                      ✓ {isUrdu ? 'حساب شدہ' : 'Updated'}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-400">{strings.targetWastageNotice}</span>
+                  )}
                 </div>
 
                 <div className="flex items-baseline justify-between mb-3">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white">
+                    <span
+                      key={`wastage-${calculationKey}`}
+                      className={`text-2xl sm:text-3xl font-black font-mono tracking-tight text-white ${
+                        isCalculated ? 'animate-number-pop' : ''
+                      }`}
+                    >
                       {result !== null ? result.wastedDoses.toLocaleString() : '—'}
                     </span>
                     <span className="text-xs font-semibold text-amber-300">

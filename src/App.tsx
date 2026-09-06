@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { usePWA } from './usePWA';
 import { LanguageProvider, useLanguage } from './LanguageContext';
+import { triggerHaptic } from './haptics';
 import {
   Shield,
   Download,
@@ -123,6 +124,7 @@ function AppContent() {
   }, []);
 
   const scrollToCalculator = (id: string) => {
+    triggerHaptic('light');
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -132,6 +134,7 @@ function AppContent() {
   };
 
   const scrollToTop = () => {
+    triggerHaptic('light');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -171,7 +174,10 @@ function AppContent() {
             <button
               id="language-toggle-btn"
               type="button"
-              onClick={toggleLanguage}
+              onClick={() => {
+                triggerHaptic('light');
+                toggleLanguage();
+              }}
               aria-label={isUrdu ? 'Switch to English' : 'اردو میں تبدیل کریں'}
               title={isUrdu ? 'Switch to English' : 'اردو میں تبدیل کریں'}
               className="saas-btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 text-xs font-bold cursor-pointer"
@@ -227,7 +233,10 @@ function AppContent() {
           <div className="flex items-center justify-between gap-2">
             <button
               type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                triggerHaptic('light');
+                setMobileMenuOpen(!mobileMenuOpen);
+              }}
               className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 flex-1 min-w-0 text-left cursor-pointer"
             >
               <span className="w-6 h-6 rounded bg-teal-700 text-white font-mono text-xs flex items-center justify-center flex-shrink-0">

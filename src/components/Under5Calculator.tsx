@@ -3,6 +3,7 @@ import { Users, RotateCcw } from 'lucide-react';
 import { calculateUnder5Children } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
+import { useCalculationFeedback } from '../useCalculationFeedback';
 
 interface Props {
   compact?: boolean;
@@ -11,6 +12,7 @@ interface Props {
 export const Under5Calculator: React.FC<Props> = () => {
   const { isUrdu, t } = useLanguage();
   const strings = t.under5Population;
+  const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
   const [totalPop, setTotalPop] = useState<string>('50000');
   const [under5Pct, setUnder5Pct] = useState<string>('15');
@@ -24,19 +26,23 @@ export const Under5Calculator: React.FC<Props> = () => {
 
     if (isNaN(pop) || pop <= 0) {
       setError(isUrdu ? 'براہ کرم درست کل آبادی درج کریں (> 0)' : 'Please enter a valid total population (> 0)');
+      triggerError();
       return;
     }
     if (isNaN(pct) || pct <= 0 || pct > 100) {
       setError(isUrdu ? 'شرح 0 سے 100 فیصد کے درمیان ہونی چاہیے' : 'Percentage must be between 0 and 100');
+      triggerError();
       return;
     }
 
     try {
       const res = calculateUnder5Children({ method: 'population', totalPopulation: pop, under5Percentage: pct });
       setResult(res.under5Children);
+      triggerFeedback('calculate');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : isUrdu ? 'حسابی خرابی' : 'Invalid input values';
       setError(msg);
+      triggerError();
     }
   };
 
@@ -45,10 +51,11 @@ export const Under5Calculator: React.FC<Props> = () => {
     setUnder5Pct('15');
     setResult(null);
     setError('');
+    triggerReset();
   };
 
   return (
-    <div className={`saas-card p-5 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
+    <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
       {/* Header */}
       <div>
         <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 mb-3.5">
@@ -138,7 +145,7 @@ export const Under5Calculator: React.FC<Props> = () => {
             </div>
 
             {error && (
-              <p className="text-xs text-rose-600 font-semibold">{error}</p>
+              <p className="text-xs text-rose-600 font-semibold animate-error-shake">{error}</p>
             )}
 
             {/* Action Buttons */}
@@ -166,21 +173,38 @@ export const Under5Calculator: React.FC<Props> = () => {
 
           {/* Results Column */}
           <div className="md:col-span-6">
-            <div className="saas-result-card p-4 sm:p-5 flex flex-col justify-between h-full min-h-[170px]">
+            <div
+              className={`saas-result-card p-4 sm:p-5 flex flex-col justify-between h-full min-h-[170px] transition-all duration-300 ${
+                isCalculated
+                  ? 'ring-2 ring-teal-400/60 shadow-[0_0_20px_rgba(20,184,166,0.25)] animate-calculate-pulse'
+                  : ''
+              }`}
+            >
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
                   <span className="flex items-center gap-1.5 font-semibold text-slate-300">
                     <Users className="w-3.5 h-3.5 text-teal-400" />
                     {strings.estimatedTargetLabel}
                   </span>
-                  <span className="text-[10px] text-teal-300 font-semibold" dir="ltr">
-                    {under5Pct ? `${under5Pct}% Demographic` : 'Cohort'}
-                  </span>
+                  {isCalculated ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-500/40 animate-micro-fade-in">
+                      ✓ {isUrdu ? 'حساب شدہ' : 'Updated'}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-teal-300 font-semibold" dir="ltr">
+                      {under5Pct ? `${under5Pct}% Demographic` : 'Cohort'}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-baseline justify-between mb-3">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white">
+                    <span
+                      key={`u5-res-${calculationKey}`}
+                      className={`text-2xl sm:text-3xl font-black font-mono tracking-tight text-white ${
+                        isCalculated ? 'animate-number-pop' : ''
+                      }`}
+                    >
                       {result !== null ? result.toLocaleString() : '—'}
                     </span>
                     <span className="text-xs font-semibold text-teal-300">

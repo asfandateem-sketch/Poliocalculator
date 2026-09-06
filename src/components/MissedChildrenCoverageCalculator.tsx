@@ -6,6 +6,7 @@ import {
 } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
+import { useCalculationFeedback } from '../useCalculationFeedback';
 
 interface Props {
   compact?: boolean;
@@ -14,6 +15,7 @@ interface Props {
 export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
   const { isUrdu, t } = useLanguage();
   const strings = t.missedChildren;
+  const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
   // Initial state values for typical polio campaign day:
   // 120 NA reported, 105 NA covered
@@ -47,6 +49,7 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
           ? 'براہ کرم درست رپورٹ شدہ NA بچے درج کریں (0 یا اس سے زیادہ)'
           : 'Please enter valid reported NA children (≥ 0)'
       );
+      triggerError();
       return;
     }
     if (isNaN(covNA) || covNA < 0) {
@@ -55,6 +58,7 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
           ? 'براہ کرم درست کور شدہ NA بچے درج کریں (0 یا اس سے زیادہ)'
           : 'Please enter valid covered NA children (≥ 0)'
       );
+      triggerError();
       return;
     }
     if (isNaN(repRef) || repRef < 0) {
@@ -63,6 +67,7 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
           ? 'براہ کرم درست رپورٹ شدہ انکاری کیسز درج کریں (0 یا اس سے زیادہ)'
           : 'Please enter valid reported refusals (≥ 0)'
       );
+      triggerError();
       return;
     }
     if (isNaN(covRef) || covRef < 0) {
@@ -71,6 +76,7 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
           ? 'براہ کرم درست حل شدہ انکاری کیسز درج کریں (0 یا اس سے زیادہ)'
           : 'Please enter valid covered refusals (≥ 0)'
       );
+      triggerError();
       return;
     }
 
@@ -80,6 +86,7 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
           ? 'کور شدہ NA بچے رپورٹ شدہ NA بچوں سے زیادہ نہیں ہو سکتے'
           : 'Covered NA cannot exceed reported NA'
       );
+      triggerError();
       return;
     }
     if (covRef > repRef) {
@@ -88,12 +95,14 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
           ? 'حل شدہ انکاری کیسز رپورٹ شدہ انکاری کیسز سے زیادہ نہیں ہو سکتے'
           : 'Covered refusals cannot exceed reported refusals'
       );
+      triggerError();
       return;
     }
 
     try {
       const res = calculateCombinedMissedChildren(repNA, covNA, repRef, covRef);
       setResult(res);
+      triggerFeedback('calculate');
     } catch (err: unknown) {
       const msg =
         err instanceof Error
@@ -103,6 +112,7 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
           : 'Calculation error';
       setError(msg);
       setResult(null);
+      triggerError();
     }
   };
 
@@ -113,12 +123,13 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
     setCoveredRefusals('');
     setResult(null);
     setError('');
+    triggerReset();
   };
 
   return (
     <div
       id="missed-children-calculator"
-      className={`saas-card p-5 sm:p-6 flex flex-col justify-between h-full ${
+      className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${
         isUrdu ? 'font-arabic' : ''
       }`}
     >
@@ -247,7 +258,7 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
             </div>
 
             {error && (
-              <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 flex items-center gap-2 text-xs text-rose-700 font-semibold">
+              <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 flex items-center gap-2 text-xs text-rose-700 font-semibold animate-error-shake">
                 <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -278,34 +289,50 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
 
           {/* Results Column */}
           <div className="md:col-span-6">
-            <div className="saas-result-card p-4 sm:p-5 flex flex-col justify-between h-full min-h-[170px]">
+            <div
+              className={`saas-result-card p-4 sm:p-5 flex flex-col justify-between h-full min-h-[170px] transition-all duration-300 ${
+                isCalculated
+                  ? 'ring-2 ring-teal-400/60 shadow-[0_0_20px_rgba(20,184,166,0.25)] animate-calculate-pulse'
+                  : ''
+              }`}
+            >
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-300 mb-2">
                   <span className="flex items-center gap-1.5 font-semibold text-slate-300">
                     <ShieldAlert className="w-3.5 h-3.5 text-teal-400" />
                     {strings.combinedCoveragePercentLabel}
                   </span>
-                  <span
-                    className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
-                      result === null
-                        ? 'badge-neutral'
-                        : result.status === 'OPTIMAL'
-                        ? 'badge-optimal'
-                        : result.status === 'ACCEPTABLE'
-                        ? 'badge-acceptable'
-                        : 'badge-warning'
-                    }`}
-                  >
-                    {result !== null ? result.status : strings.statusBadge}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {isCalculated && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-500/40 animate-micro-fade-in">
+                        ✓ {isUrdu ? 'حساب شدہ' : 'Updated'}
+                      </span>
+                    )}
+                    <span
+                      className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
+                        result === null
+                          ? 'badge-neutral'
+                          : result.status === 'OPTIMAL'
+                          ? 'badge-optimal'
+                          : result.status === 'ACCEPTABLE'
+                          ? 'badge-acceptable'
+                          : 'badge-warning'
+                      }`}
+                    >
+                      {result !== null ? result.status : strings.statusBadge}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Primary Metric */}
                 <div className="flex items-baseline justify-between mb-3 pb-2.5 border-b border-slate-800/80">
                   <div>
                     <div
+                      key={`missed-pct-${calculationKey}`}
                       dir="ltr"
                       className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${
+                        isCalculated ? 'animate-number-pop' : ''
+                      } ${
                         result === null || result.combinedCoveragePercent === null
                           ? 'text-slate-300'
                           : result.combinedCoveragePercent >= 90

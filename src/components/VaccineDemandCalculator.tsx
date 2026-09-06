@@ -3,6 +3,7 @@ import { Package, RotateCcw, Droplets } from 'lucide-react';
 import { calculateVaccineDemand } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
+import { useCalculationFeedback } from '../useCalculationFeedback';
 
 interface Props {
   compact?: boolean;
@@ -11,6 +12,7 @@ interface Props {
 export const VaccineDemandCalculator: React.FC<Props> = () => {
   const { isUrdu, t } = useLanguage();
   const strings = t.vaccineDemand;
+  const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
   const [targetChildren, setTargetChildren] = useState<string>('5000');
   const [bufferPct, setBufferPct] = useState<string>('5');
@@ -26,12 +28,14 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
     const children = Number(targetChildren.replace(/,/g, ''));
     if (isNaN(children) || children < 0) {
       setError(isUrdu ? 'براہ کرم درست تعداد درج کریں (≥ 0)' : 'Please enter a valid number of children (≥ 0)');
+      triggerError();
       return;
     }
 
     const buffer = bufferPct ? Number(bufferPct) : 0;
     if (isNaN(buffer) || buffer < 0 || buffer > 100) {
       setError(isUrdu ? 'حفاظتی بفر 0 سے 100 فیصد کے درمیان ہونا چاہیے' : 'Buffer percentage must be between 0 and 100');
+      triggerError();
       return;
     }
 
@@ -45,9 +49,11 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
       setTotalDoses(result.totalDoses);
       setTotalDrops(result.totalDropsRequired);
       setCoveredChildren(result.childrenCoveredByVials);
+      triggerFeedback('calculate');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : isUrdu ? 'حسابی خرابی' : 'Calculation error';
       setError(msg);
+      triggerError();
     }
   };
 
@@ -60,10 +66,11 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
     setTotalDrops(null);
     setCoveredChildren(null);
     setError('');
+    triggerReset();
   };
 
   return (
-    <div className={`saas-card p-5 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
+    <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
       {/* Header */}
       <div>
         <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 mb-3.5">
@@ -148,7 +155,7 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
             </div>
 
             {error && (
-              <p className="text-xs text-rose-600 font-semibold">{error}</p>
+              <p className="text-xs text-rose-600 font-semibold animate-error-shake">{error}</p>
             )}
 
             {/* Action Buttons */}
@@ -176,19 +183,36 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
 
           {/* Results Column */}
           <div className="md:col-span-6">
-            <div className="saas-result-card p-4 sm:p-5 flex flex-col justify-between h-full min-h-[170px]">
+            <div
+              className={`saas-result-card p-4 sm:p-5 flex flex-col justify-between h-full min-h-[170px] transition-all duration-300 ${
+                isCalculated
+                  ? 'ring-2 ring-teal-400/60 shadow-[0_0_20px_rgba(20,184,166,0.25)] animate-calculate-pulse'
+                  : ''
+              }`}
+            >
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
                   <span className="flex items-center gap-1.5 font-semibold text-slate-300">
                     <Package className="w-3.5 h-3.5 text-teal-400" />
                     {strings.vialsResultLabel}
                   </span>
-                  <span className="text-[10px] text-teal-300 font-mono font-medium" dir="ltr">CEIL(N ÷ 20)</span>
+                  {isCalculated ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-500/40 animate-micro-fade-in">
+                      ✓ {isUrdu ? 'حساب شدہ' : 'Updated'}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-teal-300 font-mono font-medium" dir="ltr">CEIL(N ÷ 20)</span>
+                  )}
                 </div>
 
                 <div className="flex items-baseline justify-between mb-3">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white">
+                    <span
+                      key={`vials-${calculationKey}`}
+                      className={`text-2xl sm:text-3xl font-black font-mono tracking-tight text-white ${
+                        isCalculated ? 'animate-number-pop' : ''
+                      }`}
+                    >
                       {vialsRequired !== null ? vialsRequired.toLocaleString() : '—'}
                     </span>
                     <span className="text-xs font-semibold text-teal-300">
