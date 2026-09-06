@@ -4,8 +4,31 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
-  base: '/Poliocalculator/',
+export default defineConfig(({ command, mode }) => {
+  const isProduction = command === 'build' || mode === 'production' || process.env.NODE_ENV === 'production';
+
+  return {
+    base: isProduction ? '/Poliocalculator/' : '/',
+
+  build: {
+    target: 'es2020',
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react-dom') || id.includes('react/') || id.includes('scheduler')) {
+              return 'vendor-react';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+          }
+        },
+      },
+    },
+  },
 
   plugins: [
     react(),
@@ -56,7 +79,10 @@ export default defineConfig({
   },
 
   server: {
+    port: 3000,
+    host: '0.0.0.0',
     hmr: process.env.DISABLE_HMR !== 'true',
     watch: process.env.DISABLE_HMR === 'true' ? null : {},
   },
+};
 });

@@ -8,7 +8,7 @@ interface Props {
   compact?: boolean;
 }
 
-export const ChildAgeCalculator: React.FC<Props> = ({ compact = true }) => {
+export const ChildAgeCalculator: React.FC<Props> = () => {
   const { isUrdu, t } = useLanguage();
   const strings = t.childAge;
 
@@ -74,131 +74,142 @@ export const ChildAgeCalculator: React.FC<Props> = ({ compact = true }) => {
   };
 
   return (
-    <div className={`clay-card flex flex-col justify-between p-4 sm:p-5 h-full ${isUrdu ? 'font-arabic' : ''}`}>
+    <div className={`saas-card p-5 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
       {/* Header */}
       <div>
-        <div className="flex items-center justify-between gap-2 mb-1.5">
+        <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 mb-3.5">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="clay-num-badge w-7 h-7 rounded-xl font-black text-sm flex items-center justify-center flex-shrink-0">
-              1
+            <span className="w-7 h-7 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/80 font-mono font-bold text-xs flex items-center justify-center flex-shrink-0">
+              01
             </span>
-            <h2 className="text-sm sm:text-base font-extrabold text-slate-900 leading-snug">
-              {strings.title}
-            </h2>
+            <div className="min-w-0">
+              <h2 className="text-base font-bold text-slate-900 tracking-tight leading-snug">
+                {strings.title}
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                {strings.purpose}
+              </p>
+            </div>
           </div>
-          <span className="clay-badge text-[11px] font-mono font-bold text-slate-600 bg-slate-100/90 px-3 py-1 rounded-xl flex-shrink-0" dir="ltr">
+          <span className="text-xs font-mono font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/70 flex-shrink-0" dir="ltr">
             {strings.badge}
           </span>
         </div>
-        <p className="text-xs text-slate-600 mb-3 leading-relaxed">
-          {strings.purpose}
-        </p>
 
-        {/* Date Input with Info Tooltip */}
-        <div className="mb-3">
-          <div className="flex items-center justify-between mb-1.5">
-            <InfoTooltip
-              id="dob"
-              label={strings.dobLabel}
-              formula={strings.dobTooltip.formula}
-              fieldRule={strings.dobTooltip.fieldRule}
-              explanation={strings.dobTooltip.explanation}
-              isUrdu={isUrdu}
-            />
-            <span className="text-xs text-slate-500 font-semibold">{strings.dobSub}</span>
-          </div>
-          <input
-            id="child-dob"
-            type="date"
-            max={todayString}
-            value={dob}
-            onChange={(e) => handleDateChange(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && performCalculation(dob)}
-            className="clay-input h-11 w-full px-3 text-sm sm:text-base font-mono font-bold text-slate-900 cursor-pointer"
-          />
-        </div>
-
-        {error && (
-          <p className="text-xs text-rose-600 mb-2 font-bold">{error}</p>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 mb-3">
-          <button
-            id="age-calc-btn"
-            type="button"
-            onClick={() => performCalculation(dob)}
-            className="clay-btn-teal h-11 flex-1 px-4 font-black text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
-          >
-            {strings.calculateBtn}
-          </button>
-          <button
-            id="age-reset-btn"
-            type="button"
-            onClick={handleReset}
-            title={strings.resetBtn}
-            className="clay-btn-light h-11 w-11 cursor-pointer flex items-center justify-center flex-shrink-0"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Result Box - Clay Dark Box */}
-      <div className="clay-dark-box p-3.5 sm:p-4 text-white">
-        <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1.5">
-          <span className="flex items-center gap-1.5 font-bold">
-            <Calendar className="w-3.5 h-3.5 text-teal-400" />
-            {strings.under5Status}
-          </span>
-          <span className="text-[10px] text-slate-400 font-medium">{strings.strictRuleNotice}</span>
-        </div>
-
-        {/* Prominent Under 5 YES/NO display */}
-        <div className="flex items-center justify-between mb-2.5">
-          {result ? (
-            <div className="flex items-center gap-2.5">
-              <span
-                className={`clay-badge inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black tracking-wide ${
-                  result.isUnder5
-                    ? 'bg-emerald-500/25 text-emerald-300 border-emerald-400/40'
-                    : 'bg-rose-500/25 text-rose-300 border-rose-400/40'
-                }`}
-              >
-                {result.isUnder5 ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    {strings.eligibleYes}
-                  </>
-                ) : (
-                  <>
-                    <XCircle className="w-4 h-4 text-rose-400" />
-                    {strings.eligibleNo}
-                  </>
-                )}
-              </span>
-              <span className="text-xs text-slate-300 font-bold">
-                {result.isUnder5 ? strings.eligibleDesc : strings.notEligibleDesc}
-              </span>
+        {/* Content Layout: 2 Columns on md+ screens */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
+          {/* Inputs Column */}
+          <div className="md:col-span-6 flex flex-col justify-between space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <InfoTooltip
+                  id="dob"
+                  label={strings.dobLabel}
+                  formula={strings.dobTooltip.formula}
+                  fieldRule={strings.dobTooltip.fieldRule}
+                  explanation={strings.dobTooltip.explanation}
+                  isUrdu={isUrdu}
+                />
+                <span className="text-[11px] text-slate-500 font-medium">{strings.dobSub}</span>
+              </div>
+              <input
+                id="child-dob"
+                type="date"
+                max={todayString}
+                value={dob}
+                onChange={(e) => handleDateChange(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && performCalculation(dob)}
+                className="saas-input w-full px-3.5 text-sm sm:text-base cursor-pointer"
+              />
+              {error && (
+                <p className="text-xs text-rose-600 mt-2 font-semibold">{error}</p>
+              )}
             </div>
-          ) : (
-            <span className="text-lg font-black text-slate-500 font-mono">—</span>
-          )}
-        </div>
 
-        {/* Age Today & DOB detail */}
-        <div className="pt-2.5 border-t border-slate-700/80 space-y-1 text-xs">
-          <div className="flex items-baseline justify-between">
-            <span className="text-slate-400 font-medium">{strings.exactAgeLabel}</span>
-            <span className="font-mono text-white font-extrabold tracking-tight">
-              {result ? result.ageString : '—'}
-            </span>
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                id="age-calc-btn"
+                type="button"
+                onClick={() => performCalculation(dob)}
+                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm"
+              >
+                {strings.calculateBtn}
+              </button>
+              <button
+                id="age-reset-btn"
+                type="button"
+                onClick={handleReset}
+                title={strings.resetBtn}
+                className="saas-btn-secondary px-3.5"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span className="hidden sm:inline">{strings.resetBtn}</span>
+              </button>
+            </div>
           </div>
-          <div className="flex items-baseline justify-between text-[11px]">
-            <span className="text-slate-400 font-medium">{strings.dobResultLabel}</span>
-            <span className="font-mono text-slate-300 font-semibold">
-              {result ? result.formattedDob : '—'}
-            </span>
+
+          {/* Results Column */}
+          <div className="md:col-span-6">
+            <div className="saas-result-card p-4 sm:p-5 flex flex-col justify-between h-full min-h-[170px]">
+              <div>
+                <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+                  <span className="flex items-center gap-1.5 font-semibold text-slate-300">
+                    <Calendar className="w-3.5 h-3.5 text-teal-400" />
+                    {strings.under5Status}
+                  </span>
+                  <span className="text-[10px] text-slate-400">{strings.strictRuleNotice}</span>
+                </div>
+
+                {/* Hero Under-5 Status Display */}
+                <div className="flex items-center gap-2.5 my-2">
+                  {result ? (
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-black tracking-wide ${
+                          result.isUnder5
+                            ? 'badge-optimal'
+                            : 'badge-warning'
+                        }`}
+                      >
+                        {result.isUnder5 ? (
+                          <>
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            {strings.eligibleYes}
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="w-4 h-4 text-rose-400" />
+                            {strings.eligibleNo}
+                          </>
+                        )}
+                      </span>
+                      <span className="text-xs text-slate-200 font-medium">
+                        {result.isUnder5 ? strings.eligibleDesc : strings.notEligibleDesc}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-xl font-bold text-slate-500 font-mono">—</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Exact Age Details */}
+              <div className="pt-3 border-t border-slate-800 space-y-1.5 text-xs mt-3">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-slate-400 font-medium">{strings.exactAgeLabel}</span>
+                  <span className="font-mono text-white font-bold tracking-tight">
+                    {result ? result.ageString : '—'}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between text-[11px]">
+                  <span className="text-slate-400 font-medium">{strings.dobResultLabel}</span>
+                  <span className="font-mono text-slate-300 font-medium">
+                    {result ? result.formattedDob : '—'}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
