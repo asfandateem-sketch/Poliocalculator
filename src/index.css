@@ -6,7 +6,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 :root {
@@ -21,6 +21,7 @@ body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #f8fafc;
   color: #0f172a;
+  overflow-x: clip;
 }
 
 /* Urdu / Arabic Typography Enhancements with Noto Nastaliq Urdu Priority */
@@ -564,11 +565,11 @@ body {
     overflow: visible;
   }
 
-  /* Mobile Calculator Selector & Modal Items */
-  [dir="rtl"] #mobile-calculator-selector-btn span,
-  .font-arabic #mobile-calculator-selector-btn span,
-  [dir="rtl"] #mobile-calculator-modal button,
-  .font-arabic #mobile-calculator-modal button {
+  /* Top Calculator Navigation & Overview Modal Items in Urdu */
+  [dir="rtl"] #top-calculators-bar button,
+  .font-arabic #top-calculators-bar button,
+  [dir="rtl"] #calculator-overview-modal button,
+  .font-arabic #calculator-overview-modal button {
     line-height: 1.75 !important;
     overflow: visible;
   }

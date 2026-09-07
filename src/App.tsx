@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { usePWA } from './usePWA';
 import { LanguageProvider, useLanguage } from './LanguageContext';
 import { triggerHaptic } from './haptics';
@@ -11,8 +11,7 @@ import {
   ArrowUp,
 } from 'lucide-react';
 import { CALCULATOR_ITEMS } from './platformNavigation';
-import { DesktopCalculatorIndex } from './components/DesktopCalculatorIndex';
-import { MobileCalculatorSelector } from './components/MobileCalculatorSelector';
+import { TopCalculatorNavigation } from './components/TopCalculatorNavigation';
 
 const ChildAgeCalculator = lazy(() =>
   import('./components/ChildAgeCalculator').then((m) => ({ default: m.ChildAgeCalculator }))
@@ -73,6 +72,9 @@ function AppContent() {
   const [activeSection, setActiveSection] = useState<string>('calc-1');
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
 
+  const isProgrammaticScrollRef = useRef(false);
+  const scrollEndTimerRef = useRef<number | null>(null);
+
   // Scroll spy to highlight the currently visible calculator and update both desktop and mobile navigation
   useEffect(() => {
     const handleScroll = () => {
@@ -82,17 +84,20 @@ function AppContent() {
 
     const observer = new IntersectionObserver(
       (entries) => {
+        // Do not alter active section while a programmatic click-to-scroll is actively animating
+        if (isProgrammaticScrollRef.current) return;
+
         const visibleEntries = entries.filter((entry) => entry.isIntersecting);
         if (visibleEntries.length > 0) {
           visibleEntries.sort((a, b) => {
-            const topA = Math.abs(a.boundingClientRect.top - 120);
-            const topB = Math.abs(b.boundingClientRect.top - 120);
+            const topA = Math.abs(a.boundingClientRect.top - 100);
+            const topB = Math.abs(b.boundingClientRect.top - 100);
             return topA - topB;
           });
           setActiveSection(visibleEntries[0].target.id);
         }
       },
-      { rootMargin: '-10% 0px -40% 0px', threshold: [0, 0.1, 0.25] }
+      { rootMargin: '-10% 0px -45% 0px', threshold: [0, 0.1, 0.25] }
     );
 
     CALCULATOR_ITEMS.forEach((c) => {
@@ -103,6 +108,9 @@ function AppContent() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
       observer.disconnect();
+      if (scrollEndTimerRef.current) {
+        clearTimeout(scrollEndTimerRef.current);
+      }
     };
   }, []);
 
@@ -110,17 +118,29 @@ function AppContent() {
     triggerHaptic('light');
     const el = document.getElementById(id);
     if (el) {
-      const isMobile = window.innerWidth < 1024;
-      // Account for mobile sticky selector (approx 110px) vs desktop header offset
-      const headerOffset = isMobile ? 120 : 28;
+      isProgrammaticScrollRef.current = true;
+      setActiveSection(id);
+
+      if (scrollEndTimerRef.current) {
+        clearTimeout(scrollEndTimerRef.current);
+      }
+
+      // Dynamically calculate the top sticky bar height
+      const topBar = document.getElementById('top-calculators-bar');
+      const topBarHeight = topBar ? topBar.offsetHeight : 76;
+      const headerOffset = topBarHeight + 14;
       const elementPosition = el.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
       window.scrollTo({
         top: Math.max(0, offsetPosition),
         behavior: 'smooth',
       });
-      setActiveSection(id);
+
+      // Release lock after smooth scroll animation completes
+      scrollEndTimerRef.current = window.setTimeout(() => {
+        isProgrammaticScrollRef.current = false;
+      }, 750);
     }
   };
 
@@ -131,14 +151,14 @@ function AppContent() {
 
   return (
     <div
-      className={`min-h-screen saas-bg text-slate-900 flex flex-col justify-between px-3 sm:px-6 lg:px-8 py-3 sm:py-5 overflow-x-hidden selection:bg-teal-200 selection:text-teal-950 ${
+      className={`min-h-screen saas-bg text-slate-900 flex flex-col justify-between px-3 sm:px-6 lg:px-8 py-3 sm:py-5 overflow-x-clip selection:bg-teal-200 selection:text-teal-950 ${
         isUrdu ? 'font-arabic' : ''
       }`}
       dir={isUrdu ? 'rtl' : 'ltr'}
     >
-      <div className="max-w-7xl w-full mx-auto flex flex-col flex-1 min-h-0">
+      <div className="max-w-5xl w-full mx-auto flex flex-col flex-1 min-h-0">
         {/* Header - Modern Clean Healthcare SaaS Header */}
-        <header className="saas-header p-3 sm:p-4 mb-4 sm:mb-5 flex items-center justify-between flex-shrink-0 gap-2 sm:gap-3">
+        <header className="saas-header p-3 sm:p-4 mb-3 sm:mb-4 flex items-center justify-between flex-shrink-0 gap-2 sm:gap-3">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-teal-800 text-white flex items-center justify-center shadow-xs border border-teal-700/50 flex-shrink-0">
               <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -217,77 +237,68 @@ function AppContent() {
           </div>
         </header>
 
-        {/* Robust Grid Layout: Full Width on Mobile, Main + Right Index on Desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[minmax(0,1fr)_310px] 2xl:grid-cols-[minmax(0,1fr)_330px] gap-6 items-start flex-1 min-h-0 pb-6 w-full">
-          {/* Main Content: Left Column with All 9 Calculators */}
-          <main className="w-full min-w-0 space-y-5 sm:space-y-6">
-            {/* Mobile / Tablet Calculator Selector at top of calculator area (< lg screens) */}
-            <MobileCalculatorSelector
-              activeSection={activeSection}
-              onSelect={scrollToCalculator}
-            />
+        {/* Top Calculator Navigation Strip with All 9 Names Displayed Above Calculators */}
+        <TopCalculatorNavigation
+          activeSection={activeSection}
+          onSelect={scrollToCalculator}
+        />
 
-            <section id="calc-1" className="scroll-mt-32 lg:scroll-mt-8">
-              <Suspense fallback={<CalculatorSkeleton />}>
-                <ChildAgeCalculator />
-              </Suspense>
-            </section>
+        {/* All 9 Calculators Aligned in Clean Full-Width Container */}
+        <main className="w-full min-w-0 space-y-6 sm:space-y-7 pb-8">
+          <section id="calc-1" className="scroll-mt-24 sm:scroll-mt-28">
+            <Suspense fallback={<CalculatorSkeleton />}>
+              <ChildAgeCalculator />
+            </Suspense>
+          </section>
 
-            <section id="calc-2" className="scroll-mt-32 lg:scroll-mt-8">
-              <Suspense fallback={<CalculatorSkeleton />}>
-                <VaccineDemandCalculator />
-              </Suspense>
-            </section>
+          <section id="calc-2" className="scroll-mt-24 sm:scroll-mt-28">
+            <Suspense fallback={<CalculatorSkeleton />}>
+              <VaccineDemandCalculator />
+            </Suspense>
+          </section>
 
-            <section id="calc-3" className="scroll-mt-32 lg:scroll-mt-8">
-              <Suspense fallback={<CalculatorSkeleton />}>
-                <VaccineWastageCalculator />
-              </Suspense>
-            </section>
+          <section id="calc-3" className="scroll-mt-24 sm:scroll-mt-28">
+            <Suspense fallback={<CalculatorSkeleton />}>
+              <VaccineWastageCalculator />
+            </Suspense>
+          </section>
 
-            <section id="calc-4" className="scroll-mt-32 lg:scroll-mt-8">
-              <Suspense fallback={<CalculatorSkeleton />}>
-                <NACoverageCalculator />
-              </Suspense>
-            </section>
+          <section id="calc-4" className="scroll-mt-24 sm:scroll-mt-28">
+            <Suspense fallback={<CalculatorSkeleton />}>
+              <NACoverageCalculator />
+            </Suspense>
+          </section>
 
-            <section id="calc-5" className="scroll-mt-32 lg:scroll-mt-8">
-              <Suspense fallback={<CalculatorSkeleton />}>
-                <RefusalCalculator />
-              </Suspense>
-            </section>
+          <section id="calc-5" className="scroll-mt-24 sm:scroll-mt-28">
+            <Suspense fallback={<CalculatorSkeleton />}>
+              <RefusalCalculator />
+            </Suspense>
+          </section>
 
-            <section id="calc-6" className="scroll-mt-32 lg:scroll-mt-8">
-              <Suspense fallback={<CalculatorSkeleton />}>
-                <MissedChildrenCoverageCalculator />
-              </Suspense>
-            </section>
+          <section id="calc-6" className="scroll-mt-24 sm:scroll-mt-28">
+            <Suspense fallback={<CalculatorSkeleton />}>
+              <MissedChildrenCoverageCalculator />
+            </Suspense>
+          </section>
 
-            <section id="calc-7" className="scroll-mt-32 lg:scroll-mt-8">
-              <Suspense fallback={<CalculatorSkeleton />}>
-                <CampaignCoverageCalculator />
-              </Suspense>
-            </section>
+          <section id="calc-7" className="scroll-mt-24 sm:scroll-mt-28">
+            <Suspense fallback={<CalculatorSkeleton />}>
+              <CampaignCoverageCalculator />
+            </Suspense>
+          </section>
 
-            <section id="calc-8" className="scroll-mt-32 lg:scroll-mt-8">
-              <Suspense fallback={<CalculatorSkeleton />}>
-                <DailyCatchUpCalculator />
-              </Suspense>
-            </section>
+          <section id="calc-8" className="scroll-mt-24 sm:scroll-mt-28">
+            <Suspense fallback={<CalculatorSkeleton />}>
+              <DailyCatchUpCalculator />
+            </Suspense>
+          </section>
 
-            <section id="calc-9" className="scroll-mt-32 lg:scroll-mt-8">
-              <Suspense fallback={<CalculatorSkeleton />}>
-                <Under5Calculator />
-              </Suspense>
-            </section>
-          </main>
-
-          {/* Sticky Right Navigation Panel: Desktop Only (>= lg screens) */}
-          <DesktopCalculatorIndex
-            activeSection={activeSection}
-            onSelect={scrollToCalculator}
-          />
-        </div>
+          <section id="calc-9" className="scroll-mt-24 sm:scroll-mt-28">
+            <Suspense fallback={<CalculatorSkeleton />}>
+              <Under5Calculator />
+            </Suspense>
+          </section>
+        </main>
       </div>
 
       {/* Floating Back to Top Button (Shown when scrolled > 300px) */}
