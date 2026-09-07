@@ -14,41 +14,66 @@ export const RefusalCalculator: React.FC<Props> = () => {
   const strings = t.refusalCoverage;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
+  const [totalTarget, setTotalTarget] = useState<string>('5000');
   const [reportedRefusals, setReportedRefusals] = useState<string>('50');
   const [coveredRefusals, setCoveredRefusals] = useState<string>('25');
-  const [result, setResult] = useState<RefusalResult | null>(() => {
-    try {
-      return calculateRefusal(50, 25);
-    } catch {
-      return null;
-    }
-  });
+  const [result, setResult] = useState<{
+    totalTarget: number;
+    reportedRefusals: number;
+    coveredRefusals: number;
+    remainingRefusals: number;
+    conversionRatePercent: number;
+    stillRefusalPercent: number;
+  } | null>(() => ({
+    totalTarget: 5000,
+    reportedRefusals: 50,
+    coveredRefusals: 25,
+    remainingRefusals: 25,
+    conversionRatePercent: 50.0,
+    stillRefusalPercent: 0.5,
+  }));
   const [error, setError] = useState<string>('');
 
   const calculate = () => {
     setError('');
+    const target = Number(totalTarget.replace(/,/g, ''));
     const rep = Number(reportedRefusals.replace(/,/g, ''));
     const cov = Number(coveredRefusals.replace(/,/g, ''));
 
+    if (isNaN(target) || target <= 0) {
+      setError(isUrdu ? 'براہ کرم درست ہدف درج کریں (> 0)' : 'Please enter valid total target (> 0)');
+      triggerError();
+      return;
+    }
     if (isNaN(rep) || rep < 0) {
-      setError(isUrdu ? 'براہ کرم درست رپورٹ شدہ انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid reported refusals (≥ 0)');
+      setError(isUrdu ? 'براہ کرم درست ابتدائی انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid initial refusals (≥ 0)');
       triggerError();
       return;
     }
     if (isNaN(cov) || cov < 0) {
-      setError(isUrdu ? 'براہ کرم درست حل شدہ انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid covered/resolved refusals (≥ 0)');
+      setError(isUrdu ? 'براہ کرم درست حل شدہ/ویکسین شدہ انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid vaccinated refusals (≥ 0)');
       triggerError();
       return;
     }
     if (cov > rep) {
-      setError(isUrdu ? 'حل شدہ انکاری رپورٹ شدہ انکاری کیسز سے زیادہ نہیں ہو سکتے' : 'Covered refusals cannot exceed Reported Refusals');
+      setError(isUrdu ? 'ویکسین شدہ انکاری ابتدائی انکاری کیسز سے زیادہ نہیں ہو سکتے' : 'Vaccinated refusals cannot exceed Initial Refusals');
       triggerError();
       return;
     }
 
     try {
-      const calculation = calculateRefusal(rep, cov);
-      setResult(calculation);
+      const remaining = rep - cov;
+      const convRate = rep > 0 ? Number(((cov / rep) * 100).toFixed(1)) : 100;
+      const stillPct = Number(((remaining / target) * 100).toFixed(2));
+
+      setResult({
+        totalTarget: target,
+        reportedRefusals: rep,
+        coveredRefusals: cov,
+        remainingRefusals: remaining,
+        conversionRatePercent: convRate,
+        stillRefusalPercent: stillPct,
+      });
       triggerFeedback('calculate');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : isUrdu ? 'حسابی خرابی' : 'Invalid input values';
@@ -59,6 +84,7 @@ export const RefusalCalculator: React.FC<Props> = () => {
   };
 
   const handleReset = () => {
+    setTotalTarget('');
     setReportedRefusals('');
     setCoveredRefusals('');
     setResult(null);
@@ -93,27 +119,20 @@ export const RefusalCalculator: React.FC<Props> = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
           {/* Inputs Column */}
           <div className="md:col-span-6 flex flex-col justify-between space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-3">
               <div>
-                <div className="mb-1.5">
-                  <InfoTooltip
-                    id="ref-reported"
-                    label={strings.reportedRefusalLabel}
-                    formula={strings.reportedRefusalTooltip.formula}
-                    fieldRule={strings.reportedRefusalTooltip.fieldRule}
-                    explanation={strings.reportedRefusalTooltip.explanation}
-                    isUrdu={isUrdu}
-                  />
-                </div>
+                <label htmlFor="ref-target-input" className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  {isUrdu ? 'کل ہدف بچے (Total Target)' : 'Total Target Children'}
+                </label>
                 <input
-                  id="ref-reported-input"
+                  id="ref-target-input"
                   type="number"
-                  min="0"
+                  min="1"
                   inputMode="numeric"
-                  placeholder="e.g. 50"
-                  value={reportedRefusals}
+                  placeholder="e.g. 5000"
+                  value={totalTarget}
                   onChange={(e) => {
-                    setReportedRefusals(e.target.value);
+                    setTotalTarget(e.target.value);
                     setError('');
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && calculate()}
@@ -121,31 +140,50 @@ export const RefusalCalculator: React.FC<Props> = () => {
                 />
               </div>
 
-              <div>
-                <div className="mb-1.5">
-                  <InfoTooltip
-                    id="ref-covered"
-                    label={strings.coveredRefusalLabel}
-                    formula={strings.coveredRefusalTooltip.formula}
-                    fieldRule={strings.coveredRefusalTooltip.fieldRule}
-                    explanation={strings.coveredRefusalTooltip.explanation}
-                    isUrdu={isUrdu}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <div className="mb-1.5">
+                    <label htmlFor="ref-reported-input" className="block text-xs font-semibold text-slate-700">
+                      {isUrdu ? 'ابتدائی انکاری کیسز' : 'Initial Refusals'}
+                    </label>
+                  </div>
+                  <input
+                    id="ref-reported-input"
+                    type="number"
+                    min="0"
+                    inputMode="numeric"
+                    placeholder="e.g. 50"
+                    value={reportedRefusals}
+                    onChange={(e) => {
+                      setReportedRefusals(e.target.value);
+                      setError('');
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                    className="saas-input w-full px-3.5"
                   />
                 </div>
-                <input
-                  id="ref-covered-input"
-                  type="number"
-                  min="0"
-                  inputMode="numeric"
-                  placeholder="e.g. 25"
-                  value={coveredRefusals}
-                  onChange={(e) => {
-                    setCoveredRefusals(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
-                  className="saas-input w-full px-3.5"
-                />
+
+                <div>
+                  <div className="mb-1.5">
+                    <label htmlFor="ref-covered-input" className="block text-xs font-semibold text-slate-700">
+                      {isUrdu ? 'ویکسین شدہ انکاری' : 'Refusals Vaccinated'}
+                    </label>
+                  </div>
+                  <input
+                    id="ref-covered-input"
+                    type="number"
+                    min="0"
+                    inputMode="numeric"
+                    placeholder="e.g. 25"
+                    value={coveredRefusals}
+                    onChange={(e) => {
+                      setCoveredRefusals(e.target.value);
+                      setError('');
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                    className="saas-input w-full px-3.5"
+                  />
+                </div>
               </div>
             </div>
 
@@ -159,7 +197,7 @@ export const RefusalCalculator: React.FC<Props> = () => {
                 id="refusal-calc-btn"
                 type="button"
                 onClick={calculate}
-                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm"
+                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm min-h-[48px]"
               >
                 {strings.calculateBtn}
               </button>
@@ -168,7 +206,8 @@ export const RefusalCalculator: React.FC<Props> = () => {
                 type="button"
                 onClick={handleReset}
                 title={strings.resetBtn}
-                className="saas-btn-secondary px-3.5"
+                aria-label={strings.resetBtn}
+                className="saas-btn-secondary px-4 min-h-[48px] min-w-[48px]"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="hidden sm:inline">{strings.resetBtn}</span>
@@ -188,63 +227,78 @@ export const RefusalCalculator: React.FC<Props> = () => {
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
                   <span className="flex items-center gap-1.5 font-semibold text-slate-300">
-                    <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
-                    {strings.coverageRateLabel}
+                    <AlertCircle className="w-3.5 h-3.5 text-teal-400" />
+                    {isUrdu ? 'کنورژن شرح (Conversion Rate)' : 'Refusal Conversion Rate'}
                   </span>
-                  {isCalculated ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-500/40 animate-micro-fade-in">
-                      ✓ {isUrdu ? 'حساب شدہ' : 'Updated'}
+                  {result !== null && (
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                        result.stillRefusalPercent <= 0.5 ? 'badge-optimal' : 'badge-warning'
+                      }`}
+                    >
+                      {result.stillRefusalPercent <= 0.5
+                        ? (isUrdu ? 'بہترین (≤0.5% تاحال)' : 'Optimal (≤0.5% still)')
+                        : (isUrdu ? 'انتباہ (>0.5% تاحال)' : 'Warning (>0.5% still)')}
                     </span>
-                  ) : (
-                    <span className="text-[10px] text-slate-400">{strings.resolutionRateBadge}</span>
                   )}
                 </div>
 
                 <div className="flex items-baseline justify-between mb-3">
-                  <span
-                    key={`refusal-pct-${calculationKey}`}
-                    dir="ltr"
-                    className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${
-                      isCalculated ? 'animate-number-pop' : ''
-                    } ${
-                      result === null || result.refusalCoveragePercent === null
-                        ? 'text-slate-400'
-                        : result.refusalCoveragePercent >= 50
-                        ? 'text-emerald-400'
-                        : 'text-amber-400'
-                    }`}
-                  >
-                    {result !== null
-                      ? result.refusalCoveragePercent !== null
-                        ? `${result.refusalCoveragePercent}%`
-                        : 'N/A'
-                      : '—'}
-                  </span>
-                  <div className="text-right">
-                    <span className="text-[11px] text-slate-400 font-medium">{strings.remainingRefusalLabel} </span>
+                  <div>
                     <span
-                      className={`font-mono font-bold text-xs ${
-                        result && result.remainingRefusals > 0 ? 'text-rose-300' : 'text-emerald-300'
+                      key={`refusal-pct-${calculationKey}`}
+                      dir="ltr"
+                      className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${
+                        isCalculated ? 'animate-number-pop' : ''
+                      } ${
+                        result === null
+                          ? 'text-slate-400'
+                          : result.conversionRatePercent >= 50
+                          ? 'text-emerald-400'
+                          : 'text-amber-400'
                       }`}
                     >
-                      {result !== null ? result.remainingRefusals.toLocaleString() : '—'}
+                      {result !== null ? `${result.conversionRatePercent}%` : '—'}
+                    </span>
+                    <span className="text-xs text-slate-400 block mt-0.5 font-mono">
+                      {isUrdu ? 'کنورٹ شدہ انکاری' : 'conversion rate'}
+                    </span>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-[11px] text-slate-400 font-medium block">
+                      {isUrdu ? 'تاحال انکاری (% ہدف)' : 'Still Refusal % of Target'}
+                    </span>
+                    <span
+                      dir="ltr"
+                      className={`font-mono font-bold text-lg ${
+                        result && result.stillRefusalPercent <= 0.5 ? 'text-emerald-300' : 'text-rose-300'
+                      }`}
+                    >
+                      {result !== null ? `${result.stillRefusalPercent}%` : '—'}
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* Supporting metrics */}
-              <div className="saas-result-cell p-2.5 grid grid-cols-2 gap-2 text-xs text-slate-300 mt-2">
+              <div className="saas-result-cell p-2.5 grid grid-cols-3 gap-2 text-xs text-slate-300 mt-2">
                 <div>
-                  <span className="block text-slate-400 text-[10px] font-medium">{strings.reportedRefusalResult}</span>
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'ابتدائی' : 'Initial'}</span>
                   <span className="font-mono text-slate-200 font-bold text-xs">
                     {result !== null ? result.reportedRefusals.toLocaleString() : '—'}
                   </span>
                 </div>
-                <div className="text-right">
-                  <span className="block text-slate-400 text-[10px] font-medium">{strings.coveredRefusalResult}</span>
+                <div>
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'حل شدہ' : 'Resolved'}</span>
                   <span className="font-mono text-emerald-300 font-bold text-xs">
                     {result !== null ? result.coveredRefusals.toLocaleString() : '—'}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'باقی انکاری' : 'Still Refusal'}</span>
+                  <span className="font-mono text-rose-300 font-bold text-xs">
+                    {result !== null ? result.remainingRefusals.toLocaleString() : '—'}
                   </span>
                 </div>
               </div>

@@ -15,11 +15,12 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
   const [targetChildren, setTargetChildren] = useState<string>('5000');
-  const [bufferPct, setBufferPct] = useState<string>('5');
-  const [vialsRequired, setVialsRequired] = useState<number | null>(250);
-  const [bufferVials, setBufferVials] = useState<number | null>(13);
-  const [totalDoses, setTotalDoses] = useState<number | null>(5000);
-  const [totalDrops, setTotalDrops] = useState<number | null>(10000);
+  const [dosesPerVial, setDosesPerVial] = useState<string>('20');
+  const [bufferPct, setBufferPct] = useState<string>('10');
+  const [vialsRequired, setVialsRequired] = useState<number | null>(275);
+  const [bufferVials, setBufferVials] = useState<number | null>(25);
+  const [totalDoses, setTotalDoses] = useState<number | null>(5500);
+  const [totalDrops, setTotalDrops] = useState<number | null>(11000);
   const [coveredChildren, setCoveredChildren] = useState<number | null>(5000);
   const [error, setError] = useState<string>('');
 
@@ -32,6 +33,13 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
       return;
     }
 
+    const perVial = dosesPerVial ? Number(dosesPerVial) : 20;
+    if (isNaN(perVial) || perVial <= 0) {
+      setError(isUrdu ? 'فی وائل خوراکیں 0 سے زیادہ ہونی چاہئیں' : 'Doses per vial must be greater than 0');
+      triggerError();
+      return;
+    }
+
     const buffer = bufferPct ? Number(bufferPct) : 0;
     if (isNaN(buffer) || buffer < 0 || buffer > 100) {
       setError(isUrdu ? 'حفاظتی بفر 0 سے 100 فیصد کے درمیان ہونا چاہیے' : 'Buffer percentage must be between 0 and 100');
@@ -40,15 +48,16 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
     }
 
     try {
-      const result = calculateVaccineDemand(children);
-      const baseVials = result.vialsRequired;
-      const calculatedBuffer = Math.ceil(baseVials * (buffer / 100));
+      const neededDosesWithBuffer = Math.ceil(children * (1 + buffer / 100));
+      const neededVials = Math.ceil(neededDosesWithBuffer / perVial);
+      const baseVials = Math.ceil(children / perVial);
+      const calcBufferVials = Math.max(0, neededVials - baseVials);
 
-      setVialsRequired(baseVials + calculatedBuffer);
-      setBufferVials(calculatedBuffer);
-      setTotalDoses(result.totalDoses);
-      setTotalDrops(result.totalDropsRequired);
-      setCoveredChildren(result.childrenCoveredByVials);
+      setVialsRequired(neededVials);
+      setBufferVials(calcBufferVials);
+      setTotalDoses(neededDosesWithBuffer);
+      setTotalDrops(neededDosesWithBuffer * 2);
+      setCoveredChildren(children);
       triggerFeedback('calculate');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : isUrdu ? 'حسابی خرابی' : 'Calculation error';
@@ -59,7 +68,8 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
 
   const handleReset = () => {
     setTargetChildren('');
-    setBufferPct('0');
+    setDosesPerVial('20');
+    setBufferPct('10');
     setVialsRequired(null);
     setBufferVials(null);
     setTotalDoses(null);
@@ -96,8 +106,8 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
           {/* Inputs Column */}
           <div className="md:col-span-6 flex flex-col justify-between space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="sm:col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+              <div className="sm:col-span-6">
                 <div className="flex items-center justify-between mb-1.5">
                   <InfoTooltip
                     id="demand-target"
@@ -125,7 +135,28 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
                 />
               </div>
 
-              <div>
+              <div className="sm:col-span-3">
+                <label htmlFor="demand-doses-per-vial" className="block text-xs font-semibold text-slate-700 mb-1.5 truncate">
+                  {isUrdu ? 'خوراکیں/وائل' : 'Doses/Vial'}
+                </label>
+                <input
+                  id="demand-doses-per-vial"
+                  type="number"
+                  min="1"
+                  max="100"
+                  inputMode="numeric"
+                  placeholder="20"
+                  value={dosesPerVial}
+                  onChange={(e) => {
+                    setDosesPerVial(e.target.value);
+                    setError('');
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  className="saas-input w-full px-3.5"
+                />
+              </div>
+
+              <div className="sm:col-span-3">
                 <div className="flex items-center justify-between mb-1.5">
                   <InfoTooltip
                     id="demand-buffer"
@@ -142,7 +173,7 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
                   min="0"
                   max="50"
                   inputMode="numeric"
-                  placeholder="5%"
+                  placeholder="10%"
                   value={bufferPct}
                   onChange={(e) => {
                     setBufferPct(e.target.value);
@@ -164,7 +195,7 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
                 id="demand-calc-btn"
                 type="button"
                 onClick={calculate}
-                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm"
+                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm min-h-[48px]"
               >
                 {strings.calculateBtn}
               </button>
@@ -173,7 +204,8 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
                 type="button"
                 onClick={handleReset}
                 title={strings.resetBtn}
-                className="saas-btn-secondary px-3.5"
+                aria-label={strings.resetBtn}
+                className="saas-btn-secondary px-4 min-h-[48px] min-w-[48px]"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="hidden sm:inline">{strings.resetBtn}</span>

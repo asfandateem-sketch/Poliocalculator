@@ -20,6 +20,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
   // Default sample DOB for field workers: 2 years ago today
   const defaultDob = `${today.getFullYear() - 2}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
+  const [campaignDate, setCampaignDate] = useState<string>(todayString);
   const [dob, setDob] = useState<string>(defaultDob);
   const [result, setResult] = useState<ChildAgeResult | null>(() => {
     try {
@@ -31,7 +32,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
   });
   const [error, setError] = useState<string>('');
 
-  const performCalculation = (dobVal: string) => {
+  const performCalculation = (dobVal: string, campDateVal: string = campaignDate) => {
     setError('');
     if (!dobVal) {
       setError(isUrdu ? 'براہ کرم درست تاریخِ پیدائش منتخب کریں' : 'Please select a valid date of birth');
@@ -48,11 +49,19 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
       return;
     }
 
+    let asOf = new Date();
+    if (campDateVal) {
+      const campParts = campDateVal.split('-').map(Number);
+      if (campParts.length === 3 && !campParts.some(isNaN)) {
+        asOf = new Date(campParts[0], campParts[1] - 1, campParts[2]);
+      }
+    }
+
     const [year, month, day] = parts;
     const selectedDate = new Date(year, month - 1, day);
 
     try {
-      const res = calculateChildAge(selectedDate, new Date());
+      const res = calculateChildAge(selectedDate, asOf);
       setResult(res);
       triggerFeedback('calculate');
     } catch (err: unknown) {
@@ -66,7 +75,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
   const handleDateChange = (newDob: string) => {
     setDob(newDob);
     if (newDob) {
-      performCalculation(newDob);
+      performCalculation(newDob, campaignDate);
     } else {
       setResult(null);
       setError('');
@@ -74,7 +83,15 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
     }
   };
 
+  const handleCampaignDateChange = (newCampDate: string) => {
+    setCampaignDate(newCampDate);
+    if (dob) {
+      performCalculation(dob, newCampDate);
+    }
+  };
+
   const handleReset = () => {
+    setCampaignDate(todayString);
     setDob('');
     setResult(null);
     setError('');
@@ -108,30 +125,45 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
           {/* Inputs Column */}
           <div className="md:col-span-6 flex flex-col justify-between space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <InfoTooltip
-                  id="dob"
-                  label={strings.dobLabel}
-                  formula={strings.dobTooltip.formula}
-                  fieldRule={strings.dobTooltip.fieldRule}
-                  explanation={strings.dobTooltip.explanation}
-                  isUrdu={isUrdu}
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="campaign-date" className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  {isUrdu ? 'مہم کی تاریخ (Campaign Date)' : 'Campaign Date'}
+                </label>
+                <input
+                  id="campaign-date"
+                  type="date"
+                  value={campaignDate}
+                  onChange={(e) => handleCampaignDateChange(e.target.value)}
+                  className="saas-input w-full px-3.5 text-sm sm:text-base cursor-pointer"
                 />
-                <span className="text-[11px] text-slate-500 font-medium">{strings.dobSub}</span>
               </div>
-              <input
-                id="child-dob"
-                type="date"
-                max={todayString}
-                value={dob}
-                onChange={(e) => handleDateChange(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && performCalculation(dob)}
-                className="saas-input w-full px-3.5 text-sm sm:text-base cursor-pointer"
-              />
-              {error && (
-                <p className="text-xs text-rose-600 mt-2 font-semibold animate-error-shake">{error}</p>
-              )}
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <InfoTooltip
+                    id="dob"
+                    label={strings.dobLabel}
+                    formula={strings.dobTooltip.formula}
+                    fieldRule={strings.dobTooltip.fieldRule}
+                    explanation={strings.dobTooltip.explanation}
+                    isUrdu={isUrdu}
+                  />
+                  <span className="text-[11px] text-slate-500 font-medium">{strings.dobSub}</span>
+                </div>
+                <input
+                  id="child-dob"
+                  type="date"
+                  max={campaignDate || todayString}
+                  value={dob}
+                  onChange={(e) => handleDateChange(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && performCalculation(dob, campaignDate)}
+                  className="saas-input w-full px-3.5 text-sm sm:text-base cursor-pointer"
+                />
+                {error && (
+                  <p className="text-xs text-rose-600 mt-2 font-semibold animate-error-shake">{error}</p>
+                )}
+              </div>
             </div>
 
             {/* Action Buttons */}
@@ -139,8 +171,8 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
               <button
                 id="age-calc-btn"
                 type="button"
-                onClick={() => performCalculation(dob)}
-                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm"
+                onClick={() => performCalculation(dob, campaignDate)}
+                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm min-h-[48px]"
               >
                 {strings.calculateBtn}
               </button>
@@ -149,7 +181,8 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
                 type="button"
                 onClick={handleReset}
                 title={strings.resetBtn}
-                className="saas-btn-secondary px-3.5"
+                aria-label={strings.resetBtn}
+                className="saas-btn-secondary px-4 min-h-[48px] min-w-[48px]"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="hidden sm:inline">{strings.resetBtn}</span>

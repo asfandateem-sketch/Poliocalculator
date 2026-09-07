@@ -15,8 +15,16 @@ export const Under5Calculator: React.FC<Props> = () => {
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
   const [totalPop, setTotalPop] = useState<string>('50000');
-  const [under5Pct, setUnder5Pct] = useState<string>('15');
-  const [result, setResult] = useState<number | null>(7500);
+  const [under5Pct, setUnder5Pct] = useState<string>('13.5');
+  const [result, setResult] = useState<{
+    under5Children: number;
+    under1Children: number;
+    vialsNeeded: number;
+  } | null>(() => ({
+    under5Children: 6750,
+    under1Children: 1350,
+    vialsNeeded: 338,
+  }));
   const [error, setError] = useState<string>('');
 
   const calculate = () => {
@@ -36,8 +44,15 @@ export const Under5Calculator: React.FC<Props> = () => {
     }
 
     try {
-      const res = calculateUnder5Children({ method: 'population', totalPopulation: pop, under5Percentage: pct });
-      setResult(res.under5Children);
+      const u5 = Math.round(pop * (pct / 100));
+      const u1 = Math.round(pop * 0.027); // Standard EPI / Polio ratio 2.7%
+      const vials = Math.ceil(u5 / 20);
+
+      setResult({
+        under5Children: u5,
+        under1Children: u1,
+        vialsNeeded: vials,
+      });
       triggerFeedback('calculate');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : isUrdu ? 'حسابی خرابی' : 'Invalid input values';
@@ -48,7 +63,7 @@ export const Under5Calculator: React.FC<Props> = () => {
 
   const handleReset = () => {
     setTotalPop('');
-    setUnder5Pct('15');
+    setUnder5Pct('13.5');
     setResult(null);
     setError('');
     triggerReset();
@@ -154,7 +169,7 @@ export const Under5Calculator: React.FC<Props> = () => {
                 id="u5-calc-btn"
                 type="button"
                 onClick={calculate}
-                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm"
+                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm min-h-[48px]"
               >
                 {strings.calculateBtn}
               </button>
@@ -163,7 +178,8 @@ export const Under5Calculator: React.FC<Props> = () => {
                 type="button"
                 onClick={handleReset}
                 title={strings.resetBtn}
-                className="saas-btn-secondary px-3.5"
+                aria-label={strings.resetBtn}
+                className="saas-btn-secondary px-4 min-h-[48px] min-w-[48px]"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="hidden sm:inline">{strings.resetBtn}</span>
@@ -205,10 +221,17 @@ export const Under5Calculator: React.FC<Props> = () => {
                         isCalculated ? 'animate-number-pop' : ''
                       }`}
                     >
-                      {result !== null ? result.toLocaleString() : '—'}
+                      {result !== null ? result.under5Children.toLocaleString() : '—'}
                     </span>
                     <span className="text-xs font-semibold text-teal-300">
-                      {isUrdu ? 'بچے (عمر 5 سال سے کم)' : 'children < 5 yrs'}
+                      {isUrdu ? 'بچے (عمر < 5 سال)' : 'children < 5 yrs'}
+                    </span>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-400 block">{isUrdu ? 'عمر < 1 سال (2.7%)' : 'Under 1 yr (2.7%)'}</span>
+                    <span className="font-mono text-cyan-300 font-bold text-sm">
+                      {result !== null ? result.under1Children.toLocaleString() : '—'}
                     </span>
                   </div>
                 </div>
@@ -225,7 +248,7 @@ export const Under5Calculator: React.FC<Props> = () => {
                 <div className="text-right">
                   <span className="block text-slate-400 text-[10px] mb-0.5">{strings.vialsRequiredLabel}</span>
                   <span className="font-mono text-emerald-300 font-bold text-xs sm:text-sm">
-                    {result !== null ? `${Math.ceil(result / 20).toLocaleString()} ${isUrdu ? 'وائلز' : 'vials'}` : '—'}
+                    {result !== null ? `${result.vialsNeeded.toLocaleString()} ${isUrdu ? 'وائلز' : 'vials'}` : '—'}
                   </span>
                 </div>
               </div>

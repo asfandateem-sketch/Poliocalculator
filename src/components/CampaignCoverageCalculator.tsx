@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Award, RotateCcw, CheckCircle, Clock } from 'lucide-react';
+import { Award, RotateCcw, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { calculateCoverage } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
@@ -156,7 +156,7 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
                 id="coverage-calc-btn"
                 type="button"
                 onClick={calculate}
-                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm"
+                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm min-h-[48px]"
               >
                 {strings.calculateBtn}
               </button>
@@ -165,7 +165,8 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
                 type="button"
                 onClick={handleReset}
                 title={strings.resetBtn}
-                className="saas-btn-secondary px-3.5"
+                aria-label={strings.resetBtn}
+                className="saas-btn-secondary px-4 min-h-[48px] min-w-[48px]"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="hidden sm:inline">{strings.resetBtn}</span>
@@ -207,9 +208,11 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
                       } ${
                         coveragePct === null
                           ? 'text-white'
-                          : isTargetMet
+                          : coveragePct >= 95
                           ? 'text-emerald-400'
-                          : 'text-amber-400'
+                          : coveragePct >= 85
+                          ? 'text-amber-400'
+                          : 'text-rose-400'
                       }`}
                     >
                       {coveragePct !== null ? `${coveragePct}%` : '—'}
@@ -220,21 +223,28 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
                     className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold ${
                       coveragePct === null
                         ? 'badge-neutral'
-                        : isTargetMet
+                        : coveragePct >= 95
                         ? 'badge-optimal'
-                        : 'badge-acceptable'
+                        : coveragePct >= 85
+                        ? 'badge-acceptable'
+                        : 'badge-warning'
                     }`}
                   >
                     {coveragePct !== null ? (
-                      isTargetMet ? (
+                      coveragePct >= 95 ? (
                         <>
                           <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                          {strings.targetMetBadge}
+                          {isUrdu ? 'بہترین (≥95%)' : 'Optimal (≥95%)'}
+                        </>
+                      ) : coveragePct >= 85 ? (
+                        <>
+                          <Clock className="w-3.5 h-3.5 text-amber-400" />
+                          {isUrdu ? 'قابل قبول (85-94.9%)' : 'Acceptable (85-94.9%)'}
                         </>
                       ) : (
                         <>
-                          <Clock className="w-3.5 h-3.5 text-amber-400" />
-                          {strings.inProgressBadge}
+                          <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+                          {isUrdu ? 'انتباہ (<85%)' : 'Warning (<85%)'}
                         </>
                       )
                     ) : (

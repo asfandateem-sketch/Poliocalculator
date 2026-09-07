@@ -190,7 +190,7 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
                 id="catchup-calc-btn"
                 type="button"
                 onClick={calculate}
-                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm"
+                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm min-h-[48px]"
               >
                 {strings.calculateBtn}
               </button>
@@ -199,7 +199,8 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
                 type="button"
                 onClick={handleReset}
                 title={strings.resetBtn}
-                className="saas-btn-secondary px-3.5"
+                aria-label={strings.resetBtn}
+                className="saas-btn-secondary px-4 min-h-[48px] min-w-[48px]"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="hidden sm:inline">{strings.resetBtn}</span>

@@ -14,41 +14,65 @@ export const NACoverageCalculator: React.FC<Props> = () => {
   const strings = t.naCoverage;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
+  const [totalTarget, setTotalTarget] = useState<string>('5000');
   const [reportedNA, setReportedNA] = useState<string>('100');
   const [coveredNA, setCoveredNA] = useState<string>('80');
-  const [result, setResult] = useState<NACoverageResult | null>(() => {
-    try {
-      return calculateNACoverage(100, 80);
-    } catch {
-      return null;
-    }
-  });
+  const [result, setResult] = useState<{
+    totalTarget: number;
+    reportedNA: number;
+    coveredNA: number;
+    stillNA: number;
+    stillNaPercent: number;
+    recoveryRatePercent: number;
+  } | null>(() => ({
+    totalTarget: 5000,
+    reportedNA: 100,
+    coveredNA: 80,
+    stillNA: 20,
+    stillNaPercent: 0.4,
+    recoveryRatePercent: 80.0,
+  }));
   const [error, setError] = useState<string>('');
 
   const calculate = () => {
     setError('');
+    const target = Number(totalTarget.replace(/,/g, ''));
     const rep = Number(reportedNA.replace(/,/g, ''));
     const cov = Number(coveredNA.replace(/,/g, ''));
 
+    if (isNaN(target) || target <= 0) {
+      setError(isUrdu ? 'براہ کرم درست ہدف درج کریں (> 0)' : 'Please enter valid total target (> 0)');
+      triggerError();
+      return;
+    }
     if (isNaN(rep) || rep < 0) {
-      setError(isUrdu ? 'براہ کرم درست رپورٹ شدہ NA بچے درج کریں (≥ 0)' : 'Please enter valid reported NA children (≥ 0)');
+      setError(isUrdu ? 'براہ کرم درست ریکارڈ شدہ NA بچے درج کریں (≥ 0)' : 'Please enter valid recorded NA children (≥ 0)');
       triggerError();
       return;
     }
     if (isNaN(cov) || cov < 0) {
-      setError(isUrdu ? 'براہ کرم درست کور شدہ NA بچے درج کریں (≥ 0)' : 'Please enter valid covered NA children (≥ 0)');
+      setError(isUrdu ? 'براہ کرم درست ویکسین شدہ NA بچے درج کریں (≥ 0)' : 'Please enter valid vaccinated NA children (≥ 0)');
       triggerError();
       return;
     }
     if (cov > rep) {
-      setError(isUrdu ? 'کور شدہ بچے رپورٹ شدہ NA سے زیادہ نہیں ہو سکتے' : 'Covered NA cannot exceed Reported NA');
+      setError(isUrdu ? 'ویکسین شدہ بچے ریکارڈ شدہ NA سے زیادہ نہیں ہو سکتے' : 'Vaccinated NA cannot exceed Recorded NA');
       triggerError();
       return;
     }
 
     try {
-      const res = calculateNACoverage(rep, cov);
-      setResult(res);
+      const still = rep - cov;
+      const stillPct = Number(((still / target) * 100).toFixed(2));
+      const recPct = rep > 0 ? Number(((cov / rep) * 100).toFixed(1)) : 100;
+      setResult({
+        totalTarget: target,
+        reportedNA: rep,
+        coveredNA: cov,
+        stillNA: still,
+        stillNaPercent: stillPct,
+        recoveryRatePercent: recPct,
+      });
       triggerFeedback('calculate');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : isUrdu ? 'حسابی خرابی' : 'Invalid input values';
@@ -59,6 +83,7 @@ export const NACoverageCalculator: React.FC<Props> = () => {
   };
 
   const handleReset = () => {
+    setTotalTarget('');
     setReportedNA('');
     setCoveredNA('');
     setResult(null);
@@ -93,27 +118,20 @@ export const NACoverageCalculator: React.FC<Props> = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
           {/* Inputs Column */}
           <div className="md:col-span-6 flex flex-col justify-between space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-3">
               <div>
-                <div className="mb-1.5">
-                  <InfoTooltip
-                    id="na-reported"
-                    label={strings.reportedNaLabel}
-                    formula={strings.reportedNaTooltip.formula}
-                    fieldRule={strings.reportedNaTooltip.fieldRule}
-                    explanation={strings.reportedNaTooltip.explanation}
-                    isUrdu={isUrdu}
-                  />
-                </div>
+                <label htmlFor="na-target-input" className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  {isUrdu ? 'کل ہدف بچے (Total Target)' : 'Total Target Children'}
+                </label>
                 <input
-                  id="na-reported-input"
+                  id="na-target-input"
                   type="number"
-                  min="0"
+                  min="1"
                   inputMode="numeric"
-                  placeholder="e.g. 100"
-                  value={reportedNA}
+                  placeholder="e.g. 5000"
+                  value={totalTarget}
                   onChange={(e) => {
-                    setReportedNA(e.target.value);
+                    setTotalTarget(e.target.value);
                     setError('');
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && calculate()}
@@ -121,31 +139,50 @@ export const NACoverageCalculator: React.FC<Props> = () => {
                 />
               </div>
 
-              <div>
-                <div className="mb-1.5">
-                  <InfoTooltip
-                    id="na-covered"
-                    label={strings.coveredNaLabel}
-                    formula={strings.coveredNaTooltip.formula}
-                    fieldRule={strings.coveredNaTooltip.fieldRule}
-                    explanation={strings.coveredNaTooltip.explanation}
-                    isUrdu={isUrdu}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <div className="mb-1.5">
+                    <label htmlFor="na-reported-input" className="block text-xs font-semibold text-slate-700">
+                      {isUrdu ? 'ریکارڈ شدہ NA بچے' : 'NA Children Recorded'}
+                    </label>
+                  </div>
+                  <input
+                    id="na-reported-input"
+                    type="number"
+                    min="0"
+                    inputMode="numeric"
+                    placeholder="e.g. 100"
+                    value={reportedNA}
+                    onChange={(e) => {
+                      setReportedNA(e.target.value);
+                      setError('');
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                    className="saas-input w-full px-3.5"
                   />
                 </div>
-                <input
-                  id="na-covered-input"
-                  type="number"
-                  min="0"
-                  inputMode="numeric"
-                  placeholder="e.g. 80"
-                  value={coveredNA}
-                  onChange={(e) => {
-                    setCoveredNA(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
-                  className="saas-input w-full px-3.5"
-                />
+
+                <div>
+                  <div className="mb-1.5">
+                    <label htmlFor="na-covered-input" className="block text-xs font-semibold text-slate-700">
+                      {isUrdu ? 'ویکسین شدہ NA بچے' : 'NA Vaccinated on Catch-up'}
+                    </label>
+                  </div>
+                  <input
+                    id="na-covered-input"
+                    type="number"
+                    min="0"
+                    inputMode="numeric"
+                    placeholder="e.g. 80"
+                    value={coveredNA}
+                    onChange={(e) => {
+                      setCoveredNA(e.target.value);
+                      setError('');
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                    className="saas-input w-full px-3.5"
+                  />
+                </div>
               </div>
             </div>
 
@@ -159,7 +196,7 @@ export const NACoverageCalculator: React.FC<Props> = () => {
                 id="na-calc-btn"
                 type="button"
                 onClick={calculate}
-                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm"
+                className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm min-h-[48px]"
               >
                 {strings.calculateBtn}
               </button>
@@ -168,7 +205,8 @@ export const NACoverageCalculator: React.FC<Props> = () => {
                 type="button"
                 onClick={handleReset}
                 title={strings.resetBtn}
-                className="saas-btn-secondary px-3.5"
+                aria-label={strings.resetBtn}
+                className="saas-btn-secondary px-4 min-h-[48px] min-w-[48px]"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="hidden sm:inline">{strings.resetBtn}</span>
@@ -189,62 +227,76 @@ export const NACoverageCalculator: React.FC<Props> = () => {
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
                   <span className="flex items-center gap-1.5 font-semibold text-slate-300">
                     <UserX className="w-3.5 h-3.5 text-teal-400" />
-                    {strings.coverageRateLabel}
+                    {isUrdu ? 'تاحال NA شرح (Still NA %)' : 'Still NA Coverage'}
                   </span>
-                  {isCalculated ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-500/40 animate-micro-fade-in">
-                      ✓ {isUrdu ? 'حساب شدہ' : 'Updated'}
+                  {result !== null && (
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                        result.stillNaPercent <= 2 ? 'badge-optimal' : 'badge-warning'
+                      }`}
+                    >
+                      {result.stillNaPercent <= 2
+                        ? (isUrdu ? 'بہترین (≤2%)' : 'Optimal (≤2%)')
+                        : (isUrdu ? 'انتباہ (>2%)' : 'Warning (>2%)')}
                     </span>
-                  ) : (
-                    <span className="text-[10px] text-slate-400">{strings.recoveryRateBadge}</span>
                   )}
                 </div>
 
                 <div className="flex items-baseline justify-between mb-3">
-                  <span
-                    key={`na-pct-${calculationKey}`}
-                    dir="ltr"
-                    className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${
-                      isCalculated ? 'animate-number-pop' : ''
-                    } ${
-                      result === null || result.coveredNaPercent === null
-                        ? 'text-slate-400'
-                        : result.coveredNaPercent >= 80
-                        ? 'text-emerald-400'
-                        : 'text-amber-400'
-                    }`}
-                  >
-                    {result !== null
-                      ? result.coveredNaPercent !== null
-                        ? `${result.coveredNaPercent}%`
-                        : 'N/A'
-                      : '—'}
-                  </span>
-                  <div className="text-right">
-                    <span className="text-[11px] text-slate-400 font-medium">{strings.remainingNaLabel} </span>
+                  <div>
                     <span
-                      className={`font-mono font-bold text-xs ${
-                        result && result.naRemaining > 0 ? 'text-amber-300' : 'text-emerald-300'
+                      key={`na-pct-${calculationKey}`}
+                      dir="ltr"
+                      className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${
+                        isCalculated ? 'animate-number-pop' : ''
+                      } ${
+                        result === null
+                          ? 'text-slate-400'
+                          : result.stillNaPercent <= 2
+                          ? 'text-emerald-400'
+                          : 'text-rose-400'
                       }`}
                     >
-                      {result !== null ? result.naRemaining.toLocaleString() : '—'}
+                      {result !== null ? `${result.stillNaPercent}%` : '—'}
+                    </span>
+                    <span className="text-xs text-slate-400 block mt-0.5 font-mono">
+                      {isUrdu ? 'ہدف کا فیصد' : '% of target'}
+                    </span>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-[11px] text-slate-400 font-medium block">
+                      {isUrdu ? 'باقی ماندہ NA' : 'Still NA Count'}
+                    </span>
+                    <span
+                      className={`font-mono font-bold text-lg ${
+                        result && result.stillNA > 0 ? 'text-amber-300' : 'text-emerald-300'
+                      }`}
+                    >
+                      {result !== null ? result.stillNA.toLocaleString() : '—'}
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* Supporting metrics */}
-              <div className="saas-result-cell p-2.5 grid grid-cols-2 gap-2 text-xs text-slate-300 mt-2">
+              <div className="saas-result-cell p-2.5 grid grid-cols-3 gap-2 text-xs text-slate-300 mt-2">
                 <div>
-                  <span className="block text-slate-400 text-[10px] font-medium">{strings.reportedNaResult}</span>
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'ریکارڈ NA' : 'Recorded'}</span>
                   <span className="font-mono text-slate-200 font-bold text-xs">
                     {result !== null ? result.reportedNA.toLocaleString() : '—'}
                   </span>
                 </div>
-                <div className="text-right">
-                  <span className="block text-slate-400 text-[10px] font-medium">{strings.coveredNaResult}</span>
+                <div>
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'ویکسین شدہ' : 'Vaccinated'}</span>
                   <span className="font-mono text-emerald-300 font-bold text-xs">
                     {result !== null ? result.coveredNA.toLocaleString() : '—'}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'ریکوری شرح' : 'Recovery'}</span>
+                  <span className="font-mono text-teal-300 font-bold text-xs">
+                    {result !== null ? `${result.recoveryRatePercent}%` : '—'}
                   </span>
                 </div>
               </div>
