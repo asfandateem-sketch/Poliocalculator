@@ -23,10 +23,12 @@ body {
   color: #0f172a;
 }
 
-/* Urdu / Arabic Typography Enhancements */
+/* Urdu / Arabic Typography Enhancements with Noto Nastaliq Urdu Priority */
+.font-nastaliq,
+.font-urdu,
 .font-arabic,
 [dir="rtl"] {
-  font-family: 'Noto Naskh Arabic', 'Noto Nastaliq Urdu', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Tahoma, sans-serif;
+  font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Tahoma, sans-serif;
   letter-spacing: 0 !important;
   word-spacing: normal !important;
 }
@@ -35,18 +37,39 @@ body {
   letter-spacing: 0 !important;
 }
 
-/* Ensure Urdu text has adequate line-height so dots/diacritics are never cut off */
+/* Ensure Urdu / Nastaliq text has generous line-height so dots, ascenders, and descenders never overlap or clip */
 [dir="rtl"] h1,
 [dir="rtl"] h2,
-[dir="rtl"] h3 {
-  line-height: 1.45 !important;
+[dir="rtl"] h3,
+.font-arabic h1,
+.font-arabic h2,
+.font-arabic h3,
+.font-nastaliq h1,
+.font-nastaliq h2,
+.font-nastaliq h3 {
+  line-height: 1.75 !important;
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
+  overflow: visible;
 }
 
 [dir="rtl"] p,
 [dir="rtl"] span,
 [dir="rtl"] label,
-[dir="rtl"] button {
+.font-arabic p,
+.font-arabic span,
+.font-arabic label,
+.font-nastaliq p,
+.font-nastaliq span,
+.font-nastaliq label {
+  line-height: 1.85 !important;
+}
+
+[dir="rtl"] button,
+.font-arabic button,
+.font-nastaliq button {
   line-height: 1.6 !important;
+  overflow: visible;
 }
 
 /* Tabular figures for monospace and metrics */
@@ -108,9 +131,16 @@ body {
   border: 1px solid #cbd5e1;
   color: #0f172a;
   font-family: var(--font-mono);
-  font-size: 0.875rem;
+  font-size: 16px; /* 16px minimum prevents iOS Safari auto-zoom on input focus */
   font-weight: 600;
   transition: all 0.15s ease;
+}
+
+@media (min-width: 640px) {
+  .saas-input,
+  .clay-input {
+    font-size: 0.875rem;
+  }
 }
 
 .saas-input:focus,
@@ -355,3 +385,192 @@ body {
   background-color: #f8fafc;
   color: #0f172a;
 }
+
+/* Mobile Side Navigation Drawer */
+.mobile-drawer-overlay {
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.mobile-drawer-content {
+  background: #ffffff;
+  box-shadow: -4px 0 24px rgba(15, 23, 42, 0.15);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[dir="rtl"] .mobile-drawer-content {
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.15);
+}
+
+/* Hide scrollbar utility for clean touch drag */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ================= Mobile Breakpoint Refinements (< 768px) ================= */
+/* Refined font scaling and anti-clipping for English and Noto Nastaliq Urdu */
+@media (max-width: 767.98px) {
+  /* --- 1. Base English Mobile Typography --- */
+  h1 {
+    font-size: clamp(1.05rem, 4vw, 1.25rem);
+    line-height: 1.35;
+  }
+
+  h2 {
+    font-size: clamp(0.95rem, 3.6vw, 1.075rem);
+    line-height: 1.4;
+  }
+
+  h3 {
+    font-size: 0.875rem;
+    line-height: 1.42;
+  }
+
+  label,
+  .saas-label {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Prevent badges, tags, and category chips from wrapping or clipping text */
+  .badge-optimal,
+  .badge-acceptable,
+  .badge-warning,
+  .badge-neutral,
+  .saas-card span[class*="rounded"] {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Card Header Layout Balance: Allow comfortable room for title, icon badge, and tag */
+  .saas-card > div:first-child .flex.items-start.justify-between {
+    gap: 0.625rem;
+    align-items: flex-start;
+  }
+
+  /* --- 2. Urdu & Noto Nastaliq Urdu Mobile Refinements --- */
+  /* Noto Nastaliq Urdu has tall ascenders, deep descenders, and stacked calligraphic baseline.
+     These rules provide generous line-heights and padding buffers to prevent any overlapping or clipping. */
+  [dir="rtl"] h1,
+  .font-arabic h1,
+  .font-urdu h1,
+  .font-nastaliq h1 {
+    font-size: clamp(1.05rem, 4.2vw, 1.225rem) !important;
+    line-height: 1.85 !important;
+    padding-top: 0.18em;
+    padding-bottom: 0.18em;
+    overflow: visible;
+  }
+
+  [dir="rtl"] h2,
+  .font-arabic h2,
+  .font-urdu h2,
+  .font-nastaliq h2 {
+    font-size: clamp(0.925rem, 3.6vw, 1.05rem) !important;
+    line-height: 1.9 !important;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+    overflow: visible;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  [dir="rtl"] h3,
+  .font-arabic h3,
+  .font-urdu h3,
+  .font-nastaliq h3 {
+    font-size: 0.875rem !important;
+    line-height: 1.8 !important;
+    padding-top: 0.15em;
+    padding-bottom: 0.15em;
+    overflow: visible;
+  }
+
+  /* Paragraphs, card descriptions, and notes */
+  [dir="rtl"] p,
+  .font-arabic p,
+  .font-urdu p,
+  .font-nastaliq p {
+    font-size: 0.8125rem !important;
+    line-height: 2.05 !important;
+    padding-top: 0.1em;
+    padding-bottom: 0.15em;
+    overflow: visible;
+  }
+
+  /* Form Labels & Field Explanations */
+  [dir="rtl"] label,
+  [dir="rtl"] .saas-label,
+  .font-arabic label,
+  .font-arabic .saas-label,
+  .font-urdu label,
+  .font-nastaliq label {
+    font-size: 0.825rem !important;
+    line-height: 1.95 !important;
+    padding-top: 0.15em;
+    padding-bottom: 0.15em;
+    display: inline-flex;
+    align-items: center;
+    overflow: visible;
+  }
+
+  /* InfoTooltip trigger container & labels */
+  [dir="rtl"] .relative.inline-flex.flex-col > .flex.items-center,
+  .font-arabic .relative.inline-flex.flex-col > .flex.items-center,
+  .font-nastaliq .relative.inline-flex.flex-col > .flex.items-center {
+    line-height: 1.85 !important;
+    min-height: 1.625rem;
+    overflow: visible;
+  }
+
+  /* Badges, Category Chips & Status Pills in Urdu */
+  [dir="rtl"] span[class*="rounded"],
+  .font-arabic span[class*="rounded"],
+  .font-urdu span[class*="rounded"],
+  .font-nastaliq span[class*="rounded"] {
+    line-height: 1.65 !important;
+    padding-top: 0.28rem !important;
+    padding-bottom: 0.32rem !important;
+    display: inline-flex;
+    align-items: center;
+    overflow: visible;
+    white-space: nowrap;
+  }
+
+  /* Action Buttons in Urdu (Calculate, Reset, Presets) */
+  [dir="rtl"] button,
+  .font-arabic button,
+  .font-urdu button,
+  .font-nastaliq button {
+    line-height: 1.6 !important;
+    overflow: visible;
+  }
+
+  /* Result KPI Cards & Metric Sublabels in Urdu */
+  [dir="rtl"] .saas-result-cell span,
+  .font-arabic .saas-result-cell span,
+  .font-urdu .saas-result-cell span,
+  .font-nastaliq .saas-result-cell span {
+    line-height: 1.8 !important;
+    padding-top: 0.1em;
+    padding-bottom: 0.15em;
+    overflow: visible;
+  }
+
+  /* Mobile Calculator Selector & Modal Items */
+  [dir="rtl"] #mobile-calculator-selector-btn span,
+  .font-arabic #mobile-calculator-selector-btn span,
+  [dir="rtl"] #mobile-calculator-modal button,
+  .font-arabic #mobile-calculator-modal button {
+    line-height: 1.75 !important;
+    overflow: visible;
+  }
+}
+

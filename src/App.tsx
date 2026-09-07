@@ -7,20 +7,12 @@ import {
   Download,
   Wifi,
   WifiOff,
-  Calendar,
-  ShieldCheck,
-  ShieldAlert,
-  AlertCircle,
-  Award,
-  TrendingUp,
-  UserX,
-  AlertTriangle,
-  Users,
   Languages,
   ArrowUp,
-  ChevronDown,
-  Info,
 } from 'lucide-react';
+import { CALCULATOR_ITEMS } from './platformNavigation';
+import { DesktopCalculatorIndex } from './components/DesktopCalculatorIndex';
+import { MobileCalculatorSelector } from './components/MobileCalculatorSelector';
 
 const ChildAgeCalculator = lazy(() =>
   import('./components/ChildAgeCalculator').then((m) => ({ default: m.ChildAgeCalculator }))
@@ -80,21 +72,8 @@ function AppContent() {
   const { language, toggleLanguage, isUrdu, t } = useLanguage();
   const [activeSection, setActiveSection] = useState<string>('calc-1');
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
-  const calculators = [
-    { id: 'calc-1', num: '01', label: t.childAge.title, shortLabel: t.childAge.shortTitle, icon: Calendar },
-    { id: 'calc-2', num: '02', label: t.vaccineDemand.title, shortLabel: t.vaccineDemand.shortTitle, icon: ShieldCheck },
-    { id: 'calc-3', num: '03', label: t.vaccineWastage.title, shortLabel: t.vaccineWastage.shortTitle, icon: AlertCircle },
-    { id: 'calc-4', num: '04', label: t.naCoverage.title, shortLabel: t.naCoverage.shortTitle, icon: UserX },
-    { id: 'calc-5', num: '05', label: t.refusalCoverage.title, shortLabel: t.refusalCoverage.shortTitle, icon: AlertTriangle },
-    { id: 'calc-6', num: '06', label: t.missedChildren.title, shortLabel: t.missedChildren.shortTitle, icon: ShieldAlert },
-    { id: 'calc-7', num: '07', label: t.campaignCoverage.title, shortLabel: t.campaignCoverage.shortTitle, icon: Award },
-    { id: 'calc-8', num: '08', label: t.dailyCatchUp.title, shortLabel: t.dailyCatchUp.shortTitle, icon: TrendingUp },
-    { id: 'calc-9', num: '09', label: t.under5Population.title, shortLabel: t.under5Population.shortTitle, icon: Users },
-  ];
-
-  // Scroll spy to highlight the currently visible calculator in the sticky navigation
+  // Scroll spy to highlight the currently visible calculator and update both desktop and mobile navigation
   useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 300);
@@ -103,16 +82,20 @@ function AppContent() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Find visible section
-        const visibleEntry = entries.find((entry) => entry.isIntersecting);
-        if (visibleEntry) {
-          setActiveSection(visibleEntry.target.id);
+        const visibleEntries = entries.filter((entry) => entry.isIntersecting);
+        if (visibleEntries.length > 0) {
+          visibleEntries.sort((a, b) => {
+            const topA = Math.abs(a.boundingClientRect.top - 120);
+            const topB = Math.abs(b.boundingClientRect.top - 120);
+            return topA - topB;
+          });
+          setActiveSection(visibleEntries[0].target.id);
         }
       },
-      { rootMargin: '-20% 0px -55% 0px', threshold: 0.1 }
+      { rootMargin: '-10% 0px -40% 0px', threshold: [0, 0.1, 0.25] }
     );
 
-    calculators.forEach((c) => {
+    CALCULATOR_ITEMS.forEach((c) => {
       const el = document.getElementById(c.id);
       if (el) observer.observe(el);
     });
@@ -127,9 +110,17 @@ function AppContent() {
     triggerHaptic('light');
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const isMobile = window.innerWidth < 1024;
+      // Account for mobile sticky selector (approx 110px) vs desktop header offset
+      const headerOffset = isMobile ? 120 : 28;
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: 'smooth',
+      });
       setActiveSection(id);
-      setMobileMenuOpen(false);
     }
   };
 
@@ -137,8 +128,6 @@ function AppContent() {
     triggerHaptic('light');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
-  const currentActiveCalc = calculators.find((c) => c.id === activeSection) || calculators[0];
 
   return (
     <div
@@ -149,27 +138,27 @@ function AppContent() {
     >
       <div className="max-w-7xl w-full mx-auto flex flex-col flex-1 min-h-0">
         {/* Header - Modern Clean Healthcare SaaS Header */}
-        <header className="saas-header p-3.5 sm:p-4 mb-5 flex items-center justify-between flex-shrink-0 gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-teal-800 text-white flex items-center justify-center shadow-xs border border-teal-700/50 flex-shrink-0">
+        <header className="saas-header p-3 sm:p-4 mb-4 sm:mb-5 flex items-center justify-between flex-shrink-0 gap-2 sm:gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-teal-800 text-white flex items-center justify-center shadow-xs border border-teal-700/50 flex-shrink-0">
               <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-sm sm:text-base md:text-lg font-extrabold text-slate-900 tracking-tight leading-snug">
+                <h1 className="text-sm sm:text-base md:text-lg font-extrabold text-slate-900 tracking-tight leading-snug truncate">
                   {t.appTitle}
                 </h1>
                 <span className="hidden sm:inline-block px-2.5 py-0.5 text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-200/80 rounded-md">
                   {t.roleBadge}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-normal mt-0.5 leading-normal">
+              <p className="text-xs text-slate-500 font-normal mt-0.5 leading-normal truncate">
                 {t.appSubtitle}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             {/* Language Switcher: EN | اردو */}
             <button
               id="language-toggle-btn"
@@ -180,9 +169,9 @@ function AppContent() {
               }}
               aria-label={isUrdu ? 'Switch to English' : 'اردو میں تبدیل کریں'}
               title={isUrdu ? 'Switch to English' : 'اردو میں تبدیل کریں'}
-              className="saas-btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 text-xs font-bold cursor-pointer"
+              className="saas-btn-secondary inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold cursor-pointer"
             >
-              <Languages className="w-4 h-4 text-teal-700 flex-shrink-0" />
+              <Languages className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-700 flex-shrink-0" />
               <span className={language === 'en' ? 'text-teal-900 font-bold' : 'text-slate-400 font-normal'}>
                 EN
               </span>
@@ -194,7 +183,7 @@ function AppContent() {
 
             {/* Online/Offline status */}
             <span
-              className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+              className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold border ${
                 isOnline
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                   : 'bg-amber-50 text-amber-900 border-amber-200'
@@ -203,12 +192,12 @@ function AppContent() {
               {isOnline ? (
                 <>
                   <Wifi className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="hidden xs:inline">{t.offlineReady}</span>
+                  <span className="hidden md:inline">{t.offlineReady}</span>
                 </>
               ) : (
                 <>
                   <WifiOff className="w-3.5 h-3.5 text-amber-600" />
-                  <span>{t.offline}</span>
+                  <span className="hidden md:inline">{t.offline}</span>
                 </>
               )}
             </span>
@@ -219,139 +208,74 @@ function AppContent() {
                 id="install-pwa-btn"
                 type="button"
                 onClick={install}
-                className="saas-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 text-xs font-bold"
+                className="saas-btn-primary inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">{t.install}</span>
+                <span className="hidden sm:inline">{t.install}</span>
               </button>
             )}
           </div>
         </header>
 
-        {/* Mobile / Tablet Compact Selector: Sticky Top Bar (< lg screens) */}
-        <div className="lg:hidden sticky top-2 z-20 mb-4 saas-header p-2">
-          <div className="flex items-center justify-between gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                setMobileMenuOpen(!mobileMenuOpen);
-              }}
-              className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 flex-1 min-w-0 text-left cursor-pointer"
-            >
-              <span className="w-6 h-6 rounded bg-teal-700 text-white font-mono text-xs flex items-center justify-center flex-shrink-0">
-                {currentActiveCalc.num}
-              </span>
-              <span className="truncate font-semibold">{currentActiveCalc.label}</span>
-              <ChevronDown className={`w-4 h-4 text-slate-500 ms-auto transition-transform ${mobileMenuOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {/* Quick Horizontal Jump Pills */}
-            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
-              {calculators.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => scrollToCalculator(c.id)}
-                  className={`w-7 h-7 rounded-md text-xs font-mono font-bold flex items-center justify-center flex-shrink-0 cursor-pointer transition-colors ${
-                    activeSection === c.id
-                      ? 'bg-teal-700 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                  title={c.label}
-                >
-                  {c.num}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Collapsible Mobile Dropdown */}
-          {mobileMenuOpen && (
-            <div className="mt-2 pt-2 border-t border-slate-100 grid grid-cols-1 gap-1 max-h-72 overflow-y-auto">
-              {calculators.map((calc) => {
-                const Icon = calc.icon;
-                const isActive = activeSection === calc.id;
-                return (
-                  <button
-                    key={calc.id}
-                    type="button"
-                    onClick={() => scrollToCalculator(calc.id)}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition cursor-pointer text-left ${
-                      isActive
-                        ? 'bg-teal-50 text-teal-900 font-bold border border-teal-200'
-                        : 'text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    <span
-                      className={`w-6 h-6 rounded text-[11px] font-mono font-bold flex items-center justify-center flex-shrink-0 ${
-                        isActive ? 'bg-teal-700 text-white' : 'bg-slate-200 text-slate-700'
-                      }`}
-                    >
-                      {calc.num}
-                    </span>
-                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-teal-700' : 'text-slate-500'}`} />
-                    <span className="truncate">{calc.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Two-Column Desktop Layout: Main Content (Left) + Sticky Navigation (Right) */}
-        <div className="flex flex-col lg:flex-row items-start gap-6 flex-1 min-h-0 pb-6">
+        {/* Robust Grid Layout: Full Width on Mobile, Main + Right Index on Desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[minmax(0,1fr)_310px] 2xl:grid-cols-[minmax(0,1fr)_330px] gap-6 items-start flex-1 min-h-0 pb-6 w-full">
           {/* Main Content: Left Column with All 9 Calculators */}
-          <main className="flex-1 min-w-0 w-full space-y-6">
-            <section id="calc-1" className="scroll-mt-5">
+          <main className="w-full min-w-0 space-y-5 sm:space-y-6">
+            {/* Mobile / Tablet Calculator Selector at top of calculator area (< lg screens) */}
+            <MobileCalculatorSelector
+              activeSection={activeSection}
+              onSelect={scrollToCalculator}
+            />
+
+            <section id="calc-1" className="scroll-mt-32 lg:scroll-mt-8">
               <Suspense fallback={<CalculatorSkeleton />}>
                 <ChildAgeCalculator />
               </Suspense>
             </section>
 
-            <section id="calc-2" className="scroll-mt-5">
+            <section id="calc-2" className="scroll-mt-32 lg:scroll-mt-8">
               <Suspense fallback={<CalculatorSkeleton />}>
                 <VaccineDemandCalculator />
               </Suspense>
             </section>
 
-            <section id="calc-3" className="scroll-mt-5">
+            <section id="calc-3" className="scroll-mt-32 lg:scroll-mt-8">
               <Suspense fallback={<CalculatorSkeleton />}>
                 <VaccineWastageCalculator />
               </Suspense>
             </section>
 
-            <section id="calc-4" className="scroll-mt-5">
+            <section id="calc-4" className="scroll-mt-32 lg:scroll-mt-8">
               <Suspense fallback={<CalculatorSkeleton />}>
                 <NACoverageCalculator />
               </Suspense>
             </section>
 
-            <section id="calc-5" className="scroll-mt-5">
+            <section id="calc-5" className="scroll-mt-32 lg:scroll-mt-8">
               <Suspense fallback={<CalculatorSkeleton />}>
                 <RefusalCalculator />
               </Suspense>
             </section>
 
-            <section id="calc-6" className="scroll-mt-5">
+            <section id="calc-6" className="scroll-mt-32 lg:scroll-mt-8">
               <Suspense fallback={<CalculatorSkeleton />}>
                 <MissedChildrenCoverageCalculator />
               </Suspense>
             </section>
 
-            <section id="calc-7" className="scroll-mt-5">
+            <section id="calc-7" className="scroll-mt-32 lg:scroll-mt-8">
               <Suspense fallback={<CalculatorSkeleton />}>
                 <CampaignCoverageCalculator />
               </Suspense>
             </section>
 
-            <section id="calc-8" className="scroll-mt-5">
+            <section id="calc-8" className="scroll-mt-32 lg:scroll-mt-8">
               <Suspense fallback={<CalculatorSkeleton />}>
                 <DailyCatchUpCalculator />
               </Suspense>
             </section>
 
-            <section id="calc-9" className="scroll-mt-5">
+            <section id="calc-9" className="scroll-mt-32 lg:scroll-mt-8">
               <Suspense fallback={<CalculatorSkeleton />}>
                 <Under5Calculator />
               </Suspense>
@@ -359,101 +283,23 @@ function AppContent() {
           </main>
 
           {/* Sticky Right Navigation Panel: Desktop Only (>= lg screens) */}
-          <aside className="hidden lg:block w-72 xl:w-80 flex-shrink-0 sticky top-5 space-y-4">
-            <nav
-              aria-label={isUrdu ? 'حساب کار کی فہرست' : 'Calculators Navigation'}
-              className="saas-nav-panel p-4"
-            >
-              {/* Navigation Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-2.5">
-                <div>
-                  <h2 className="text-sm font-bold text-slate-900 tracking-tight">
-                    {isUrdu ? 'حساب کار' : 'Calculators'}
-                  </h2>
-                  <p className="text-[11px] text-slate-500">
-                    {isUrdu ? 'براہِ راست انتخاب کریں' : 'Quick jump reference'}
-                  </p>
-                </div>
-                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                  9 Tools
-                </span>
-              </div>
-
-              {/* List of 9 Calculators */}
-              <div className="space-y-1">
-                {calculators.map((calc) => {
-                  const Icon = calc.icon;
-                  const isActive = activeSection === calc.id;
-                  return (
-                    <button
-                      key={calc.id}
-                      id={`sidebar-link-${calc.id}`}
-                      type="button"
-                      onClick={() => scrollToCalculator(calc.id)}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-left transition-all cursor-pointer saas-nav-item ${
-                        isActive
-                          ? 'saas-nav-item-active'
-                          : 'saas-nav-item-inactive'
-                      }`}
-                    >
-                      <span
-                        className={`w-6 h-6 rounded font-mono font-bold text-[11px] flex items-center justify-center flex-shrink-0 transition-colors ${
-                          isActive
-                            ? 'bg-teal-700 text-white'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        {calc.num}
-                      </span>
-                      <Icon
-                        className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                          isActive ? 'text-teal-700' : 'text-slate-400'
-                        }`}
-                      />
-                      <span className="truncate flex-1 tracking-tight">
-                        {calc.shortLabel}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </nav>
-
-            {/* Campaign Protocol Guidelines Card */}
-            <div className="saas-card p-3.5 text-xs text-slate-600 space-y-2">
-              <div className="flex items-center gap-1.5 text-teal-800 font-bold">
-                <Info className="w-3.5 h-3.5 text-teal-600 flex-shrink-0" />
-                <span>{isUrdu ? 'پروٹوکول رہنما اصول' : 'Campaign Standards'}</span>
-              </div>
-              <ul className="space-y-1.5 text-[11px] text-slate-600 list-disc list-inside leading-relaxed">
-                <li>
-                  <strong className="text-slate-800">bOPV Vial:</strong> 20 doses (2 drops/child)
-                </li>
-                <li>
-                  <strong className="text-slate-800">Coverage Goal:</strong> ≥ 95% target
-                </li>
-                <li>
-                  <strong className="text-slate-800">Under 5:</strong> Strict DOB verification
-                </li>
-                <li>
-                  <strong className="text-slate-800">Wastage Goal:</strong> ≤ 10% acceptable
-                </li>
-              </ul>
-            </div>
-          </aside>
+          <DesktopCalculatorIndex
+            activeSection={activeSection}
+            onSelect={scrollToCalculator}
+          />
         </div>
       </div>
 
-      {/* Floating Back-to-Top Button */}
+      {/* Floating Back to Top Button (Shown when scrolled > 300px) */}
       {showBackToTop && (
         <button
           id="back-to-top-btn"
           type="button"
           onClick={scrollToTop}
           aria-label={isUrdu ? 'اوپر جائیں' : 'Back to top'}
-          className="fixed bottom-5 ltr:right-5 rtl:left-5 z-30 p-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow-lg cursor-pointer flex items-center justify-center transition"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 p-2.5 sm:p-3 rounded-xl bg-slate-900/90 hover:bg-slate-900 text-white shadow-xl backdrop-blur-xs border border-slate-700 cursor-pointer flex items-center justify-center transition active:scale-95"
         >
-          <ArrowUp className="w-4 h-4" />
+          <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       )}
 
