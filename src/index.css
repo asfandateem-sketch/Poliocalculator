@@ -87,21 +87,21 @@ body {
   scrollbar-width: none;
 }
 
-/* ================= Public Health Hybrid Design System =================
+/* ================= UNICEF-Inspired Hybrid Design System =================
    1. SKEUOMORPHISM for function (tactile buttons, debossed inputs, sliders, toggles)
    2. NEUMORPHISM for background elements (soft extruded cards, dual-light canvas, sunken wells)
    3. GLASSMORPHISM for layers & overlays (frosted headers, floating toolbars, modals, panels)
 ======================================================================= */
 
-/* Neumorphic Healthcare Canvas Background */
+/* Neumorphic Healthcare Canvas Background (UNICEF Light Aesthetic) */
 .saas-bg,
 .clay-bg,
 .neumorph-bg {
-  background-color: #edf2f7;
+  background-color: #eef3f8;
   background-image: 
-    radial-gradient(at 15% 15%, rgba(255, 255, 255, 0.7) 0px, transparent 60%),
-    radial-gradient(at 85% 85%, rgba(203, 213, 225, 0.45) 0px, transparent 60%),
-    radial-gradient(at 50% 0%, rgba(13, 148, 136, 0.04) 0px, transparent 50%);
+    radial-gradient(at 10% 10%, rgba(255, 255, 255, 0.85) 0px, transparent 55%),
+    radial-gradient(at 90% 90%, rgba(200, 214, 229, 0.5) 0px, transparent 60%),
+    radial-gradient(at 50% 0%, rgba(28, 171, 226, 0.06) 0px, transparent 50%);
   background-attachment: fixed;
 }
 
@@ -109,36 +109,36 @@ body {
 .saas-card,
 .clay-card,
 .neumorph-card {
-  background: #f8fafc;
+  background: #ffffff;
   border-radius: 1.25rem; /* 20px */
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.9);
   box-shadow: 
-    7px 7px 18px rgba(166, 178, 196, 0.45),
-    -7px -7px 18px rgba(255, 255, 255, 0.95);
+    8px 8px 20px rgba(175, 190, 210, 0.42),
+    -8px -8px 20px rgba(255, 255, 255, 0.98);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .saas-card:hover,
 .clay-card:hover,
 .neumorph-card:hover {
-  border-color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 1);
   box-shadow: 
-    9px 9px 22px rgba(166, 178, 196, 0.55),
-    -9px -9px 22px rgba(255, 255, 255, 1);
+    10px 10px 24px rgba(175, 190, 210, 0.52),
+    -10px -10px 24px rgba(255, 255, 255, 1);
 }
 
-/* Glassmorphic Layer: Header Bar */
+/* Glassmorphic Layer: Header Bar & Sticky Ribbons */
 .saas-header,
 .clay-header,
 .glass-header {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border-radius: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.92);
   box-shadow: 
-    0 10px 25px -5px rgba(15, 23, 42, 0.06),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+    0 12px 32px -4px rgba(0, 43, 73, 0.08),
+    inset 0 1px 0 0 rgba(255, 255, 255, 1);
 }
 
 /* Skeuomorphic Form Input (Debossed Physical Slot) */
@@ -176,10 +176,10 @@ body {
 .clay-input:focus,
 .skeuo-input:focus {
   background: #ffffff;
-  border-color: #0d9488;
+  border-color: #1CABE2;
   box-shadow: 
-    inset 0 1px 3px rgba(13, 148, 136, 0.12),
-    0 0 0 3px rgba(13, 148, 136, 0.22);
+    inset 0 1px 3px rgba(28, 171, 226, 0.15),
+    0 0 0 3.5px rgba(28, 171, 226, 0.25);
   outline: none;
 }
 
@@ -189,52 +189,52 @@ body {
   font-weight: 400;
 }
 
-/* Skeuomorphic Primary Action Button (Tactile 3D Push Button) */
+/* Skeuomorphic Primary Action Button (UNICEF Blue Tactile 3D Push Button) */
 .saas-btn-primary,
 .clay-btn-teal,
 .skeuo-btn-primary {
   min-height: 3rem; /* 48px height */
   height: 3rem;
-  background: linear-gradient(180deg, #0f766e 0%, #115e59 55%, #134e4a 100%);
+  background: linear-gradient(180deg, #1CABE2 0%, #0099D8 50%, #007AA5 100%);
   color: #ffffff;
   border-radius: 0.75rem;
   font-weight: 700;
   font-size: 0.9375rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    0 3px 0 #042f2e,
-    0 5px 8px -1px rgba(15, 23, 42, 0.22);
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 3.5px 0 #005F86,
+    0 6px 14px -2px rgba(0, 43, 73, 0.28);
   transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
   touch-action: manipulation;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   min-width: 3rem;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 1px rgba(0, 43, 73, 0.4);
 }
 
 .saas-btn-primary:hover,
 .clay-btn-teal:hover,
 .skeuo-btn-primary:hover {
-  background: linear-gradient(180deg, #115e59 0%, #0f766e 40%, #134e4a 100%);
+  background: linear-gradient(180deg, #28B4EA 0%, #1CABE2 50%, #0087BF 100%);
   box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 3px 0 #042f2e,
-    0 6px 12px -1px rgba(15, 23, 42, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 3.5px 0 #005F86,
+    0 8px 18px -2px rgba(0, 43, 73, 0.35);
 }
 
 .saas-btn-primary:active,
 .clay-btn-teal:active,
 .skeuo-btn-primary:active {
-  transform: translateY(2px);
-  background: linear-gradient(180deg, #042f2e 0%, #115e59 100%);
+  transform: translateY(2.5px);
+  background: linear-gradient(180deg, #00729F 0%, #0087BF 100%);
   box-shadow: 
-    0 1px 0 #042f2e,
-    inset 0 2px 4px rgba(0, 0, 0, 0.45);
+    0 1px 0 #005F86,
+    inset 0 2px 5px rgba(0, 0, 0, 0.35);
 }
 
 /* Skeuomorphic Secondary / Reset Button (Tactile Light Push Button) */
@@ -244,7 +244,7 @@ body {
   min-height: 3rem; /* 48px height */
   height: 3rem;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 40%, #e2e8f0 100%);
-  color: #1e293b;
+  color: #002B49;
   border-radius: 0.75rem;
   border: 1px solid #cbd5e1;
   font-weight: 600;
@@ -268,7 +268,7 @@ body {
 .clay-btn-light:hover,
 .skeuo-btn-secondary:hover {
   background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
-  color: #0f172a;
+  color: #001E33;
   border-color: #94a3b8;
   box-shadow: 
     inset 0 1px 0 #ffffff,
@@ -283,7 +283,32 @@ body {
   background: #e2e8f0;
   box-shadow: 
     0 0.5px 0 #cbd5e1,
-    inset 0 2px 3px rgba(0, 0, 0, 0.1);
+    inset 0 2px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* Skeuomorphic Toggle Switch (Physical Track with Glossy Thumb) */
+.skeuo-toggle-track {
+  background: linear-gradient(180deg, #cbd5e1 0%, #e2e8f0 100%);
+  border: 1.5px solid #94a3b8;
+  border-radius: 9999px;
+  box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.18), 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.skeuo-toggle-track-active {
+  background: linear-gradient(180deg, #0099D8 0%, #1CABE2 100%);
+  border-color: #007AA5;
+  box-shadow: inset 0 2px 4px rgba(0, 43, 73, 0.25), 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.skeuo-toggle-thumb {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 45%, #e2e8f0 100%);
+  border-radius: 9999px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 
+    inset 0 1px 0 #ffffff,
+    0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Tactile Micro-Interactions & Sensory Animations */

@@ -274,13 +274,13 @@ export const VaccineWastageCalculator: React.FC<Props> = React.memo(() => {
               {/* Supporting metrics */}
               <div className="saas-result-cell p-2.5 grid grid-cols-3 gap-2 text-xs text-slate-300 mt-2">
                 <div>
-                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'جاری وائلز' : 'Vials Issued'}</span>
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'جاری کردہ وائلز' : 'Vials Issued'}</span>
                   <span className="font-mono text-slate-200 font-bold text-xs">
                     {result !== null ? `${result.vials.toLocaleString()} (${result.totalDoses.toLocaleString()})` : '—'}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'ویکسین شدہ' : 'Vaccinated'}</span>
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'ویکسین کیے گئے بچے' : 'Children Vaccinated'}</span>
                   <span className="font-mono text-teal-300 font-bold text-xs">
                     {result !== null ? result.vaccinated.toLocaleString() : '—'}
                   </span>

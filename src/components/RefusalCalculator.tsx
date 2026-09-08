@@ -28,10 +28,15 @@ export const RefusalCalculator: React.FC<Props> = React.memo(() => {
   }));
   const [error, setError] = useState<string>('');
 
-  const calculate = useCallback(() => {
-    setError('');
-    const rep = Number(reportedRefusals.replace(/,/g, ''));
-    const cov = Number(coveredRefusals.replace(/,/g, ''));
+  const computeResult = useCallback((repStr: string, covStr: string, showPulse = false) => {
+    const rep = Number(repStr.replace(/,/g, ''));
+    const cov = Number(covStr.replace(/,/g, ''));
+
+    if (repStr.trim() === '' && covStr.trim() === '') {
+      setError('');
+      setResult(null);
+      return;
+    }
 
     if (isNaN(rep) || rep < 0) {
       setError(isUrdu ? 'براہ کرم درست رپورٹ شدہ انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid reported refusals (≥ 0)');
@@ -53,34 +58,36 @@ export const RefusalCalculator: React.FC<Props> = React.memo(() => {
       return;
     }
 
-    try {
-      const remaining = rep - cov;
-      const convRate = rep > 0 ? Number(((cov / rep) * 100).toFixed(1)) : 100;
+    setError('');
+    const remaining = rep - cov;
+    const convRate = rep > 0 ? Number(((cov / rep) * 100).toFixed(1)) : 100;
 
-      setResult({
-        reportedRefusals: rep,
-        coveredRefusals: cov,
-        remainingRefusals: remaining,
-        conversionRate: convRate,
-      });
+    setResult({
+      reportedRefusals: rep,
+      coveredRefusals: cov,
+      remainingRefusals: remaining,
+      conversionRate: convRate,
+    });
+    if (showPulse) {
       triggerFeedback('calculate');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : isUrdu ? 'حسابی خرابی' : 'Invalid input values';
-      setError(msg);
-      setResult(null);
-      triggerError();
     }
-  }, [reportedRefusals, coveredRefusals, isUrdu, triggerError, triggerFeedback]);
+  }, [isUrdu, triggerError, triggerFeedback]);
+
+  const calculate = useCallback(() => {
+    computeResult(reportedRefusals, coveredRefusals, true);
+  }, [computeResult, reportedRefusals, coveredRefusals]);
 
   const handleReportedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setReportedRefusals(e.target.value);
-    setError('');
-  }, []);
+    const val = e.target.value;
+    setReportedRefusals(val);
+    computeResult(val, coveredRefusals, false);
+  }, [coveredRefusals, computeResult]);
 
   const handleCoveredChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setCoveredRefusals(e.target.value);
-    setError('');
-  }, []);
+    const val = e.target.value;
+    setCoveredRefusals(val);
+    computeResult(reportedRefusals, val, false);
+  }, [reportedRefusals, computeResult]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {

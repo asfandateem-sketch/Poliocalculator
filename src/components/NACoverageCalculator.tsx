@@ -28,10 +28,15 @@ export const NACoverageCalculator: React.FC<Props> = React.memo(() => {
   }));
   const [error, setError] = useState<string>('');
 
-  const calculate = useCallback(() => {
-    setError('');
-    const rep = Number(reportedNA.replace(/,/g, ''));
-    const cov = Number(coveredNA.replace(/,/g, ''));
+  const computeResult = useCallback((repStr: string, covStr: string, showPulse = false) => {
+    const rep = Number(repStr.replace(/,/g, ''));
+    const cov = Number(covStr.replace(/,/g, ''));
+
+    if (repStr.trim() === '' && covStr.trim() === '') {
+      setError('');
+      setResult(null);
+      return;
+    }
 
     if (isNaN(rep) || rep < 0) {
       setError(isUrdu ? 'براہ کرم درست رپورٹ شدہ NA بچے درج کریں (≥ 0)' : 'Please enter valid reported NA children (≥ 0)');
@@ -53,33 +58,35 @@ export const NACoverageCalculator: React.FC<Props> = React.memo(() => {
       return;
     }
 
-    try {
-      const remaining = rep - cov;
-      const rate = rep > 0 ? Number(((cov / rep) * 100).toFixed(1)) : 100;
-      setResult({
-        reportedNA: rep,
-        coveredNA: cov,
-        remainingNA: remaining,
-        coverageRate: rate,
-      });
+    setError('');
+    const remaining = rep - cov;
+    const rate = rep > 0 ? Number(((cov / rep) * 100).toFixed(1)) : 100;
+    setResult({
+      reportedNA: rep,
+      coveredNA: cov,
+      remainingNA: remaining,
+      coverageRate: rate,
+    });
+    if (showPulse) {
       triggerFeedback('calculate');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : isUrdu ? 'حسابی خرابی' : 'Invalid input values';
-      setError(msg);
-      setResult(null);
-      triggerError();
     }
-  }, [reportedNA, coveredNA, isUrdu, triggerError, triggerFeedback]);
+  }, [isUrdu, triggerError, triggerFeedback]);
+
+  const calculate = useCallback(() => {
+    computeResult(reportedNA, coveredNA, true);
+  }, [computeResult, reportedNA, coveredNA]);
 
   const handleReportedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setReportedNA(e.target.value);
-    setError('');
-  }, []);
+    const val = e.target.value;
+    setReportedNA(val);
+    computeResult(val, coveredNA, false);
+  }, [coveredNA, computeResult]);
 
   const handleCoveredChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setCoveredNA(e.target.value);
-    setError('');
-  }, []);
+    const val = e.target.value;
+    setCoveredNA(val);
+    computeResult(reportedNA, val, false);
+  }, [reportedNA, computeResult]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {

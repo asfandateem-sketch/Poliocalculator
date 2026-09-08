@@ -127,7 +127,6 @@ export const VaccineDemandCalculator: React.FC<Props> = React.memo(() => {
                     explanation={strings.targetTooltip.explanation}
                     isUrdu={isUrdu}
                   />
-                  <span className="text-[11px] text-teal-700 font-medium font-mono" dir="ltr">20 doses/vial</span>
                 </div>
                 <input
                   id="demand-target-input"
@@ -241,13 +240,6 @@ export const VaccineDemandCalculator: React.FC<Props> = React.memo(() => {
                         +{bufferVials} {isUrdu ? 'بفر' : 'buffer'}
                       </span>
                     )}
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-[11px] text-slate-400 font-medium">{isUrdu ? 'کل خوراکیں: ' : 'Total Doses: '}</span>
-                    <span className="font-mono font-bold text-xs text-white">
-                      {totalDoses !== null ? totalDoses.toLocaleString() : '—'}
-                    </span>
                   </div>
                 </div>
               </div>
