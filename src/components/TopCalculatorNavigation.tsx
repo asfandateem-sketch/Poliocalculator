@@ -217,8 +217,8 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = (
                   <span
                     className={`w-5 h-5 rounded-md font-mono font-bold text-[10.5px] flex items-center justify-center flex-shrink-0 transition-colors ${
                       isActive
-                        ? 'bg-white/20 text-white'
-                        : 'bg-slate-200/70 text-slate-700 group-hover:bg-slate-300/80'
+                        ? 'bg-white text-teal-950 font-black shadow-xs'
+                        : 'bg-slate-200 text-slate-800 group-hover:bg-slate-300'
                     }`}
                   >
                     {calc.num}
@@ -227,7 +227,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = (
                   {/* Icon */}
                   <Icon
                     className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${
-                      isActive ? 'text-teal-200' : 'text-slate-400 group-hover:text-slate-600'
+                      isActive ? 'text-teal-100' : 'text-slate-500 group-hover:text-slate-700'
                     }`}
                   />
 

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { AlertCircle, RotateCcw } from 'lucide-react';
-import { calculateRefusal, RefusalResult } from '../calculatorEngine';
+import { UserCheck, RotateCcw, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
 import { useCalculationFeedback } from '../useCalculationFeedback';
@@ -14,49 +13,42 @@ export const RefusalCalculator: React.FC<Props> = () => {
   const strings = t.refusalCoverage;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
-  const [totalTarget, setTotalTarget] = useState<string>('5000');
   const [reportedRefusals, setReportedRefusals] = useState<string>('50');
   const [coveredRefusals, setCoveredRefusals] = useState<string>('25');
   const [result, setResult] = useState<{
-    totalTarget: number;
     reportedRefusals: number;
     coveredRefusals: number;
     remainingRefusals: number;
-    conversionRatePercent: number;
-    stillRefusalPercent: number;
+    conversionRate: number;
   } | null>(() => ({
-    totalTarget: 5000,
     reportedRefusals: 50,
     coveredRefusals: 25,
     remainingRefusals: 25,
-    conversionRatePercent: 50.0,
-    stillRefusalPercent: 0.5,
+    conversionRate: 50.0,
   }));
   const [error, setError] = useState<string>('');
 
   const calculate = () => {
     setError('');
-    const target = Number(totalTarget.replace(/,/g, ''));
     const rep = Number(reportedRefusals.replace(/,/g, ''));
     const cov = Number(coveredRefusals.replace(/,/g, ''));
 
-    if (isNaN(target) || target <= 0) {
-      setError(isUrdu ? 'براہ کرم درست ہدف درج کریں (> 0)' : 'Please enter valid total target (> 0)');
-      triggerError();
-      return;
-    }
     if (isNaN(rep) || rep < 0) {
-      setError(isUrdu ? 'براہ کرم درست ابتدائی انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid initial refusals (≥ 0)');
+      setError(isUrdu ? 'براہ کرم درست رپورٹ شدہ انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid reported refusals (≥ 0)');
       triggerError();
       return;
     }
     if (isNaN(cov) || cov < 0) {
-      setError(isUrdu ? 'براہ کرم درست حل شدہ/ویکسین شدہ انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid vaccinated refusals (≥ 0)');
+      setError(isUrdu ? 'براہ کرم درست حل شدہ/کور شدہ انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid covered refusals (≥ 0)');
       triggerError();
       return;
     }
     if (cov > rep) {
-      setError(isUrdu ? 'ویکسین شدہ انکاری ابتدائی انکاری کیسز سے زیادہ نہیں ہو سکتے' : 'Vaccinated refusals cannot exceed Initial Refusals');
+      setError(
+        isUrdu
+          ? `حل شدہ انکاری (${cov}) رپورٹ شدہ انکاری کیسز (${rep}) سے زیادہ نہیں ہو سکتے`
+          : `Covered refusals (${cov}) cannot exceed reported refusals (${rep})`
+      );
       triggerError();
       return;
     }
@@ -64,15 +56,12 @@ export const RefusalCalculator: React.FC<Props> = () => {
     try {
       const remaining = rep - cov;
       const convRate = rep > 0 ? Number(((cov / rep) * 100).toFixed(1)) : 100;
-      const stillPct = Number(((remaining / target) * 100).toFixed(2));
 
       setResult({
-        totalTarget: target,
         reportedRefusals: rep,
         coveredRefusals: cov,
         remainingRefusals: remaining,
-        conversionRatePercent: convRate,
-        stillRefusalPercent: stillPct,
+        conversionRate: convRate,
       });
       triggerFeedback('calculate');
     } catch (err: unknown) {
@@ -84,7 +73,6 @@ export const RefusalCalculator: React.FC<Props> = () => {
   };
 
   const handleReset = () => {
-    setTotalTarget('');
     setReportedRefusals('');
     setCoveredRefusals('');
     setResult(null);
@@ -119,20 +107,29 @@ export const RefusalCalculator: React.FC<Props> = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
           {/* Inputs Column */}
           <div className="md:col-span-6 flex flex-col justify-between space-y-4">
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label htmlFor="ref-target-input" className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  {isUrdu ? 'کل ہدف بچے (Total Target)' : 'Total Target Children'}
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <InfoTooltip
+                    id="ref-reported-tooltip"
+                    htmlFor="ref-reported-input"
+                    label={strings.reportedRefusalLabel}
+                    formula={strings.reportedRefusalTooltip.formula}
+                    fieldRule={strings.reportedRefusalTooltip.fieldRule}
+                    explanation={strings.reportedRefusalTooltip.explanation}
+                    isUrdu={isUrdu}
+                  />
+                </div>
                 <input
-                  id="ref-target-input"
+                  id="ref-reported-input"
                   type="number"
-                  min="1"
+                  aria-label={strings.reportedRefusalLabel}
+                  min="0"
                   inputMode="numeric"
-                  placeholder="e.g. 5000"
-                  value={totalTarget}
+                  placeholder="e.g. 50"
+                  value={reportedRefusals}
                   onChange={(e) => {
-                    setTotalTarget(e.target.value);
+                    setReportedRefusals(e.target.value);
                     setError('');
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && calculate()}
@@ -140,50 +137,33 @@ export const RefusalCalculator: React.FC<Props> = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <div className="mb-1.5">
-                    <label htmlFor="ref-reported-input" className="block text-xs font-semibold text-slate-700">
-                      {isUrdu ? 'ابتدائی انکاری کیسز' : 'Initial Refusals'}
-                    </label>
-                  </div>
-                  <input
-                    id="ref-reported-input"
-                    type="number"
-                    min="0"
-                    inputMode="numeric"
-                    placeholder="e.g. 50"
-                    value={reportedRefusals}
-                    onChange={(e) => {
-                      setReportedRefusals(e.target.value);
-                      setError('');
-                    }}
-                    onKeyDown={(e) => e.key === 'Enter' && calculate()}
-                    className="saas-input w-full px-3.5"
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <InfoTooltip
+                    id="ref-covered-tooltip"
+                    htmlFor="ref-covered-input"
+                    label={strings.coveredRefusalLabel}
+                    formula={strings.coveredRefusalTooltip.formula}
+                    fieldRule={strings.coveredRefusalTooltip.fieldRule}
+                    explanation={strings.coveredRefusalTooltip.explanation}
+                    isUrdu={isUrdu}
                   />
                 </div>
-
-                <div>
-                  <div className="mb-1.5">
-                    <label htmlFor="ref-covered-input" className="block text-xs font-semibold text-slate-700">
-                      {isUrdu ? 'ویکسین شدہ انکاری' : 'Refusals Vaccinated'}
-                    </label>
-                  </div>
-                  <input
-                    id="ref-covered-input"
-                    type="number"
-                    min="0"
-                    inputMode="numeric"
-                    placeholder="e.g. 25"
-                    value={coveredRefusals}
-                    onChange={(e) => {
-                      setCoveredRefusals(e.target.value);
-                      setError('');
-                    }}
-                    onKeyDown={(e) => e.key === 'Enter' && calculate()}
-                    className="saas-input w-full px-3.5"
-                  />
-                </div>
+                <input
+                  id="ref-covered-input"
+                  type="number"
+                  aria-label={strings.coveredRefusalLabel}
+                  min="0"
+                  inputMode="numeric"
+                  placeholder="e.g. 25"
+                  value={coveredRefusals}
+                  onChange={(e) => {
+                    setCoveredRefusals(e.target.value);
+                    setError('');
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  className="saas-input w-full px-3.5"
+                />
               </div>
             </div>
 
@@ -227,55 +207,39 @@ export const RefusalCalculator: React.FC<Props> = () => {
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
                   <span className="flex items-center gap-1.5 font-semibold text-slate-300">
-                    <AlertCircle className="w-3.5 h-3.5 text-teal-400" />
-                    {isUrdu ? 'کنورژن شرح (Conversion Rate)' : 'Refusal Conversion Rate'}
+                    <UserCheck className="w-3.5 h-3.5 text-teal-400" />
+                    {strings.coverageRateLabel}
                   </span>
-                  {result !== null && (
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
-                        result.stillRefusalPercent <= 0.5 ? 'badge-optimal' : 'badge-warning'
-                      }`}
-                    >
-                      {result.stillRefusalPercent <= 0.5
-                        ? (isUrdu ? 'بہترین (≤0.5% تاحال)' : 'Optimal (≤0.5% still)')
-                        : (isUrdu ? 'انتباہ (>0.5% تاحال)' : 'Warning (>0.5% still)')}
-                    </span>
-                  )}
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded border badge-optimal">
+                    {strings.resolutionRateBadge}
+                  </span>
                 </div>
 
                 <div className="flex items-baseline justify-between mb-3">
-                  <div>
+                  <div className="flex items-baseline gap-2">
                     <span
-                      key={`refusal-pct-${calculationKey}`}
+                      key={`ref-pct-${calculationKey}`}
                       dir="ltr"
                       className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${
                         isCalculated ? 'animate-number-pop' : ''
                       } ${
                         result === null
                           ? 'text-slate-400'
-                          : result.conversionRatePercent >= 50
+                          : result.conversionRate >= 50
                           ? 'text-emerald-400'
                           : 'text-amber-400'
                       }`}
                     >
-                      {result !== null ? `${result.conversionRatePercent}%` : '—'}
+                      {result !== null ? `${result.conversionRate}%` : '—'}
                     </span>
-                    <span className="text-xs text-slate-400 block mt-0.5 font-mono">
-                      {isUrdu ? 'کنورٹ شدہ انکاری' : 'conversion rate'}
+                    <span className="text-xs font-semibold text-slate-300">
+                      {isUrdu ? 'حل شدہ شرح' : 'Resolution Rate'}
                     </span>
                   </div>
 
                   <div className="text-right">
-                    <span className="text-[11px] text-slate-400 font-medium block">
-                      {isUrdu ? 'تاحال انکاری (% ہدف)' : 'Still Refusal % of Target'}
-                    </span>
-                    <span
-                      dir="ltr"
-                      className={`font-mono font-bold text-lg ${
-                        result && result.stillRefusalPercent <= 0.5 ? 'text-emerald-300' : 'text-rose-300'
-                      }`}
-                    >
-                      {result !== null ? `${result.stillRefusalPercent}%` : '—'}
+                    <span className="text-[11px] text-amber-300 font-bold block">
+                      {strings.remainingRefusalLabel} {result !== null ? result.remainingRefusals.toLocaleString() : '—'}
                     </span>
                   </div>
                 </div>
@@ -284,19 +248,19 @@ export const RefusalCalculator: React.FC<Props> = () => {
               {/* Supporting metrics */}
               <div className="saas-result-cell p-2.5 grid grid-cols-3 gap-2 text-xs text-slate-300 mt-2">
                 <div>
-                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'ابتدائی' : 'Initial'}</span>
+                  <span className="block text-slate-400 text-[10px] font-medium">{strings.reportedRefusalResult}</span>
                   <span className="font-mono text-slate-200 font-bold text-xs">
                     {result !== null ? result.reportedRefusals.toLocaleString() : '—'}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'حل شدہ' : 'Resolved'}</span>
+                  <span className="block text-slate-400 text-[10px] font-medium">{strings.coveredRefusalResult}</span>
                   <span className="font-mono text-emerald-300 font-bold text-xs">
                     {result !== null ? result.coveredRefusals.toLocaleString() : '—'}
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'باقی انکاری' : 'Still Refusal'}</span>
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'باقی انکاری' : 'Remaining'}</span>
                   <span className="font-mono text-rose-300 font-bold text-xs">
                     {result !== null ? result.remainingRefusals.toLocaleString() : '—'}
                   </span>

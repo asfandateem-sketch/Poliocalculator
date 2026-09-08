@@ -15,7 +15,6 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
   const [targetChildren, setTargetChildren] = useState<string>('5000');
-  const [dosesPerVial, setDosesPerVial] = useState<string>('20');
   const [bufferPct, setBufferPct] = useState<string>('10');
   const [vialsRequired, setVialsRequired] = useState<number | null>(275);
   const [bufferVials, setBufferVials] = useState<number | null>(25);
@@ -24,18 +23,13 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
   const [coveredChildren, setCoveredChildren] = useState<number | null>(5000);
   const [error, setError] = useState<string>('');
 
+  const DOSES_PER_VIAL = 20;
+
   const calculate = () => {
     setError('');
     const children = Number(targetChildren.replace(/,/g, ''));
     if (isNaN(children) || children < 0) {
       setError(isUrdu ? 'براہ کرم درست تعداد درج کریں (≥ 0)' : 'Please enter a valid number of children (≥ 0)');
-      triggerError();
-      return;
-    }
-
-    const perVial = dosesPerVial ? Number(dosesPerVial) : 20;
-    if (isNaN(perVial) || perVial <= 0) {
-      setError(isUrdu ? 'فی وائل خوراکیں 0 سے زیادہ ہونی چاہئیں' : 'Doses per vial must be greater than 0');
       triggerError();
       return;
     }
@@ -49,8 +43,8 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
 
     try {
       const neededDosesWithBuffer = Math.ceil(children * (1 + buffer / 100));
-      const neededVials = Math.ceil(neededDosesWithBuffer / perVial);
-      const baseVials = Math.ceil(children / perVial);
+      const neededVials = Math.ceil(neededDosesWithBuffer / DOSES_PER_VIAL);
+      const baseVials = Math.ceil(children / DOSES_PER_VIAL);
       const calcBufferVials = Math.max(0, neededVials - baseVials);
 
       setVialsRequired(neededVials);
@@ -68,7 +62,6 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
 
   const handleReset = () => {
     setTargetChildren('');
-    setDosesPerVial('20');
     setBufferPct('10');
     setVialsRequired(null);
     setBufferVials(null);
@@ -107,21 +100,23 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
           {/* Inputs Column */}
           <div className="md:col-span-6 flex flex-col justify-between space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-              <div className="sm:col-span-6">
+              <div className="sm:col-span-8">
                 <div className="flex items-center justify-between mb-1.5">
                   <InfoTooltip
                     id="demand-target"
+                    htmlFor="demand-target-input"
                     label={strings.targetLabel}
                     formula={strings.targetTooltip.formula}
                     fieldRule={strings.targetTooltip.fieldRule}
                     explanation={strings.targetTooltip.explanation}
                     isUrdu={isUrdu}
                   />
-                  <span className="text-[11px] text-slate-500 font-medium">bOPV (2 drops)</span>
+                  <span className="text-[11px] text-teal-700 font-medium font-mono" dir="ltr">20 doses/vial</span>
                 </div>
                 <input
                   id="demand-target-input"
                   type="number"
+                  aria-label={strings.targetLabel}
                   min="0"
                   inputMode="numeric"
                   placeholder="e.g. 5000"
@@ -135,31 +130,11 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
                 />
               </div>
 
-              <div className="sm:col-span-3">
-                <label htmlFor="demand-doses-per-vial" className="block text-xs font-semibold text-slate-700 mb-1.5 truncate">
-                  {isUrdu ? 'خوراکیں/وائل' : 'Doses/Vial'}
-                </label>
-                <input
-                  id="demand-doses-per-vial"
-                  type="number"
-                  min="1"
-                  max="100"
-                  inputMode="numeric"
-                  placeholder="20"
-                  value={dosesPerVial}
-                  onChange={(e) => {
-                    setDosesPerVial(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
-                  className="saas-input w-full px-3.5"
-                />
-              </div>
-
-              <div className="sm:col-span-3">
+              <div className="sm:col-span-4">
                 <div className="flex items-center justify-between mb-1.5">
                   <InfoTooltip
                     id="demand-buffer"
+                    htmlFor="demand-buffer-input"
                     label={strings.bufferLabel}
                     formula={strings.bufferTooltip.formula}
                     fieldRule={strings.bufferTooltip.fieldRule}
@@ -170,6 +145,7 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
                 <input
                   id="demand-buffer-input"
                   type="number"
+                  aria-label={strings.bufferLabel}
                   min="0"
                   max="50"
                   inputMode="numeric"

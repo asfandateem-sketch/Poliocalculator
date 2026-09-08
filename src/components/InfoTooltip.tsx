@@ -8,6 +8,7 @@ export interface InfoTooltipProps {
   fieldRule?: string;
   id?: string;
   isUrdu?: boolean;
+  htmlFor?: string;
   data?: {
     label: string;
     formula?: string;
@@ -21,7 +22,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = (props) => {
   const formula = props.data ? props.data.formula : props.formula;
   const explanation = props.data ? props.data.explanation : props.explanation || '';
   const fieldRule = props.data ? props.data.fieldRule : props.fieldRule;
-  const { id, isUrdu = false } = props;
+  const { id, isUrdu = false, htmlFor } = props;
 
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -53,7 +54,15 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = (props) => {
   return (
     <div ref={containerRef} className="relative inline-flex flex-col">
       <div className="flex items-center gap-1.5 flex-wrap">
-        {label && <span className="font-bold text-slate-700 text-xs">{label}</span>}
+        {label && (
+          htmlFor ? (
+            <label htmlFor={htmlFor} className="font-bold text-slate-800 text-xs cursor-pointer select-none">
+              {label}
+            </label>
+          ) : (
+            <span className="font-bold text-slate-800 text-xs">{label}</span>
+          )
+        )}
         <button
           id={id ? `info-btn-${id}` : undefined}
           type="button"

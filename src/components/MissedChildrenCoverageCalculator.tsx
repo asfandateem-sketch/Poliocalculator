@@ -176,12 +176,15 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-slate-700">{strings.reportedNaInputLabel}</span>
+                      <label htmlFor="missed-reported-na" className="text-xs font-medium text-slate-700 cursor-pointer">
+                        {strings.reportedNaInputLabel}
+                      </label>
                       <InfoTooltip data={strings.reportedNaTooltip} isUrdu={isUrdu} />
                     </div>
                     <input
                       id="missed-reported-na"
                       type="number"
+                      aria-label={strings.reportedNaInputLabel}
                       inputMode="numeric"
                       min="0"
                       value={reportedNA}
@@ -192,12 +195,15 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-slate-700">{strings.coveredNaInputLabel}</span>
+                      <label htmlFor="missed-covered-na" className="text-xs font-medium text-slate-700 cursor-pointer">
+                        {strings.coveredNaInputLabel}
+                      </label>
                       <InfoTooltip data={strings.coveredNaTooltip} isUrdu={isUrdu} />
                     </div>
                     <input
                       id="missed-covered-na"
                       type="number"
+                      aria-label={strings.coveredNaInputLabel}
                       inputMode="numeric"
                       min="0"
                       value={coveredNA}
@@ -223,12 +229,15 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-slate-700">{strings.reportedRefusalInputLabel}</span>
+                      <label htmlFor="missed-reported-refusal" className="text-xs font-medium text-slate-700 cursor-pointer">
+                        {strings.reportedRefusalInputLabel}
+                      </label>
                       <InfoTooltip data={strings.reportedRefusalTooltip} isUrdu={isUrdu} />
                     </div>
                     <input
                       id="missed-reported-refusal"
                       type="number"
+                      aria-label={strings.reportedRefusalInputLabel}
                       inputMode="numeric"
                       min="0"
                       value={reportedRefusals}
@@ -239,12 +248,15 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-slate-700">{strings.coveredRefusalInputLabel}</span>
+                      <label htmlFor="missed-covered-refusal" className="text-xs font-medium text-slate-700 cursor-pointer">
+                        {strings.coveredRefusalInputLabel}
+                      </label>
                       <InfoTooltip data={strings.coveredRefusalTooltip} isUrdu={isUrdu} />
                     </div>
                     <input
                       id="missed-covered-refusal"
                       type="number"
+                      aria-label={strings.coveredRefusalInputLabel}
                       inputMode="numeric"
                       min="0"
                       value={coveredRefusals}

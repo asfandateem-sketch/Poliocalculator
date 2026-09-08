@@ -101,6 +101,7 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
                 <div className="mb-1.5">
                   <InfoTooltip
                     id="catchup-target"
+                    htmlFor="catchup-target-input"
                     label={strings.targetLabel}
                     formula={strings.targetTooltip.formula}
                     fieldRule={strings.targetTooltip.fieldRule}
@@ -111,6 +112,7 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
                 <input
                   id="catchup-target-input"
                   type="number"
+                  aria-label={strings.targetLabel}
                   min="0"
                   inputMode="numeric"
                   placeholder="e.g. 5000"
@@ -128,6 +130,7 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
                 <div className="mb-1.5">
                   <InfoTooltip
                     id="catchup-vaccinated"
+                    htmlFor="catchup-vaccinated-input"
                     label={strings.vaccinatedLabel}
                     formula={strings.vaccinatedTooltip.formula}
                     fieldRule={strings.vaccinatedTooltip.fieldRule}
@@ -138,6 +141,7 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
                 <input
                   id="catchup-vaccinated-input"
                   type="number"
+                  aria-label={strings.vaccinatedLabel}
                   min="0"
                   inputMode="numeric"
                   placeholder="e.g. 2000"
@@ -155,6 +159,7 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
                 <div className="mb-1.5">
                   <InfoTooltip
                     id="catchup-days"
+                    htmlFor="catchup-days-input"
                     label={strings.daysLabel}
                     formula={strings.daysTooltip.formula}
                     fieldRule={strings.daysTooltip.fieldRule}
@@ -165,6 +170,7 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
                 <input
                   id="catchup-days-input"
                   type="number"
+                  aria-label={strings.daysLabel}
                   min="1"
                   max="14"
                   inputMode="numeric"

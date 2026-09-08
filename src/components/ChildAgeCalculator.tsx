@@ -133,6 +133,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
                 <input
                   id="campaign-date"
                   type="date"
+                  aria-label={isUrdu ? 'مہم کی تاریخ (Campaign Date)' : 'Campaign Date'}
                   value={campaignDate}
                   onChange={(e) => handleCampaignDateChange(e.target.value)}
                   className="saas-input w-full px-3.5 text-sm sm:text-base cursor-pointer"
@@ -143,6 +144,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
                 <div className="flex items-center justify-between mb-1.5">
                   <InfoTooltip
                     id="dob"
+                    htmlFor="child-dob"
                     label={strings.dobLabel}
                     formula={strings.dobTooltip.formula}
                     fieldRule={strings.dobTooltip.fieldRule}
@@ -154,6 +156,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
                 <input
                   id="child-dob"
                   type="date"
+                  aria-label={strings.dobLabel}
                   max={campaignDate || todayString}
                   value={dob}
                   onChange={(e) => handleDateChange(e.target.value)}

@@ -95,6 +95,7 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
                 <div className="flex items-center justify-between mb-1.5">
                   <InfoTooltip
                     id="coverage-target"
+                    htmlFor="coverage-target-input"
                     label={strings.targetLabel}
                     formula={strings.targetTooltip.formula}
                     fieldRule={strings.targetTooltip.fieldRule}
@@ -105,6 +106,7 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
                 <input
                   id="coverage-target-input"
                   type="number"
+                  aria-label={strings.targetLabel}
                   min="0"
                   inputMode="numeric"
                   placeholder="e.g. 5000"
@@ -122,6 +124,7 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
                 <div className="flex items-center justify-between mb-1.5">
                   <InfoTooltip
                     id="coverage-vac"
+                    htmlFor="coverage-vac-input"
                     label={strings.vaccinatedLabel}
                     formula={strings.vaccinatedTooltip.formula}
                     fieldRule={strings.vaccinatedTooltip.fieldRule}
@@ -132,6 +135,7 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
                 <input
                   id="coverage-vac-input"
                   type="number"
+                  aria-label={strings.vaccinatedLabel}
                   min="0"
                   inputMode="numeric"
                   placeholder="e.g. 4750"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { usePWA } from './usePWA';
 import { LanguageProvider, useLanguage } from './LanguageContext';
 import { triggerHaptic } from './haptics';
@@ -12,59 +12,15 @@ import {
 } from 'lucide-react';
 import { CALCULATOR_ITEMS } from './platformNavigation';
 import { TopCalculatorNavigation } from './components/TopCalculatorNavigation';
-
-const ChildAgeCalculator = lazy(() =>
-  import('./components/ChildAgeCalculator').then((m) => ({ default: m.ChildAgeCalculator }))
-);
-const VaccineDemandCalculator = lazy(() =>
-  import('./components/VaccineDemandCalculator').then((m) => ({ default: m.VaccineDemandCalculator }))
-);
-const VaccineWastageCalculator = lazy(() =>
-  import('./components/VaccineWastageCalculator').then((m) => ({ default: m.VaccineWastageCalculator }))
-);
-const NACoverageCalculator = lazy(() =>
-  import('./components/NACoverageCalculator').then((m) => ({ default: m.NACoverageCalculator }))
-);
-const RefusalCalculator = lazy(() =>
-  import('./components/RefusalCalculator').then((m) => ({ default: m.RefusalCalculator }))
-);
-const MissedChildrenCoverageCalculator = lazy(() =>
-  import('./components/MissedChildrenCoverageCalculator').then((m) => ({
-    default: m.MissedChildrenCoverageCalculator,
-  }))
-);
-const CampaignCoverageCalculator = lazy(() =>
-  import('./components/CampaignCoverageCalculator').then((m) => ({
-    default: m.CampaignCoverageCalculator,
-  }))
-);
-const DailyCatchUpCalculator = lazy(() =>
-  import('./components/DailyCatchUpCalculator').then((m) => ({ default: m.DailyCatchUpCalculator }))
-);
-const Under5Calculator = lazy(() =>
-  import('./components/Under5Calculator').then((m) => ({ default: m.Under5Calculator }))
-);
-
-const CalculatorSkeleton = () => (
-  <div className="saas-card p-5 sm:p-6 h-[260px] flex flex-col justify-between animate-pulse">
-    <div>
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-slate-200" />
-          <div className="h-5 w-36 bg-slate-200 rounded" />
-        </div>
-        <div className="h-5 w-20 bg-slate-200 rounded" />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-3">
-          <div className="h-11 bg-slate-100 rounded-lg" />
-          <div className="h-11 bg-slate-200 rounded-lg" />
-        </div>
-        <div className="h-28 bg-slate-900/60 rounded-xl" />
-      </div>
-    </div>
-  </div>
-);
+import { ChildAgeCalculator } from './components/ChildAgeCalculator';
+import { VaccineDemandCalculator } from './components/VaccineDemandCalculator';
+import { VaccineWastageCalculator } from './components/VaccineWastageCalculator';
+import { NACoverageCalculator } from './components/NACoverageCalculator';
+import { RefusalCalculator } from './components/RefusalCalculator';
+import { MissedChildrenCoverageCalculator } from './components/MissedChildrenCoverageCalculator';
+import { CampaignCoverageCalculator } from './components/CampaignCoverageCalculator';
+import { DailyCatchUpCalculator } from './components/DailyCatchUpCalculator';
+import { Under5Calculator } from './components/Under5Calculator';
 
 function AppContent() {
   const { isInstallable, isOnline, install } = usePWA();
@@ -187,16 +143,16 @@ function AppContent() {
                 triggerHaptic('light');
                 toggleLanguage();
               }}
-              aria-label={isUrdu ? 'Switch to English' : 'اردو میں تبدیل کریں'}
+              aria-label={isUrdu ? 'EN / اردو: Switch to English language' : 'EN / اردو: اردو زبان منتخب کریں'}
               title={isUrdu ? 'Switch to English' : 'اردو میں تبدیل کریں'}
               className="saas-btn-secondary inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold cursor-pointer"
             >
               <Languages className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-700 flex-shrink-0" />
-              <span className={language === 'en' ? 'text-teal-900 font-bold' : 'text-slate-400 font-normal'}>
+              <span className={language === 'en' ? 'text-teal-900 font-bold' : 'text-slate-600 font-semibold'}>
                 EN
               </span>
-              <span className="text-slate-300 font-light">|</span>
-              <span className={language === 'ur' ? 'text-teal-900 font-bold font-arabic' : 'text-slate-400 font-normal'}>
+              <span className="text-slate-400 font-normal" aria-hidden="true">|</span>
+              <span className={language === 'ur' ? 'text-teal-900 font-bold font-arabic' : 'text-slate-600 font-semibold font-arabic'}>
                 اردو
               </span>
             </button>
@@ -246,57 +202,39 @@ function AppContent() {
         {/* All 9 Calculators Aligned in Clean Full-Width Container */}
         <main className="w-full min-w-0 space-y-6 sm:space-y-7 pb-8">
           <section id="calc-1" className="scroll-mt-24 sm:scroll-mt-28">
-            <Suspense fallback={<CalculatorSkeleton />}>
-              <ChildAgeCalculator />
-            </Suspense>
+            <ChildAgeCalculator />
           </section>
 
           <section id="calc-2" className="scroll-mt-24 sm:scroll-mt-28">
-            <Suspense fallback={<CalculatorSkeleton />}>
-              <VaccineDemandCalculator />
-            </Suspense>
+            <VaccineDemandCalculator />
           </section>
 
           <section id="calc-3" className="scroll-mt-24 sm:scroll-mt-28">
-            <Suspense fallback={<CalculatorSkeleton />}>
-              <VaccineWastageCalculator />
-            </Suspense>
+            <VaccineWastageCalculator />
           </section>
 
           <section id="calc-4" className="scroll-mt-24 sm:scroll-mt-28">
-            <Suspense fallback={<CalculatorSkeleton />}>
-              <NACoverageCalculator />
-            </Suspense>
+            <NACoverageCalculator />
           </section>
 
           <section id="calc-5" className="scroll-mt-24 sm:scroll-mt-28">
-            <Suspense fallback={<CalculatorSkeleton />}>
-              <RefusalCalculator />
-            </Suspense>
+            <RefusalCalculator />
           </section>
 
           <section id="calc-6" className="scroll-mt-24 sm:scroll-mt-28">
-            <Suspense fallback={<CalculatorSkeleton />}>
-              <MissedChildrenCoverageCalculator />
-            </Suspense>
+            <MissedChildrenCoverageCalculator />
           </section>
 
           <section id="calc-7" className="scroll-mt-24 sm:scroll-mt-28">
-            <Suspense fallback={<CalculatorSkeleton />}>
-              <CampaignCoverageCalculator />
-            </Suspense>
+            <CampaignCoverageCalculator />
           </section>
 
           <section id="calc-8" className="scroll-mt-24 sm:scroll-mt-28">
-            <Suspense fallback={<CalculatorSkeleton />}>
-              <DailyCatchUpCalculator />
-            </Suspense>
+            <DailyCatchUpCalculator />
           </section>
 
           <section id="calc-9" className="scroll-mt-24 sm:scroll-mt-28">
-            <Suspense fallback={<CalculatorSkeleton />}>
-              <Under5Calculator />
-            </Suspense>
+            <Under5Calculator />
           </section>
         </main>
       </div>

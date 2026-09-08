@@ -14,57 +14,58 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
   const strings = t.vaccineWastage;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
-  const [dosesIssued, setDosesIssued] = useState<string>('1000');
-  const [dosesAdministered, setDosesAdministered] = useState<string>('950');
+  const [vialsIssued, setVialsIssued] = useState<string>('50');
+  const [childrenVaccinated, setChildrenVaccinated] = useState<string>('950');
   const [result, setResult] = useState<{
-    issued: number;
-    administered: number;
+    vials: number;
+    totalDoses: number;
+    vaccinated: number;
     wasted: number;
     wastagePercent: number;
-    vialsEquivalent: number;
   } | null>(() => ({
-    issued: 1000,
-    administered: 950,
+    vials: 50,
+    totalDoses: 1000,
+    vaccinated: 950,
     wasted: 50,
     wastagePercent: 5.0,
-    vialsEquivalent: 50,
   }));
   const [error, setError] = useState<string>('');
 
   const calculate = () => {
     setError('');
-    const issued = Number(dosesIssued.replace(/,/g, ''));
-    const administered = Number(dosesAdministered.replace(/,/g, ''));
+    const vials = Number(vialsIssued.replace(/,/g, ''));
+    const vaccinated = Number(childrenVaccinated.replace(/,/g, ''));
 
-    if (isNaN(issued) || issued <= 0) {
-      setError(isUrdu ? 'براہ کرم جاری کردہ درست خوراکیں درج کریں (> 0)' : 'Please enter valid doses issued (> 0)');
+    if (isNaN(vials) || vials <= 0) {
+      setError(isUrdu ? 'براہ کرم جاری کردہ درست وائلز درج کریں (> 0)' : 'Please enter valid vials issued (> 0)');
       triggerError();
       return;
     }
-    if (isNaN(administered) || administered < 0) {
-      setError(isUrdu ? 'براہ کرم دی گئی درست خوراکیں درج کریں (≥ 0)' : 'Please enter valid doses administered (≥ 0)');
+    if (isNaN(vaccinated) || vaccinated < 0) {
+      setError(isUrdu ? 'براہ کرم ویکسین کیے گئے درست بچے درج کریں (≥ 0)' : 'Please enter valid children vaccinated (≥ 0)');
       triggerError();
       return;
     }
-    if (administered > issued) {
+    const totalDosesSupplied = vials * 20;
+    if (vaccinated > totalDosesSupplied) {
       setError(
         isUrdu
-          ? `دی گئی خوراکیں (${administered}) جاری کردہ خوراکوں (${issued}) سے زیادہ نہیں ہو سکتیں`
-          : `Administered doses (${administered}) cannot exceed issued doses (${issued})`
+          ? `ویکسین شدہ بچے (${vaccinated}) کل جاری کردہ خوراکوں (${totalDosesSupplied.toLocaleString()} از ${vials} وائلز) سے زیادہ نہیں ہو سکتے`
+          : `Children vaccinated (${vaccinated.toLocaleString()}) cannot exceed total doses issued (${totalDosesSupplied.toLocaleString()} from ${vials} vials)`
       );
       triggerError();
       return;
     }
 
     try {
-      const wasted = issued - administered;
-      const pct = Number(((wasted / issued) * 100).toFixed(1));
+      const wasted = totalDosesSupplied - vaccinated;
+      const pct = Number(((wasted / totalDosesSupplied) * 100).toFixed(1));
       setResult({
-        issued,
-        administered,
+        vials,
+        totalDoses: totalDosesSupplied,
+        vaccinated,
         wasted,
         wastagePercent: pct,
-        vialsEquivalent: Math.ceil(issued / 20),
       });
       triggerFeedback('calculate');
     } catch (err: unknown) {
@@ -76,8 +77,8 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
   };
 
   const handleReset = () => {
-    setDosesIssued('');
-    setDosesAdministered('');
+    setVialsIssued('');
+    setChildrenVaccinated('');
     setResult(null);
     setError('');
     triggerReset();
@@ -113,24 +114,25 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label htmlFor="wastage-issued-input" className="block text-xs font-semibold text-slate-700">
-                    {isUrdu ? 'جاری کردہ کل خوراکیں (Doses Issued)' : 'Doses Issued'}
+                  <label htmlFor="wastage-vials-input" className="block text-xs font-semibold text-slate-700">
+                    {isUrdu ? 'جاری کردہ وائلز (Vials Issued)' : 'Vials Issued'}
                   </label>
-                  {dosesIssued && Number(dosesIssued) > 0 && (
+                  {vialsIssued && Number(vialsIssued) > 0 && (
                     <span className="text-[10px] font-mono text-teal-700 font-semibold" dir="ltr">
-                      ≈{Math.ceil(Number(dosesIssued) / 20)} vials
+                      = {(Number(vialsIssued) * 20).toLocaleString()} doses
                     </span>
                   )}
                 </div>
                 <input
-                  id="wastage-issued-input"
+                  id="wastage-vials-input"
                   type="number"
+                  aria-label={isUrdu ? 'جاری کردہ وائلز (Vials Issued)' : 'Vials Issued'}
                   min="1"
                   inputMode="numeric"
-                  placeholder="e.g. 1000"
-                  value={dosesIssued}
+                  placeholder="e.g. 50"
+                  value={vialsIssued}
                   onChange={(e) => {
-                    setDosesIssued(e.target.value);
+                    setVialsIssued(e.target.value);
                     setError('');
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && calculate()}
@@ -140,20 +142,21 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label htmlFor="wastage-administered-input" className="block text-xs font-semibold text-slate-700">
-                    {isUrdu ? 'استعمال شدہ خوراکیں (Doses Given)' : 'Doses Administered'}
+                  <label htmlFor="wastage-vaccinated-input" className="block text-xs font-semibold text-slate-700">
+                    {isUrdu ? 'ویکسین کیے گئے بچے (Children Vaccinated)' : 'Children Vaccinated'}
                   </label>
-                  <span className="text-[11px] text-slate-500 font-medium">{isUrdu ? 'ویکسین شدہ' : 'Vaccinated'}</span>
+                  <span className="text-[11px] text-slate-500 font-medium">{isUrdu ? '2 قطرے فی بچہ' : '2 drops/child'}</span>
                 </div>
                 <input
-                  id="wastage-administered-input"
+                  id="wastage-vaccinated-input"
                   type="number"
+                  aria-label={isUrdu ? 'ویکسین کیے گئے بچے (Children Vaccinated)' : 'Children Vaccinated'}
                   min="0"
                   inputMode="numeric"
                   placeholder="e.g. 950"
-                  value={dosesAdministered}
+                  value={childrenVaccinated}
                   onChange={(e) => {
-                    setDosesAdministered(e.target.value);
+                    setChildrenVaccinated(e.target.value);
                     setError('');
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && calculate()}
@@ -261,21 +264,21 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
               {/* Supporting metrics */}
               <div className="saas-result-cell p-2.5 grid grid-cols-3 gap-2 text-xs text-slate-300 mt-2">
                 <div>
-                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'جاری شدہ' : 'Issued'}</span>
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'جاری وائلز' : 'Vials Issued'}</span>
                   <span className="font-mono text-slate-200 font-bold text-xs">
-                    {result !== null ? result.issued.toLocaleString() : '—'}
+                    {result !== null ? `${result.vials.toLocaleString()} (${result.totalDoses.toLocaleString()})` : '—'}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'ویکسین شدہ' : 'Given'}</span>
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'ویکسین شدہ' : 'Vaccinated'}</span>
                   <span className="font-mono text-teal-300 font-bold text-xs">
-                    {result !== null ? result.administered.toLocaleString() : '—'}
+                    {result !== null ? result.vaccinated.toLocaleString() : '—'}
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'وائلز برابر' : 'Vials'}</span>
-                  <span className="font-mono text-emerald-300 font-bold text-xs">
-                    {result !== null ? `≈${result.vialsEquivalent}` : '—'}
+                  <span className="block text-slate-400 text-[10px] font-medium">{isUrdu ? 'ضائع خوراکیں' : 'Wasted'}</span>
+                  <span className="font-mono text-amber-300 font-bold text-xs">
+                    {result !== null ? result.wasted.toLocaleString() : '—'}
                   </span>
                 </div>
               </div>

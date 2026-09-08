@@ -16,7 +16,7 @@
     />
     <meta name="author" content="National Emergency Operations Centre (NEOC) & EPI Operations" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-    <link rel="canonical" href="https://polio-calculator.web.app/" />
+    <link rel="canonical" href="https://asfandateem-sketch.github.io/Poliocalculator/" />
 
     <!-- Open Graph (OG) Protocol for Social & Search Snippets -->
     <meta property="og:site_name" content="Polio Campaign Calculator Suite" />
@@ -64,9 +64,9 @@
       "@graph": [
         {
           "@type": "WebApplication",
-          "@id": "https://polio-calculator.web.app/#webapp",
+          "@id": "https://asfandateem-sketch.github.io/Poliocalculator/#webapp",
           "name": "Polio Campaign Calculator",
-          "url": "https://polio-calculator.web.app/",
+          "url": "https://asfandateem-sketch.github.io/Poliocalculator/",
           "applicationCategory": "HealthApplication",
           "operatingSystem": "All (Web, PWA, iOS, Android)",
           "softwareVersion": "2.4.0",
@@ -86,8 +86,8 @@
         },
         {
           "@type": "MedicalWebPage",
-          "@id": "https://polio-calculator.web.app/#medicalpage",
-          "url": "https://polio-calculator.web.app/",
+          "@id": "https://asfandateem-sketch.github.io/Poliocalculator/#medicalpage",
+          "url": "https://asfandateem-sketch.github.io/Poliocalculator/",
           "name": "Polio Campaign Calculator — WHO, UNICEF & NEOC Field Standards",
           "headline": "Field Operational Calculators for Polio Eradication Campaigns",
           "audience": {
@@ -107,7 +107,7 @@
         },
         {
           "@type": "FAQPage",
-          "@id": "https://polio-calculator.web.app/#faq",
+          "@id": "https://asfandateem-sketch.github.io/Poliocalculator/#faq",
           "mainEntity": [
             {
               "@type": "Question",
@@ -167,11 +167,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Noto+Naskh+Arabic:wght@500;700&family=Noto+Nastaliq+Urdu:wght@500;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
-    />
-    <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Noto+Naskh+Arabic:wght@500;700&family=Noto+Nastaliq+Urdu:wght@500;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
       media="print"
@@ -184,14 +179,28 @@
       />
     </noscript>
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZEQKRE18VY"></script>
+    <!-- Google tag (gtag.js) - Deferred asynchronously to avoid blocking FCP / LCP -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-ZEQKRE18VY');
+
+      function loadAnalytics() {
+        if (window.__gtagLoaded) return;
+        window.__gtagLoaded = true;
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-ZEQKRE18VY';
+        document.head.appendChild(s);
+      }
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadAnalytics, { timeout: 2500 });
+      } else {
+        window.addEventListener('load', function() {
+          setTimeout(loadAnalytics, 1000);
+        });
+      }
     </script>
   </head>
   <body class="bg-slate-50 text-slate-900 antialiased selection:bg-teal-100 selection:text-teal-900">

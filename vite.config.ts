@@ -10,33 +10,29 @@ export default defineConfig(({ command, mode }) => {
   return {
     base: isProduction ? '/Poliocalculator/' : '/',
 
-  build: {
-    target: 'es2020',
-    cssCodeSplit: true,
-    chunkSizeWarningLimit: 600,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react-dom') || id.includes('react/') || id.includes('scheduler')) {
-              return 'vendor-react';
+    build: {
+      target: 'es2020',
+      cssCodeSplit: true,
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              return 'vendor';
             }
-            if (id.includes('lucide-react')) {
-              return 'vendor-icons';
-            }
-          }
+          },
         },
       },
     },
-  },
 
-  plugins: [
-    react(),
-    tailwindcss(),
+    plugins: [
+      react(),
+      tailwindcss(),
 
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      VitePWA({
+        registerType: 'autoUpdate',
+        injectRegister: 'script-defer',
+        includeAssets: ['icon.svg'],
 
       manifest: {
         id: '/Poliocalculator/',

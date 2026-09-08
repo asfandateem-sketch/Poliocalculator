@@ -101,6 +101,7 @@ export const Under5Calculator: React.FC<Props> = () => {
                 <div className="mb-1.5">
                   <InfoTooltip
                     id="u5-pop"
+                    htmlFor="u5-pop-input"
                     label={strings.totalPopLabel}
                     formula={strings.totalPopTooltip.formula}
                     fieldRule={strings.totalPopTooltip.fieldRule}
@@ -111,6 +112,7 @@ export const Under5Calculator: React.FC<Props> = () => {
                 <input
                   id="u5-pop-input"
                   type="number"
+                  aria-label={strings.totalPopLabel}
                   min="0"
                   inputMode="numeric"
                   placeholder="e.g. 50000"
@@ -128,6 +130,7 @@ export const Under5Calculator: React.FC<Props> = () => {
                 <div className="mb-1.5">
                   <InfoTooltip
                     id="u5-pct"
+                    htmlFor="u5-pct-input"
                     label={strings.under5PctLabel}
                     formula={strings.under5PctTooltip.formula}
                     fieldRule={strings.under5PctTooltip.fieldRule}
@@ -139,6 +142,7 @@ export const Under5Calculator: React.FC<Props> = () => {
                   <input
                     id="u5-pct-input"
                     type="number"
+                    aria-label={strings.under5PctLabel}
                     min="0"
                     max="100"
                     step="0.1"
