@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { TrendingUp, RotateCcw, Package, Droplet } from 'lucide-react';
 import { calculateDailyCatchUp, DailyCatchUpResult } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
@@ -9,7 +9,7 @@ interface Props {
   compact?: boolean;
 }
 
-export const DailyCatchUpCalculator: React.FC<Props> = () => {
+export const DailyCatchUpCalculator: React.FC<Props> = React.memo(() => {
   const { isUrdu, t } = useLanguage();
   const strings = t.dailyCatchUp;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
@@ -26,7 +26,7 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
   });
   const [error, setError] = useState<string>('');
 
-  const calculate = () => {
+  const calculate = useCallback(() => {
     setError('');
     const target = Number(totalTarget.replace(/,/g, ''));
     const vac = Number(alreadyVaccinated.replace(/,/g, ''));
@@ -58,16 +58,37 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
       setResult(null);
       triggerError();
     }
-  };
+  }, [totalTarget, alreadyVaccinated, daysRemaining, isUrdu, triggerError, triggerFeedback]);
 
-  const handleReset = () => {
+  const handleTargetChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setTotalTarget(e.target.value);
+    setError('');
+  }, []);
+
+  const handleVaccinatedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setAlreadyVaccinated(e.target.value);
+    setError('');
+  }, []);
+
+  const handleDaysChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setDaysRemaining(e.target.value);
+    setError('');
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      calculate();
+    }
+  }, [calculate]);
+
+  const handleReset = useCallback(() => {
     setTotalTarget('');
     setAlreadyVaccinated('');
     setDaysRemaining('');
     setResult(null);
     setError('');
     triggerReset();
-  };
+  }, [triggerReset]);
 
   return (
     <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
@@ -117,11 +138,8 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="e.g. 5000"
                   value={totalTarget}
-                  onChange={(e) => {
-                    setTotalTarget(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handleTargetChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3"
                 />
               </div>
@@ -146,11 +164,8 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="e.g. 2000"
                   value={alreadyVaccinated}
-                  onChange={(e) => {
-                    setAlreadyVaccinated(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handleVaccinatedChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3"
                 />
               </div>
@@ -176,11 +191,8 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="e.g. 3"
                   value={daysRemaining}
-                  onChange={(e) => {
-                    setDaysRemaining(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handleDaysChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3"
                 />
               </div>
@@ -291,4 +303,4 @@ export const DailyCatchUpCalculator: React.FC<Props> = () => {
       </div>
     </div>
   );
-};
+});

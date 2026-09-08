@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Users, RotateCcw } from 'lucide-react';
 import { calculateUnder5Children } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
@@ -9,7 +9,7 @@ interface Props {
   compact?: boolean;
 }
 
-export const Under5Calculator: React.FC<Props> = () => {
+export const Under5Calculator: React.FC<Props> = React.memo(() => {
   const { isUrdu, t } = useLanguage();
   const strings = t.under5Population;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
@@ -27,7 +27,7 @@ export const Under5Calculator: React.FC<Props> = () => {
   }));
   const [error, setError] = useState<string>('');
 
-  const calculate = () => {
+  const calculate = useCallback(() => {
     setError('');
     const pop = Number(totalPop.replace(/,/g, ''));
     const pct = Number(under5Pct);
@@ -59,15 +59,31 @@ export const Under5Calculator: React.FC<Props> = () => {
       setError(msg);
       triggerError();
     }
-  };
+  }, [totalPop, under5Pct, isUrdu, triggerError, triggerFeedback]);
 
-  const handleReset = () => {
+  const handlePopChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setTotalPop(e.target.value);
+    setError('');
+  }, []);
+
+  const handlePctChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setUnder5Pct(e.target.value);
+    setError('');
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      calculate();
+    }
+  }, [calculate]);
+
+  const handleReset = useCallback(() => {
     setTotalPop('');
     setUnder5Pct('13.5');
     setResult(null);
     setError('');
     triggerReset();
-  };
+  }, [triggerReset]);
 
   return (
     <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
@@ -117,11 +133,8 @@ export const Under5Calculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="e.g. 50000"
                   value={totalPop}
-                  onChange={(e) => {
-                    setTotalPop(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handlePopChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3.5"
                 />
               </div>
@@ -149,11 +162,8 @@ export const Under5Calculator: React.FC<Props> = () => {
                     inputMode="decimal"
                     placeholder="15"
                     value={under5Pct}
-                    onChange={(e) => {
-                      setUnder5Pct(e.target.value);
-                      setError('');
-                    }}
-                    onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                    onChange={handlePctChange}
+                    onKeyDown={handleKeyDown}
                     className="saas-input w-full pl-3.5 pr-8"
                   />
                   <span className="absolute right-3 top-3 text-xs text-slate-500 font-bold pointer-events-none">
@@ -262,4 +272,4 @@ export const Under5Calculator: React.FC<Props> = () => {
       </div>
     </div>
   );
-};
+});

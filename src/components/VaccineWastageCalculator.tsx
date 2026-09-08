@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { AlertCircle, RotateCcw } from 'lucide-react';
 import { calculateVaccineWastageFromVials, VialWastageResult, BOPV_CONSTANTS } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
@@ -9,7 +9,7 @@ interface Props {
   compact?: boolean;
 }
 
-export const VaccineWastageCalculator: React.FC<Props> = () => {
+export const VaccineWastageCalculator: React.FC<Props> = React.memo(() => {
   const { isUrdu, t } = useLanguage();
   const strings = t.vaccineWastage;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
@@ -31,7 +31,7 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
   }));
   const [error, setError] = useState<string>('');
 
-  const calculate = () => {
+  const calculate = useCallback(() => {
     setError('');
     const vials = Number(vialsIssued.replace(/,/g, ''));
     const vaccinated = Number(childrenVaccinated.replace(/,/g, ''));
@@ -74,15 +74,31 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
       setResult(null);
       triggerError();
     }
-  };
+  }, [vialsIssued, childrenVaccinated, isUrdu, triggerError, triggerFeedback]);
 
-  const handleReset = () => {
+  const handleVialsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setVialsIssued(e.target.value);
+    setError('');
+  }, []);
+
+  const handleVaccinatedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setChildrenVaccinated(e.target.value);
+    setError('');
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      calculate();
+    }
+  }, [calculate]);
+
+  const handleReset = useCallback(() => {
     setVialsIssued('');
     setChildrenVaccinated('');
     setResult(null);
     setError('');
     triggerReset();
-  };
+  }, [triggerReset]);
 
   return (
     <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
@@ -131,11 +147,8 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="e.g. 50"
                   value={vialsIssued}
-                  onChange={(e) => {
-                    setVialsIssued(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handleVialsChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3.5"
                 />
               </div>
@@ -155,11 +168,8 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="e.g. 950"
                   value={childrenVaccinated}
-                  onChange={(e) => {
-                    setChildrenVaccinated(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handleVaccinatedChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3.5"
                 />
               </div>
@@ -288,4 +298,4 @@ export const VaccineWastageCalculator: React.FC<Props> = () => {
       </div>
     </div>
   );
-};
+});

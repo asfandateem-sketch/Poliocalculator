@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePWA } from './usePWA';
 import { LanguageProvider, useLanguage } from './LanguageContext';
 import { triggerHaptic } from './haptics';
@@ -70,7 +70,7 @@ function AppContent() {
     };
   }, []);
 
-  const scrollToCalculator = (id: string) => {
+  const scrollToCalculator = useCallback((id: string) => {
     triggerHaptic('light');
     const el = document.getElementById(id);
     if (el) {
@@ -98,12 +98,17 @@ function AppContent() {
         isProgrammaticScrollRef.current = false;
       }, 750);
     }
-  };
+  }, []);
 
-  const scrollToTop = () => {
+  const scrollToTop = useCallback(() => {
     triggerHaptic('light');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
+
+  const handleToggleLanguage = useCallback(() => {
+    triggerHaptic('light');
+    toggleLanguage();
+  }, [toggleLanguage]);
 
   return (
     <div
@@ -139,10 +144,7 @@ function AppContent() {
             <button
               id="language-toggle-btn"
               type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                toggleLanguage();
-              }}
+              onClick={handleToggleLanguage}
               aria-label={isUrdu ? 'EN / اردو: Switch to English language' : 'EN / اردو: اردو زبان منتخب کریں'}
               title={isUrdu ? 'Switch to English' : 'اردو میں تبدیل کریں'}
               className="saas-btn-secondary inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold cursor-pointer"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { UserCheck, RotateCcw, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
@@ -8,7 +8,7 @@ interface Props {
   compact?: boolean;
 }
 
-export const RefusalCalculator: React.FC<Props> = () => {
+export const RefusalCalculator: React.FC<Props> = React.memo(() => {
   const { isUrdu, t } = useLanguage();
   const strings = t.refusalCoverage;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
@@ -28,7 +28,7 @@ export const RefusalCalculator: React.FC<Props> = () => {
   }));
   const [error, setError] = useState<string>('');
 
-  const calculate = () => {
+  const calculate = useCallback(() => {
     setError('');
     const rep = Number(reportedRefusals.replace(/,/g, ''));
     const cov = Number(coveredRefusals.replace(/,/g, ''));
@@ -70,15 +70,31 @@ export const RefusalCalculator: React.FC<Props> = () => {
       setResult(null);
       triggerError();
     }
-  };
+  }, [reportedRefusals, coveredRefusals, isUrdu, triggerError, triggerFeedback]);
 
-  const handleReset = () => {
+  const handleReportedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setReportedRefusals(e.target.value);
+    setError('');
+  }, []);
+
+  const handleCoveredChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCoveredRefusals(e.target.value);
+    setError('');
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      calculate();
+    }
+  }, [calculate]);
+
+  const handleReset = useCallback(() => {
     setReportedRefusals('');
     setCoveredRefusals('');
     setResult(null);
     setError('');
     triggerReset();
-  };
+  }, [triggerReset]);
 
   return (
     <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
@@ -128,11 +144,8 @@ export const RefusalCalculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="e.g. 50"
                   value={reportedRefusals}
-                  onChange={(e) => {
-                    setReportedRefusals(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handleReportedChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3.5"
                 />
               </div>
@@ -157,11 +170,8 @@ export const RefusalCalculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="e.g. 25"
                   value={coveredRefusals}
-                  onChange={(e) => {
-                    setCoveredRefusals(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handleCoveredChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3.5"
                 />
               </div>
@@ -272,4 +282,4 @@ export const RefusalCalculator: React.FC<Props> = () => {
       </div>
     </div>
   );
-};
+});

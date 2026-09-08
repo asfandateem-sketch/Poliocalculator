@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import {
   CALCULATOR_ITEMS,
   getLocalizedCalcName,
@@ -22,7 +22,7 @@ interface TopCalculatorNavigationProps {
   onSelect: (id: string) => void;
 }
 
-export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = ({
+export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = React.memo(({
   activeSection,
   onSelect,
 }) => {
@@ -33,7 +33,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = (
   const [isOverviewOpen, setIsOverviewOpen] = useState(false);
 
   // Check scroll position to show/hide navigation arrows
-  const checkScrollArrows = () => {
+  const checkScrollArrows = useCallback(() => {
     if (!scrollContainerRef.current) return;
     const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
     
@@ -47,7 +47,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = (
       setShowLeftArrow(scrollLeft > 12);
       setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 12);
     }
-  };
+  }, [isUrdu]);
 
   useEffect(() => {
     checkScrollArrows();
@@ -62,7 +62,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = (
       }
       window.removeEventListener('resize', checkScrollArrows);
     };
-  }, [isUrdu]);
+  }, [checkScrollArrows]);
 
   // Horizontally center the active tab inside the ribbon container ONLY (zero window scroll interference)
   useEffect(() => {
@@ -95,7 +95,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = (
     }
   }, [activeSection]);
 
-  const handleScroll = (direction: 'left' | 'right') => {
+  const handleScroll = useCallback((direction: 'left' | 'right') => {
     triggerHaptic('light');
     if (!scrollContainerRef.current) return;
     const scrollAmount = 260;
@@ -105,18 +105,31 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = (
       left: isUrdu ? -delta : delta,
       behavior: 'smooth',
     });
-  };
+  }, [isUrdu]);
 
-  const handleSelectCalculator = (id: string) => {
+  const handleSelectCalculator = useCallback((id: string) => {
     triggerHaptic('medium');
     setIsOverviewOpen(false);
     onSelect(id);
-  };
+  }, [onSelect]);
+
+  const handleOpenOverview = useCallback(() => {
+    triggerHaptic('light');
+    setIsOverviewOpen(true);
+  }, []);
+
+  const handleCloseOverview = useCallback(() => {
+    setIsOverviewOpen(false);
+  }, []);
 
   // Find active calculator item
-  const currentCalc =
-    CALCULATOR_ITEMS.find((c) => c.id === activeSection) || CALCULATOR_ITEMS[0];
-  const currentCalcName = getLocalizedCalcName(currentCalc, t, isUrdu);
+  const currentCalc = useMemo(() => {
+    return CALCULATOR_ITEMS.find((c) => c.id === activeSection) || CALCULATOR_ITEMS[0];
+  }, [activeSection]);
+
+  const currentCalcName = useMemo(() => {
+    return getLocalizedCalcName(currentCalc, t, isUrdu);
+  }, [currentCalc, t, isUrdu]);
 
   return (
     <nav
@@ -151,10 +164,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = (
             <button
               id="top-nav-overview-btn"
               type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                setIsOverviewOpen(true);
-              }}
+              onClick={handleOpenOverview}
               aria-expanded={isOverviewOpen}
               aria-controls="calculator-overview-modal"
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100/80 border border-teal-200/80 transition cursor-pointer"
@@ -311,7 +321,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = (
 
               <button
                 type="button"
-                onClick={() => setIsOverviewOpen(false)}
+                onClick={handleCloseOverview}
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
                 aria-label={isUrdu ? 'بند کریں' : 'Close'}
               >
@@ -404,7 +414,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = (
               </div>
               <button
                 type="button"
-                onClick={() => setIsOverviewOpen(false)}
+                onClick={handleCloseOverview}
                 className="saas-btn-secondary px-3.5 py-1 text-xs font-semibold cursor-pointer"
               >
                 {isUrdu ? 'بند کریں' : 'Close'}
@@ -415,4 +425,4 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = (
       )}
     </nav>
   );
-};
+});

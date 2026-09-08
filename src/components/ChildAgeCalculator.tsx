@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Calendar, RotateCcw, CheckCircle2, XCircle } from 'lucide-react';
 import { calculateChildAge, ChildAgeResult } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
@@ -9,30 +9,31 @@ interface Props {
   compact?: boolean;
 }
 
-export const ChildAgeCalculator: React.FC<Props> = () => {
+export const ChildAgeCalculator: React.FC<Props> = React.memo(() => {
   const { isUrdu, t } = useLanguage();
   const strings = t.childAge;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
 
-  const today = new Date();
-  const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-  // Default sample DOB for field workers: 2 years ago today
-  const defaultDob = `${today.getFullYear() - 2}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const { todayString, defaultDob } = useMemo(() => {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const defaultDobStr = `${today.getFullYear() - 2}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    return { todayString: todayStr, defaultDob: defaultDobStr };
+  }, []);
 
   const [campaignDate, setCampaignDate] = useState<string>(todayString);
   const [dob, setDob] = useState<string>(defaultDob);
   const [result, setResult] = useState<ChildAgeResult | null>(() => {
     try {
       const [y, m, d] = defaultDob.split('-').map(Number);
-      return calculateChildAge(new Date(y, m - 1, d), today);
+      return calculateChildAge(new Date(y, m - 1, d), new Date());
     } catch {
       return null;
     }
   });
   const [error, setError] = useState<string>('');
 
-  const performCalculation = (dobVal: string, campDateVal: string = campaignDate) => {
+  const performCalculation = useCallback((dobVal: string, campDateVal: string = campaignDate) => {
     setError('');
     if (!dobVal) {
       setError(isUrdu ? 'براہ کرم درست تاریخِ پیدائش منتخب کریں' : 'Please select a valid date of birth');
@@ -70,9 +71,10 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
       setResult(null);
       triggerError();
     }
-  };
+  }, [campaignDate, isUrdu, triggerError, triggerFeedback]);
 
-  const handleDateChange = (newDob: string) => {
+  const handleDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDob = e.target.value;
     setDob(newDob);
     if (newDob) {
       performCalculation(newDob, campaignDate);
@@ -81,22 +83,33 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
       setError('');
       triggerReset();
     }
-  };
+  }, [campaignDate, performCalculation, triggerReset]);
 
-  const handleCampaignDateChange = (newCampDate: string) => {
+  const handleCampaignDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newCampDate = e.target.value;
     setCampaignDate(newCampDate);
     if (dob) {
       performCalculation(dob, newCampDate);
     }
-  };
+  }, [dob, performCalculation]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setCampaignDate(todayString);
     setDob('');
     setResult(null);
     setError('');
     triggerReset();
-  };
+  }, [todayString, triggerReset]);
+
+  const handleCalculateClick = useCallback(() => {
+    performCalculation(dob, campaignDate);
+  }, [dob, campaignDate, performCalculation]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      performCalculation(dob, campaignDate);
+    }
+  }, [dob, campaignDate, performCalculation]);
 
   return (
     <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
@@ -135,7 +148,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
                   type="date"
                   aria-label={isUrdu ? 'مہم کی تاریخ (Campaign Date)' : 'Campaign Date'}
                   value={campaignDate}
-                  onChange={(e) => handleCampaignDateChange(e.target.value)}
+                  onChange={handleCampaignDateChange}
                   className="saas-input w-full px-3.5 text-sm sm:text-base cursor-pointer"
                 />
               </div>
@@ -159,8 +172,8 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
                   aria-label={strings.dobLabel}
                   max={campaignDate || todayString}
                   value={dob}
-                  onChange={(e) => handleDateChange(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && performCalculation(dob, campaignDate)}
+                  onChange={handleDateChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3.5 text-sm sm:text-base cursor-pointer"
                 />
                 {error && (
@@ -174,7 +187,7 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
               <button
                 id="age-calc-btn"
                 type="button"
-                onClick={() => performCalculation(dob, campaignDate)}
+                onClick={handleCalculateClick}
                 className="saas-btn-primary flex-1 px-4 text-xs sm:text-sm min-h-[48px]"
               >
                 {strings.calculateBtn}
@@ -276,4 +289,4 @@ export const ChildAgeCalculator: React.FC<Props> = () => {
       </div>
     </div>
   );
-};
+});

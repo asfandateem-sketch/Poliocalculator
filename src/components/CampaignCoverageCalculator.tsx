@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Award, RotateCcw, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { calculateCoverage } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
@@ -9,7 +9,7 @@ interface Props {
   compact?: boolean;
 }
 
-export const CampaignCoverageCalculator: React.FC<Props> = () => {
+export const CampaignCoverageCalculator: React.FC<Props> = React.memo(() => {
   const { isUrdu, t } = useLanguage();
   const strings = t.campaignCoverage;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
@@ -22,7 +22,7 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
   const [remainingChildren, setRemainingChildren] = useState<number | null>(250);
   const [error, setError] = useState<string>('');
 
-  const calculate = () => {
+  const calculate = useCallback(() => {
     setError('');
     const target = Number(targetChildren.replace(/,/g, ''));
     const vaccinated = Number(vaccinatedChildren.replace(/,/g, ''));
@@ -50,9 +50,25 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
       setError(msg);
       triggerError();
     }
-  };
+  }, [targetChildren, vaccinatedChildren, isUrdu, triggerError, triggerFeedback]);
 
-  const handleReset = () => {
+  const handleTargetChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setTargetChildren(e.target.value);
+    setError('');
+  }, []);
+
+  const handleVaccinatedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setVaccinatedChildren(e.target.value);
+    setError('');
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      calculate();
+    }
+  }, [calculate]);
+
+  const handleReset = useCallback(() => {
     setTargetChildren('');
     setVaccinatedChildren('');
     setCoveragePct(null);
@@ -61,7 +77,7 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
     setRemainingChildren(null);
     setError('');
     triggerReset();
-  };
+  }, [triggerReset]);
 
   return (
     <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
@@ -111,11 +127,8 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="e.g. 5000"
                   value={targetChildren}
-                  onChange={(e) => {
-                    setTargetChildren(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handleTargetChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3.5"
                 />
               </div>
@@ -140,11 +153,8 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="e.g. 4750"
                   value={vaccinatedChildren}
-                  onChange={(e) => {
-                    setVaccinatedChildren(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handleVaccinatedChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3.5"
                 />
               </div>
@@ -283,4 +293,4 @@ export const CampaignCoverageCalculator: React.FC<Props> = () => {
       </div>
     </div>
   );
-};
+});

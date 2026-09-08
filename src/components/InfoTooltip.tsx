@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Info, X, Calculator } from 'lucide-react';
 
 export interface InfoTooltipProps {
@@ -17,7 +17,7 @@ export interface InfoTooltipProps {
   };
 }
 
-export const InfoTooltip: React.FC<InfoTooltipProps> = (props) => {
+export const InfoTooltip: React.FC<InfoTooltipProps> = React.memo((props) => {
   const label = props.data ? props.data.label : props.label || '';
   const formula = props.data ? props.data.formula : props.formula;
   const explanation = props.data ? props.data.explanation : props.explanation || '';
@@ -45,11 +45,15 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = (props) => {
     };
   }, [isOpen]);
 
-  const toggle = (e: React.MouseEvent) => {
+  const toggle = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsOpen(!isOpen);
-  };
+    setIsOpen((prev) => !prev);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+  }, []);
 
   return (
     <div ref={containerRef} className="relative inline-flex flex-col">
@@ -96,7 +100,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = (props) => {
             </div>
             <button
               type="button"
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
               className="text-slate-400 hover:text-white p-0.5 rounded-md hover:bg-slate-800 transition cursor-pointer"
               aria-label={isUrdu ? 'بند کریں' : 'Close'}
             >
@@ -136,7 +140,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = (props) => {
             <span>{isUrdu ? 'فیلڈ اسٹاف رہنمائی' : 'Field Staff Guidance'}</span>
             <button
               type="button"
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
               className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] px-2.5 py-1 rounded-md font-semibold cursor-pointer transition-colors"
             >
               {isUrdu ? 'ٹھیک ہے' : 'Got it'}
@@ -146,4 +150,4 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = (props) => {
       )}
     </div>
   );
-};
+});

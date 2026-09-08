@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ShieldAlert, RotateCcw, AlertTriangle } from 'lucide-react';
 import {
   calculateCombinedMissedChildren,
@@ -12,7 +12,7 @@ interface Props {
   compact?: boolean;
 }
 
-export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
+export const MissedChildrenCoverageCalculator: React.FC<Props> = React.memo(() => {
   const { isUrdu, t } = useLanguage();
   const strings = t.missedChildren;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
@@ -35,7 +35,7 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
 
   const [error, setError] = useState<string>('');
 
-  const calculate = () => {
+  const calculate = useCallback(() => {
     setError('');
 
     const repNA = Number(reportedNA.replace(/,/g, ''));
@@ -114,9 +114,35 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
       setResult(null);
       triggerError();
     }
-  };
+  }, [reportedNA, coveredNA, reportedRefusals, coveredRefusals, isUrdu, triggerError, triggerFeedback]);
 
-  const handleReset = () => {
+  const handleReportedNAChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setReportedNA(e.target.value);
+    setError('');
+  }, []);
+
+  const handleCoveredNAChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCoveredNA(e.target.value);
+    setError('');
+  }, []);
+
+  const handleReportedRefusalsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setReportedRefusals(e.target.value);
+    setError('');
+  }, []);
+
+  const handleCoveredRefusalsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCoveredRefusals(e.target.value);
+    setError('');
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      calculate();
+    }
+  }, [calculate]);
+
+  const handleReset = useCallback(() => {
     setReportedNA('');
     setCoveredNA('');
     setReportedRefusals('');
@@ -124,7 +150,7 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
     setResult(null);
     setError('');
     triggerReset();
-  };
+  }, [triggerReset]);
 
   return (
     <div
@@ -188,7 +214,8 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
                       inputMode="numeric"
                       min="0"
                       value={reportedNA}
-                      onChange={(e) => setReportedNA(e.target.value)}
+                      onChange={handleReportedNAChange}
+                      onKeyDown={handleKeyDown}
                       placeholder="0"
                       className="saas-input w-full px-3.5"
                     />
@@ -207,7 +234,8 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
                       inputMode="numeric"
                       min="0"
                       value={coveredNA}
-                      onChange={(e) => setCoveredNA(e.target.value)}
+                      onChange={handleCoveredNAChange}
+                      onKeyDown={handleKeyDown}
                       placeholder="0"
                       className="saas-input w-full px-3.5"
                     />
@@ -241,7 +269,8 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
                       inputMode="numeric"
                       min="0"
                       value={reportedRefusals}
-                      onChange={(e) => setReportedRefusals(e.target.value)}
+                      onChange={handleReportedRefusalsChange}
+                      onKeyDown={handleKeyDown}
                       placeholder="0"
                       className="saas-input w-full px-3.5"
                     />
@@ -260,7 +289,8 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
                       inputMode="numeric"
                       min="0"
                       value={coveredRefusals}
-                      onChange={(e) => setCoveredRefusals(e.target.value)}
+                      onChange={handleCoveredRefusalsChange}
+                      onKeyDown={handleKeyDown}
                       placeholder="0"
                       className="saas-input w-full px-3.5"
                     />
@@ -448,4 +478,4 @@ export const MissedChildrenCoverageCalculator: React.FC<Props> = () => {
       </div>
     </div>
   );
-};
+});

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Package, RotateCcw, Droplets } from 'lucide-react';
 import { calculateVaccineDemand } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
@@ -9,7 +9,7 @@ interface Props {
   compact?: boolean;
 }
 
-export const VaccineDemandCalculator: React.FC<Props> = () => {
+export const VaccineDemandCalculator: React.FC<Props> = React.memo(() => {
   const { isUrdu, t } = useLanguage();
   const strings = t.vaccineDemand;
   const { isCalculated, calculationKey, triggerFeedback, triggerReset, triggerError } = useCalculationFeedback();
@@ -25,7 +25,7 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
 
   const DOSES_PER_VIAL = 20;
 
-  const calculate = () => {
+  const calculate = useCallback(() => {
     setError('');
     const children = Number(targetChildren.replace(/,/g, ''));
     if (isNaN(children) || children < 0) {
@@ -58,9 +58,25 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
       setError(msg);
       triggerError();
     }
-  };
+  }, [targetChildren, bufferPct, isUrdu, triggerError, triggerFeedback]);
 
-  const handleReset = () => {
+  const handleTargetChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setTargetChildren(e.target.value);
+    setError('');
+  }, []);
+
+  const handleBufferChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setBufferPct(e.target.value);
+    setError('');
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      calculate();
+    }
+  }, [calculate]);
+
+  const handleReset = useCallback(() => {
     setTargetChildren('');
     setBufferPct('10');
     setVialsRequired(null);
@@ -70,7 +86,7 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
     setCoveredChildren(null);
     setError('');
     triggerReset();
-  };
+  }, [triggerReset]);
 
   return (
     <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
@@ -121,11 +137,8 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="e.g. 5000"
                   value={targetChildren}
-                  onChange={(e) => {
-                    setTargetChildren(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handleTargetChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3.5"
                 />
               </div>
@@ -151,11 +164,8 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
                   inputMode="numeric"
                   placeholder="10%"
                   value={bufferPct}
-                  onChange={(e) => {
-                    setBufferPct(e.target.value);
-                    setError('');
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && calculate()}
+                  onChange={handleBufferChange}
+                  onKeyDown={handleKeyDown}
                   className="saas-input w-full px-3.5"
                 />
               </div>
@@ -266,4 +276,4 @@ export const VaccineDemandCalculator: React.FC<Props> = () => {
       </div>
     </div>
   );
-};
+});
