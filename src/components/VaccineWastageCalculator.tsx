@@ -31,60 +31,80 @@ export const VaccineWastageCalculator: React.FC<Props> = React.memo(() => {
   }));
   const [error, setError] = useState<string>('');
 
-  const calculate = useCallback(() => {
-    setError('');
-    const vials = Number(vialsIssued.replace(/,/g, ''));
-    const vaccinated = Number(childrenVaccinated.replace(/,/g, ''));
+  const computeResult = useCallback((vialsStr: string, vacStr: string, isExplicitSubmit = false) => {
+    const trimmedVials = vialsStr.trim();
+    const trimmedVac = vacStr.trim();
+
+    if (trimmedVials === '' || trimmedVac === '') {
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'براہ کرم دونوں فیلڈز مکمل کریں' : 'Please enter both Vials Issued and Children Vaccinated');
+        triggerError();
+      } else {
+        setError('');
+      }
+      return;
+    }
+
+    const vials = Number(trimmedVials.replace(/,/g, ''));
+    const vaccinated = Number(trimmedVac.replace(/,/g, ''));
 
     if (isNaN(vials) || vials <= 0) {
-      setError(isUrdu ? 'براہ کرم جاری کردہ درست وائلز درج کریں (> 0)' : 'Please enter valid vials issued (> 0)');
-      triggerError();
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'براہ کرم جاری کردہ درست وائلز درج کریں (> 0)' : 'Please enter valid vials issued (> 0)');
+        triggerError();
+      }
       return;
     }
     if (isNaN(vaccinated) || vaccinated < 0) {
-      setError(isUrdu ? 'براہ کرم ویکسین کیے گئے درست بچے درج کریں (≥ 0)' : 'Please enter valid children vaccinated (≥ 0)');
-      triggerError();
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'براہ کرم ویکسین کیے گئے درست بچے درج کریں (≥ 0)' : 'Please enter valid children vaccinated (≥ 0)');
+        triggerError();
+      }
       return;
     }
     const totalDosesSupplied = vials * 20;
     if (vaccinated > totalDosesSupplied) {
-      setError(
-        isUrdu
-          ? `ویکسین شدہ بچے (${vaccinated}) کل جاری کردہ خوراکوں (${totalDosesSupplied.toLocaleString()} از ${vials} وائلز) سے زیادہ نہیں ہو سکتے`
-          : `Children vaccinated (${vaccinated.toLocaleString()}) cannot exceed total doses issued (${totalDosesSupplied.toLocaleString()} from ${vials} vials)`
-      );
-      triggerError();
+      if (isExplicitSubmit) {
+        setError(
+          isUrdu
+            ? `ویکسین شدہ بچے (${vaccinated}) کل جاری کردہ خوراکوں (${totalDosesSupplied.toLocaleString()} از ${vials} وائلز) سے زیادہ نہیں ہو سکتے`
+            : `Children vaccinated (${vaccinated.toLocaleString()}) cannot exceed total doses issued (${totalDosesSupplied.toLocaleString()} from ${vials} vials)`
+        );
+        triggerError();
+      }
       return;
     }
 
-    try {
-      const wasted = totalDosesSupplied - vaccinated;
-      const pct = Number(((wasted / totalDosesSupplied) * 100).toFixed(1));
-      setResult({
-        vials,
-        totalDoses: totalDosesSupplied,
-        vaccinated,
-        wasted,
-        wastagePercent: pct,
-      });
+    setError('');
+    const wasted = totalDosesSupplied - vaccinated;
+    const pct = Number(((wasted / totalDosesSupplied) * 100).toFixed(1));
+    setResult({
+      vials,
+      totalDoses: totalDosesSupplied,
+      vaccinated,
+      wasted,
+      wastagePercent: pct,
+    });
+    if (isExplicitSubmit) {
       triggerFeedback('calculate');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : isUrdu ? 'حسابی خرابی' : 'Invalid calculation parameters';
-      setError(msg);
-      setResult(null);
-      triggerError();
     }
-  }, [vialsIssued, childrenVaccinated, isUrdu, triggerError, triggerFeedback]);
+  }, [isUrdu, triggerError, triggerFeedback]);
+
+  const calculate = useCallback(() => {
+    computeResult(vialsIssued, childrenVaccinated, true);
+  }, [computeResult, vialsIssued, childrenVaccinated]);
 
   const handleVialsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setVialsIssued(e.target.value);
-    setError('');
-  }, []);
+    const val = e.target.value;
+    setVialsIssued(val);
+    computeResult(val, childrenVaccinated, false);
+  }, [childrenVaccinated, computeResult]);
 
   const handleVaccinatedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setChildrenVaccinated(e.target.value);
-    setError('');
-  }, []);
+    const val = e.target.value;
+    setChildrenVaccinated(val);
+    computeResult(vialsIssued, val, false);
+  }, [vialsIssued, computeResult]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {

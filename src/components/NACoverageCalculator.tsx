@@ -28,33 +28,46 @@ export const NACoverageCalculator: React.FC<Props> = React.memo(() => {
   }));
   const [error, setError] = useState<string>('');
 
-  const computeResult = useCallback((repStr: string, covStr: string, showPulse = false) => {
-    const rep = Number(repStr.replace(/,/g, ''));
-    const cov = Number(covStr.replace(/,/g, ''));
+  const computeResult = useCallback((repStr: string, covStr: string, isExplicitSubmit = false) => {
+    const trimmedRep = repStr.trim();
+    const trimmedCov = covStr.trim();
 
-    if (repStr.trim() === '' && covStr.trim() === '') {
-      setError('');
-      setResult(null);
+    if (trimmedRep === '' || trimmedCov === '') {
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'براہ کرم دونوں فیلڈز مکمل کریں' : 'Please enter both Reported NA and Covered NA children');
+        triggerError();
+      } else {
+        setError('');
+      }
       return;
     }
 
+    const rep = Number(trimmedRep.replace(/,/g, ''));
+    const cov = Number(trimmedCov.replace(/,/g, ''));
+
     if (isNaN(rep) || rep < 0) {
-      setError(isUrdu ? 'براہ کرم درست رپورٹ شدہ NA بچے درج کریں (≥ 0)' : 'Please enter valid reported NA children (≥ 0)');
-      triggerError();
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'براہ کرم درست رپورٹ شدہ NA بچے درج کریں (≥ 0)' : 'Please enter valid reported NA children (≥ 0)');
+        triggerError();
+      }
       return;
     }
     if (isNaN(cov) || cov < 0) {
-      setError(isUrdu ? 'براہ کرم درست کور شدہ NA بچے درج کریں (≥ 0)' : 'Please enter valid covered NA children (≥ 0)');
-      triggerError();
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'براہ کرم درست کور شدہ NA بچے درج کریں (≥ 0)' : 'Please enter valid covered NA children (≥ 0)');
+        triggerError();
+      }
       return;
     }
     if (cov > rep) {
-      setError(
-        isUrdu
-          ? `کور شدہ بچے (${cov}) رپورٹ شدہ NA بچوں (${rep}) سے زیادہ نہیں ہو سکتے`
-          : `Covered NA children (${cov}) cannot exceed reported NA children (${rep})`
-      );
-      triggerError();
+      if (isExplicitSubmit) {
+        setError(
+          isUrdu
+            ? `کور شدہ بچے (${cov}) رپورٹ شدہ NA بچوں (${rep}) سے زیادہ نہیں ہو سکتے`
+            : `Covered NA children (${cov}) cannot exceed reported NA children (${rep})`
+        );
+        triggerError();
+      }
       return;
     }
 
@@ -67,7 +80,7 @@ export const NACoverageCalculator: React.FC<Props> = React.memo(() => {
       remainingNA: remaining,
       coverageRate: rate,
     });
-    if (showPulse) {
+    if (isExplicitSubmit) {
       triggerFeedback('calculate');
     }
   }, [isUrdu, triggerError, triggerFeedback]);

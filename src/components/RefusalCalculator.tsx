@@ -28,33 +28,46 @@ export const RefusalCalculator: React.FC<Props> = React.memo(() => {
   }));
   const [error, setError] = useState<string>('');
 
-  const computeResult = useCallback((repStr: string, covStr: string, showPulse = false) => {
-    const rep = Number(repStr.replace(/,/g, ''));
-    const cov = Number(covStr.replace(/,/g, ''));
+  const computeResult = useCallback((repStr: string, covStr: string, isExplicitSubmit = false) => {
+    const trimmedRep = repStr.trim();
+    const trimmedCov = covStr.trim();
 
-    if (repStr.trim() === '' && covStr.trim() === '') {
-      setError('');
-      setResult(null);
+    if (trimmedRep === '' || trimmedCov === '') {
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'براہ کرم دونوں فیلڈز مکمل کریں' : 'Please enter both Reported and Covered Refusals');
+        triggerError();
+      } else {
+        setError('');
+      }
       return;
     }
 
+    const rep = Number(trimmedRep.replace(/,/g, ''));
+    const cov = Number(trimmedCov.replace(/,/g, ''));
+
     if (isNaN(rep) || rep < 0) {
-      setError(isUrdu ? 'براہ کرم درست رپورٹ شدہ انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid reported refusals (≥ 0)');
-      triggerError();
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'براہ کرم درست رپورٹ شدہ انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid reported refusals (≥ 0)');
+        triggerError();
+      }
       return;
     }
     if (isNaN(cov) || cov < 0) {
-      setError(isUrdu ? 'براہ کرم درست حل شدہ/کور شدہ انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid covered refusals (≥ 0)');
-      triggerError();
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'براہ کرم درست حل شدہ/کور شدہ انکاری کیسز درج کریں (≥ 0)' : 'Please enter valid covered refusals (≥ 0)');
+        triggerError();
+      }
       return;
     }
     if (cov > rep) {
-      setError(
-        isUrdu
-          ? `حل شدہ انکاری (${cov}) رپورٹ شدہ انکاری کیسز (${rep}) سے زیادہ نہیں ہو سکتے`
-          : `Covered refusals (${cov}) cannot exceed reported refusals (${rep})`
-      );
-      triggerError();
+      if (isExplicitSubmit) {
+        setError(
+          isUrdu
+            ? `حل شدہ انکاری (${cov}) رپورٹ شدہ انکاری کیسز (${rep}) سے زیادہ نہیں ہو سکتے`
+            : `Covered refusals (${cov}) cannot exceed reported refusals (${rep})`
+        );
+        triggerError();
+      }
       return;
     }
 
@@ -68,7 +81,7 @@ export const RefusalCalculator: React.FC<Props> = React.memo(() => {
       remainingRefusals: remaining,
       conversionRate: convRate,
     });
-    if (showPulse) {
+    if (isExplicitSubmit) {
       triggerFeedback('calculate');
     }
   }, [isUrdu, triggerError, triggerFeedback]);

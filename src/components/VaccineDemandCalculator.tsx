@@ -25,50 +25,68 @@ export const VaccineDemandCalculator: React.FC<Props> = React.memo(() => {
 
   const DOSES_PER_VIAL = 20;
 
-  const calculate = useCallback(() => {
-    setError('');
-    const children = Number(targetChildren.replace(/,/g, ''));
+  const computeDemand = useCallback((childrenStr: string, bufStr: string, isExplicitSubmit = false) => {
+    const trimmedChildren = childrenStr.trim();
+    if (trimmedChildren === '') {
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'براہ کرم درست تعداد درج کریں (≥ 0)' : 'Please enter target children (≥ 0)');
+        triggerError();
+      } else {
+        setError('');
+      }
+      return;
+    }
+
+    const children = Number(trimmedChildren.replace(/,/g, ''));
     if (isNaN(children) || children < 0) {
-      setError(isUrdu ? 'براہ کرم درست تعداد درج کریں (≥ 0)' : 'Please enter a valid number of children (≥ 0)');
-      triggerError();
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'براہ کرم درست تعداد درج کریں (≥ 0)' : 'Please enter a valid number of children (≥ 0)');
+        triggerError();
+      }
       return;
     }
 
-    const buffer = bufferPct ? Number(bufferPct) : 0;
+    const buffer = bufStr.trim() !== '' ? Number(bufStr.trim()) : 0;
     if (isNaN(buffer) || buffer < 0 || buffer > 100) {
-      setError(isUrdu ? 'حفاظتی بفر 0 سے 100 فیصد کے درمیان ہونا چاہیے' : 'Buffer percentage must be between 0 and 100');
-      triggerError();
+      if (isExplicitSubmit) {
+        setError(isUrdu ? 'حفاظتی بفر 0 سے 100 فیصد کے درمیان ہونا چاہیے' : 'Buffer percentage must be between 0 and 100');
+        triggerError();
+      }
       return;
     }
 
-    try {
-      const neededDosesWithBuffer = Math.ceil(children * (1 + buffer / 100));
-      const neededVials = Math.ceil(neededDosesWithBuffer / DOSES_PER_VIAL);
-      const baseVials = Math.ceil(children / DOSES_PER_VIAL);
-      const calcBufferVials = Math.max(0, neededVials - baseVials);
+    setError('');
+    const neededDosesWithBuffer = Math.ceil(children * (1 + buffer / 100));
+    const neededVials = Math.ceil(neededDosesWithBuffer / DOSES_PER_VIAL);
+    const baseVials = Math.ceil(children / DOSES_PER_VIAL);
+    const calcBufferVials = Math.max(0, neededVials - baseVials);
 
-      setVialsRequired(neededVials);
-      setBufferVials(calcBufferVials);
-      setTotalDoses(neededDosesWithBuffer);
-      setTotalDrops(neededDosesWithBuffer * 2);
-      setCoveredChildren(children);
+    setVialsRequired(neededVials);
+    setBufferVials(calcBufferVials);
+    setTotalDoses(neededDosesWithBuffer);
+    setTotalDrops(neededDosesWithBuffer * 2);
+    setCoveredChildren(children);
+
+    if (isExplicitSubmit) {
       triggerFeedback('calculate');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : isUrdu ? 'حسابی خرابی' : 'Calculation error';
-      setError(msg);
-      triggerError();
     }
-  }, [targetChildren, bufferPct, isUrdu, triggerError, triggerFeedback]);
+  }, [isUrdu, triggerError, triggerFeedback]);
+
+  const calculate = useCallback(() => {
+    computeDemand(targetChildren, bufferPct, true);
+  }, [computeDemand, targetChildren, bufferPct]);
 
   const handleTargetChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setTargetChildren(e.target.value);
-    setError('');
-  }, []);
+    const val = e.target.value;
+    setTargetChildren(val);
+    computeDemand(val, bufferPct, false);
+  }, [bufferPct, computeDemand]);
 
   const handleBufferChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setBufferPct(e.target.value);
-    setError('');
-  }, []);
+    const val = e.target.value;
+    setBufferPct(val);
+    computeDemand(targetChildren, val, false);
+  }, [targetChildren, computeDemand]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
