@@ -1,0 +1,6 @@
+# robots.txt for Polio Field Tools (https://poliofieldtools.org)
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://poliofieldtools.org/sitemap.xml

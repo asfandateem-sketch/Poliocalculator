@@ -1,33 +1,95 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f766e" />
-      <stop offset="100%" stop-color="#042f2e" />
+    <linearGradient id="pftBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d9488" />
+      <stop offset="60%" stop-color="#0f766e" />
+      <stop offset="100%" stop-color="#115e59" />
     </linearGradient>
-    <linearGradient id="dropGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38bdf8" />
-      <stop offset="100%" stop-color="#0284c7" />
+    <linearGradient id="pftShield" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f0fdfa" />
     </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.25"/>
+    <linearGradient id="dropCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2dd4bf" />
+      <stop offset="100%" stop-color="#0d9488" />
+    </linearGradient>
+    <linearGradient id="dropTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5eead4" />
+      <stop offset="100%" stop-color="#14b8a6" />
+    </linearGradient>
+    <filter id="pftShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#042f2e" flood-opacity="0.35"/>
     </filter>
   </defs>
-  <!-- Background with safe zone -->
-  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
-  <!-- Circular shield glow -->
-  <circle cx="256" cy="256" r="180" fill="none" stroke="#14b8a6" stroke-width="8" opacity="0.35" />
-  <circle cx="256" cy="256" r="150" fill="#134e4a" opacity="0.4" />
-  
-  <!-- Vaccine Dropper / Two Drops Motif (2 drops per child) -->
-  <g filter="url(#shadow)">
-    <!-- Main Drop 1 -->
-    <path d="M220 180 C220 130, 240 100, 240 100 C240 100, 260 130, 260 180 C260 210, 242 225, 240 225 C238 225, 220 210, 220 180 Z" fill="#22d3ee" />
-    <!-- Main Drop 2 -->
-    <path d="M256 220 C256 160, 280 130, 280 130 C280 130, 304 160, 304 220 C304 252, 283 268, 280 268 C277 268, 256 252, 256 220 Z" fill="url(#dropGrad)" />
-    
-    <!-- Child protection shield outline -->
-    <path d="M256 100 L370 144 V260 C370 340, 256 400, 256 400 C256 400, 142 340, 142 260 V144 Z" fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
-    <!-- Medical Plus Symbol inside bottom of shield -->
-    <path d="M256 295 V355 M226 325 H286" stroke="#34d399" stroke-width="14" stroke-linecap="round"/>
+
+  <!-- App Icon Base: Rounded Container with #0d9488 Teal Theme -->
+  <rect width="512" height="512" rx="112" fill="url(#pftBg)" />
+
+  <!-- Field Tools Geometric Grid Pattern (Subtle Blueprint / Microplan lines) -->
+  <g opacity="0.12" stroke="#ffffff" stroke-width="2">
+    <line x1="64" y1="128" x2="448" y2="128" />
+    <line x1="64" y1="256" x2="448" y2="256" />
+    <line x1="64" y1="384" x2="448" y2="384" />
+    <line x1="128" y1="64" x2="128" y2="448" />
+    <line x1="256" y1="64" x2="256" y2="448" />
+    <line x1="384" y1="64" x2="384" y2="448" />
+    <circle cx="256" cy="256" r="192" fill="none" stroke-width="3" stroke-dasharray="6 6" />
+  </g>
+
+  <!-- Central Shield of Child Protection -->
+  <g filter="url(#pftShadow)">
+    <!-- Outer Shield Crest -->
+    <path d="M 256 92
+             C 336 92 384 120 384 120
+             L 384 252
+             C 384 340 292 396 256 418
+             C 220 396 128 340 128 252
+             L 128 120
+             C 128 120 176 92 256 92 Z"
+          fill="url(#pftShield)" />
+
+    <!-- Inner Shield Inset in Deep Teal -->
+    <path d="M 256 114
+             C 320 114 360 136 360 136
+             L 360 248
+             C 360 322 284 372 256 392
+             C 228 372 152 322 152 248
+             L 152 136
+             C 152 136 192 114 256 114 Z"
+          fill="#134e4a" />
+
+    <!-- Field Caliper / Compass Precision Tool Accents (Representing Calculation & Field Logistics) -->
+    <path d="M 188 200 L 256 142 L 324 200" fill="none" stroke="#2dd4bf" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.65" />
+    <circle cx="256" cy="142" r="7" fill="#5eead4" />
+
+    <!-- Twin Vaccine Droplets (2 Oral Drops per Child Standard) -->
+    <!-- Droplet 1 (Primary Left Drop) -->
+    <path d="M 226 232
+             C 226 200 246 174 246 174
+             C 246 174 266 200 266 232
+             C 266 252 248 266 246 266
+             C 244 266 226 252 226 232 Z"
+          fill="url(#dropTeal)" />
+
+    <!-- Droplet 2 (Accompanying Drop / Overlap) -->
+    <path d="M 252 256
+             C 252 220 274 192 274 192
+             C 274 192 296 220 296 256
+             C 296 278 277 294 274 294
+             C 271 294 252 278 252 256 Z"
+          fill="url(#dropCyan)" opacity="0.92" />
+
+    <!-- Precision Horizontal & Vertical Field Measurement Crossbars (Compass & Scale Ruler Marks) -->
+    <g stroke="#ffffff" stroke-width="4" stroke-linecap="round">
+      <!-- Horizontal measurement tick marks -->
+      <line x1="216" y1="334" x2="296" y2="334" stroke-width="6" stroke="#2dd4bf" />
+      <line x1="232" y1="324" x2="232" y2="334" />
+      <line x1="256" y1="320" x2="256" y2="334" stroke-width="6" stroke="#5eead4" />
+      <line x1="280" y1="324" x2="280" y2="334" />
+    </g>
+
+    <!-- Base Confidence Star / Check Mark Badge -->
+    <circle cx="256" cy="358" r="14" fill="#0d9488" stroke="#ffffff" stroke-width="3" />
+    <path d="M 251 358 L 255 362 L 262 355" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>

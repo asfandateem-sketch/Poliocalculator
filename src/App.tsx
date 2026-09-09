@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { usePWA } from './usePWA';
 import { LanguageProvider, useLanguage } from './LanguageContext';
 import { triggerHaptic } from './haptics';
 import {
-  Shield,
-  Download,
-  Wifi,
-  WifiOff,
+  Info,
   Languages,
   ArrowUp,
+  Share2,
+  Check,
 } from 'lucide-react';
-import { CALCULATOR_ITEMS } from './platformNavigation';
+import { CALCULATOR_ITEMS, type PlatformCategoryKey } from './platformNavigation';
+import { BrandLogo } from './components/BrandLogo';
+import { PlatformHubNavigation } from './components/PlatformHubNavigation';
+import { Breadcrumbs } from './components/Breadcrumbs';
+import { AttributionModal } from './components/AttributionModal';
 import { TopCalculatorNavigation } from './components/TopCalculatorNavigation';
 import { ChildAgeCalculator } from './components/ChildAgeCalculator';
 import { VaccineDemandCalculator } from './components/VaccineDemandCalculator';
@@ -21,18 +23,59 @@ import { MissedChildrenCoverageCalculator } from './components/MissedChildrenCov
 import { CampaignCoverageCalculator } from './components/CampaignCoverageCalculator';
 import { DailyCatchUpCalculator } from './components/DailyCatchUpCalculator';
 import { Under5Calculator } from './components/Under5Calculator';
+import { TrainingSection } from './components/TrainingSection';
+import { CommunicationSection } from './components/CommunicationSection';
+import { VideosSection } from './components/VideosSection';
+import { DocumentsSection } from './components/DocumentsSection';
+import { FieldResourcesSection } from './components/FieldResourcesSection';
+import { FaqSection } from './components/FaqSection';
 
 function AppContent() {
-  const { isInstallable, isOnline, install } = usePWA();
   const { language, toggleLanguage, isUrdu, t } = useLanguage();
+  const [activePlatformCategory, setActivePlatformCategory] = useState<PlatformCategoryKey>('calculators');
   const [activeSection, setActiveSection] = useState<string>('calc-1');
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
+  const [isAttributionOpen, setIsAttributionOpen] = useState<boolean>(false);
+  const [isShared, setIsShared] = useState<boolean>(false);
 
   const isProgrammaticScrollRef = useRef(false);
   const scrollEndTimerRef = useRef<number | null>(null);
 
-  // Scroll spy to highlight the currently visible calculator and update both desktop and mobile navigation
+  // Hash-based initial route handling
   useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (['training', 'communication', 'videos', 'documents', 'field-resources', 'field_resources', 'faq'].includes(hash)) {
+        setActivePlatformCategory(hash === 'field-resources' ? 'field_resources' : (hash as PlatformCategoryKey));
+      } else if (hash.startsWith('calc-') || hash === 'calculators') {
+        setActivePlatformCategory('calculators');
+        if (hash.startsWith('calc-')) {
+          setTimeout(() => {
+            const el = document.getElementById(hash);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }, 200);
+        }
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
+  // Register lightweight service worker for reliable offline caching in remote areas
+  useEffect(() => {
+    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // Silently continue if SW registration is restricted by environment
+      });
+    }
+  }, []);
+
+  // Scroll spy to highlight the currently visible calculator when in calculators category
+  useEffect(() => {
+    if (activePlatformCategory !== 'calculators') return;
+
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 300);
     };
@@ -40,7 +83,6 @@ function AppContent() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Do not alter active section while a programmatic click-to-scroll is actively animating
         if (isProgrammaticScrollRef.current) return;
 
         const visibleEntries = entries.filter((entry) => entry.isIntersecting);
@@ -68,37 +110,41 @@ function AppContent() {
         clearTimeout(scrollEndTimerRef.current);
       }
     };
-  }, []);
+  }, [activePlatformCategory]);
 
   const scrollToCalculator = useCallback((id: string) => {
     triggerHaptic('light');
-    const el = document.getElementById(id);
-    if (el) {
-      isProgrammaticScrollRef.current = true;
-      setActiveSection(id);
-
-      if (scrollEndTimerRef.current) {
-        clearTimeout(scrollEndTimerRef.current);
-      }
-
-      // Dynamically calculate the top sticky bar height
-      const topBar = document.getElementById('top-calculators-bar');
-      const topBarHeight = topBar ? topBar.offsetHeight : 76;
-      const headerOffset = topBarHeight + 14;
-      const elementPosition = el.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.scrollY - headerOffset;
-
-      window.scrollTo({
-        top: Math.max(0, offsetPosition),
-        behavior: 'smooth',
-      });
-
-      // Release lock after smooth scroll animation completes
-      scrollEndTimerRef.current = window.setTimeout(() => {
-        isProgrammaticScrollRef.current = false;
-      }, 750);
+    if (activePlatformCategory !== 'calculators') {
+      setActivePlatformCategory('calculators');
     }
-  }, []);
+
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) {
+        isProgrammaticScrollRef.current = true;
+        setActiveSection(id);
+
+        if (scrollEndTimerRef.current) {
+          clearTimeout(scrollEndTimerRef.current);
+        }
+
+        const topBar = document.getElementById('top-calculators-bar');
+        const topBarHeight = topBar ? topBar.offsetHeight : 76;
+        const headerOffset = topBarHeight + 14;
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+        window.scrollTo({
+          top: Math.max(0, offsetPosition),
+          behavior: 'smooth',
+        });
+
+        scrollEndTimerRef.current = window.setTimeout(() => {
+          isProgrammaticScrollRef.current = false;
+        }, 750);
+      }
+    }, 50);
+  }, [activePlatformCategory]);
 
   const scrollToTop = useCallback(() => {
     triggerHaptic('light');
@@ -110,6 +156,30 @@ function AppContent() {
     toggleLanguage();
   }, [toggleLanguage]);
 
+  const handleSelectCategory = (cat: PlatformCategoryKey) => {
+    setActivePlatformCategory(cat);
+    const hash = cat === 'field_resources' ? 'field-resources' : cat;
+    window.location.hash = hash;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleShare = () => {
+    triggerHaptic('light');
+    const shareData = {
+      title: 'Polio Field Tools',
+      text: 'Practical tools and resources for polio campaign workers in Pakistan.',
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      setIsShared(true);
+      setTimeout(() => setIsShared(false), 2500);
+    }
+  };
+
   return (
     <div
       className={`min-h-screen saas-bg text-slate-900 flex flex-col justify-between px-3 sm:px-6 lg:px-8 py-3 sm:py-5 overflow-x-clip selection:bg-teal-200 selection:text-teal-950 ${
@@ -118,28 +188,33 @@ function AppContent() {
       dir={isUrdu ? 'rtl' : 'ltr'}
     >
       <div className="max-w-5xl w-full mx-auto flex flex-col flex-1 min-h-0">
-        {/* Header - Modern Clean Healthcare SaaS Header */}
-        <header className="saas-header p-3 sm:p-4 mb-3 sm:mb-4 flex items-center justify-between flex-shrink-0 gap-2 sm:gap-3">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-teal-800 text-white flex items-center justify-center shadow-xs border border-teal-700/50 flex-shrink-0">
-              <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-sm sm:text-base md:text-lg font-extrabold text-slate-900 tracking-tight leading-snug truncate">
-                  {t.appTitle}
-                </h1>
-                <span className="hidden sm:inline-block px-2.5 py-0.5 text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-200/80 rounded-md">
-                  {t.roleBadge}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 font-normal mt-0.5 leading-normal truncate">
-                {t.appSubtitle}
-              </p>
-            </div>
-          </div>
+        {/* Header - Compact Clean Healthcare SaaS Header */}
+        <header className="saas-header p-3 sm:p-4 mb-2.5 sm:mb-3 flex items-center justify-between flex-shrink-0 gap-2 sm:gap-3">
+          <BrandLogo size="md" isUrdu={isUrdu} />
 
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            {/* Share Button */}
+            <button
+              id="share-app-btn"
+              type="button"
+              onClick={handleShare}
+              aria-label={isUrdu ? 'شیئر کریں' : 'Share tools'}
+              title={isUrdu ? 'شیئر کریں' : 'Share link with field team'}
+              className="saas-btn-secondary inline-flex items-center gap-1 px-2.5 py-1.5 sm:py-2 text-xs font-semibold cursor-pointer"
+            >
+              {isShared ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="hidden xs:inline text-emerald-700">{isUrdu ? 'کاپی ہوگیا' : 'Copied'}</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5 text-slate-600" />
+                  <span className="hidden xs:inline text-slate-700">{isUrdu ? 'شیئر' : 'Share'}</span>
+                </>
+              )}
+            </button>
+
             {/* Language Switcher: EN | اردو */}
             <button
               id="language-toggle-btn"
@@ -159,89 +234,125 @@ function AppContent() {
               </span>
             </button>
 
-            {/* Online/Offline status */}
-            <span
-              className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold border ${
-                isOnline
-                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                  : 'bg-amber-50 text-amber-900 border-amber-200'
-              }`}
+            {/* Attribution / Info Button (i) */}
+            <button
+              id="info-modal-btn"
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setIsAttributionOpen(true);
+              }}
+              aria-label={isUrdu ? 'معلومات اور اصول' : 'App Information and Guidelines'}
+              title={isUrdu ? 'معلومات دیکھیں' : 'View Attribution & Standards'}
+              className="w-8 h-8 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200/80 flex items-center justify-center cursor-pointer transition"
             >
-              {isOnline ? (
-                <>
-                  <Wifi className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="hidden md:inline">{t.offlineReady}</span>
-                </>
-              ) : (
-                <>
-                  <WifiOff className="w-3.5 h-3.5 text-amber-600" />
-                  <span className="hidden md:inline">{t.offline}</span>
-                </>
-              )}
-            </span>
-
-            {/* Install PWA button */}
-            {isInstallable && (
-              <button
-                id="install-pwa-btn"
-                type="button"
-                onClick={install}
-                className="saas-btn-primary inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t.install}</span>
-              </button>
-            )}
+              <Info className="w-4 h-4 text-teal-700" />
+            </button>
           </div>
         </header>
 
-        {/* Top Calculator Navigation Strip with All 9 Names Displayed Above Calculators */}
-        <TopCalculatorNavigation
-          activeSection={activeSection}
-          onSelect={scrollToCalculator}
+        {/* Primary Platform Hub Navigation (Calculators, Training, Communication, Videos, Documents, Field Resources, FAQ) */}
+        <PlatformHubNavigation
+          activeCategory={activePlatformCategory}
+          onSelectCategory={handleSelectCategory}
         />
 
-        {/* All 9 Calculators Aligned in Clean Full-Width Container */}
-        <main className="w-full min-w-0 space-y-6 sm:space-y-7 pb-8">
-          <section id="calc-1" className="scroll-mt-24 sm:scroll-mt-28">
-            <ChildAgeCalculator />
-          </section>
+        {/* Semantic Breadcrumbs Navigation */}
+        <div className="mb-2">
+          <Breadcrumbs
+            activeTab={activePlatformCategory}
+            onTabChange={handleSelectCategory}
+          />
+        </div>
 
-          <section id="calc-2" className="scroll-mt-24 sm:scroll-mt-28">
-            <VaccineDemandCalculator />
-          </section>
+        {/* View Switcher: Calculators OR Other Hub Sections */}
+        {activePlatformCategory === 'calculators' && (
+          <>
+            {/* Sticky Horizontal Calculator Quick Selector */}
+            <TopCalculatorNavigation
+              activeSection={activeSection}
+              onSelect={scrollToCalculator}
+            />
 
-          <section id="calc-3" className="scroll-mt-24 sm:scroll-mt-28">
-            <VaccineWastageCalculator />
-          </section>
+            {/* All 9 Calculators Aligned in Clean Full-Width Container */}
+            <main className="w-full min-w-0 space-y-6 sm:space-y-7 pb-8">
+              <section id="calc-1" className="scroll-mt-24 sm:scroll-mt-28">
+                <ChildAgeCalculator />
+              </section>
 
-          <section id="calc-4" className="scroll-mt-24 sm:scroll-mt-28">
-            <NACoverageCalculator />
-          </section>
+              <section id="calc-2" className="scroll-mt-24 sm:scroll-mt-28">
+                <VaccineDemandCalculator />
+              </section>
 
-          <section id="calc-5" className="scroll-mt-24 sm:scroll-mt-28">
-            <RefusalCalculator />
-          </section>
+              <section id="calc-3" className="scroll-mt-24 sm:scroll-mt-28">
+                <VaccineWastageCalculator />
+              </section>
 
-          <section id="calc-6" className="scroll-mt-24 sm:scroll-mt-28">
-            <MissedChildrenCoverageCalculator />
-          </section>
+              <section id="calc-4" className="scroll-mt-24 sm:scroll-mt-28">
+                <NACoverageCalculator />
+              </section>
 
-          <section id="calc-7" className="scroll-mt-24 sm:scroll-mt-28">
-            <CampaignCoverageCalculator />
-          </section>
+              <section id="calc-5" className="scroll-mt-24 sm:scroll-mt-28">
+                <RefusalCalculator />
+              </section>
 
-          <section id="calc-8" className="scroll-mt-24 sm:scroll-mt-28">
-            <DailyCatchUpCalculator />
-          </section>
+              <section id="calc-6" className="scroll-mt-24 sm:scroll-mt-28">
+                <MissedChildrenCoverageCalculator />
+              </section>
 
-          <section id="calc-9" className="scroll-mt-24 sm:scroll-mt-28">
-            <Under5Calculator />
-          </section>
-        </main>
+              <section id="calc-7" className="scroll-mt-24 sm:scroll-mt-28">
+                <CampaignCoverageCalculator />
+              </section>
+
+              <section id="calc-8" className="scroll-mt-24 sm:scroll-mt-28">
+                <DailyCatchUpCalculator />
+              </section>
+
+              <section id="calc-9" className="scroll-mt-24 sm:scroll-mt-28">
+                <Under5Calculator />
+              </section>
+            </main>
+          </>
+        )}
+
+        {activePlatformCategory === 'training' && (
+          <main className="w-full min-w-0 pb-8">
+            <TrainingSection />
+          </main>
+        )}
+
+        {activePlatformCategory === 'communication' && (
+          <main className="w-full min-w-0 pb-8">
+            <CommunicationSection />
+          </main>
+        )}
+
+        {activePlatformCategory === 'videos' && (
+          <main className="w-full min-w-0 pb-8">
+            <VideosSection />
+          </main>
+        )}
+
+        {activePlatformCategory === 'documents' && (
+          <main className="w-full min-w-0 pb-8">
+            <DocumentsSection />
+          </main>
+        )}
+
+        {activePlatformCategory === 'field_resources' && (
+          <main className="w-full min-w-0 pb-8">
+            <FieldResourcesSection />
+          </main>
+        )}
+
+        {activePlatformCategory === 'faq' && (
+          <main className="w-full min-w-0 pb-8">
+            <FaqSection />
+          </main>
+        )}
       </div>
 
-      {/* Floating Back to Top Button (Shown when scrolled > 300px) */}
+      {/* Floating Back to Top Button */}
       {showBackToTop && (
         <button
           id="back-to-top-btn"
@@ -254,14 +365,41 @@ function AppContent() {
         </button>
       )}
 
-      {/* Footer - Professional Clean Minimal Footer */}
-      <footer className="saas-header py-3 px-4 mt-2 mb-1 flex flex-col sm:flex-row items-center justify-between gap-1 text-[11px] text-slate-500 max-w-7xl w-full mx-auto flex-shrink-0">
-        <span className="text-center sm:text-left font-medium">
-          {t.footerRule}
-        </span>
-        <span className="font-semibold text-slate-700 flex-shrink-0">
-          {t.footerVersion}
-        </span>
+      {/* Attribution & Standards Modal */}
+      <AttributionModal
+        isOpen={isAttributionOpen}
+        onClose={() => setIsAttributionOpen(false)}
+      />
+
+      {/* Footer - Professional Clean Minimal Footer with Transparency Disclaimer */}
+      <footer className="saas-header py-3.5 px-4 mt-4 mb-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 max-w-5xl w-full mx-auto flex-shrink-0">
+        <div className="flex flex-col sm:flex-row items-center gap-1.5 text-center sm:text-left">
+          <span className="font-semibold text-slate-700">Polio Field Tools</span>
+          <span className="hidden sm:inline">•</span>
+          <span>{t.footerRule}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('light');
+              handleSelectCategory('faq');
+            }}
+            className="text-teal-800 hover:text-teal-900 font-semibold cursor-pointer"
+          >
+            {isUrdu ? 'سوالات و جوابات' : 'FAQ & SOPs'}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('light');
+              setIsAttributionOpen(true);
+            }}
+            className="text-slate-600 hover:text-slate-900 cursor-pointer"
+          >
+            {isUrdu ? 'معلومات' : 'Disclaimer'}
+          </button>
+        </div>
       </footer>
     </div>
   );

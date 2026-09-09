@@ -230,8 +230,8 @@ export interface TranslationStrings {
 
 export const translations: Record<Language, TranslationStrings> = {
   en: {
-    appTitle: 'Polio Campaign Calculator',
-    appSubtitle: 'Field Operations Suite • Union Council & Monitoring Teams',
+    appTitle: 'Polio Field Tools',
+    appSubtitle: 'Practical tools and resources for polio campaign workers',
     roleBadge: '9 Field Calculators',
     fixedRuleBadge: 'Fixed bOPV Standard',
     fixedRuleHeader: 'bOPV: 1 vial = 20 doses (covers 20 kids) • 2 drops/child',
@@ -243,7 +243,7 @@ export const translations: Record<Language, TranslationStrings> = {
     nextTool: 'Next Tool',
     toolOf: (cur, total) => `Tool ${cur} of ${total}`,
     footerRule: 'Fixed bOPV Rule: 1 child = 2 drops • 1 vial = 20 doses (covers 20 children)',
-    footerVersion: 'Field Operations Suite • v2.2 Professional',
+    footerVersion: 'Polio Field Tools • Operational Hub v3.0',
     calculationLogicRule: 'Calculation Logic & Rule',
     close: 'Close',
     gotIt: 'Got it (Close)',
@@ -602,8 +602,8 @@ export const translations: Record<Language, TranslationStrings> = {
   },
 
   ur: {
-    appTitle: 'پولیو مہم کیلکولیٹر',
-    appSubtitle: 'فیلڈ آپریشنز سوٹ • یونین کونسل و مانیٹرنگ ٹیمیں',
+    appTitle: 'پولیو فیلڈ ٹولز',
+    appSubtitle: 'پولیو مہم ورکرز کے لیے عملی اوزار اور رہنمائی',
     roleBadge: '9 فیلڈ کیلکولیٹرز',
     fixedRuleBadge: 'مقررہ bOPV اصول',
     fixedRuleHeader: 'مقررہ اصول: 1 وائل = 20 خوراکیں (20 بچے) • 2 قطرے فی بچہ',
@@ -615,7 +615,7 @@ export const translations: Record<Language, TranslationStrings> = {
     nextTool: 'اگلا ٹول',
     toolOf: (cur, total) => `ٹول ${cur} از ${total}`,
     footerRule: 'مقررہ bOPV اصول: 1 بچہ = 2 قطرے • 1 وائل = 20 خوراکیں (20 بچے)',
-    footerVersion: 'فیلڈ آپریشنز سوٹ • پیشہ ورانہ ایڈیشن',
+    footerVersion: 'پولیو فیلڈ ٹولز • آپریشنل فیلڈ ہب',
     calculationLogicRule: 'حسابی اصول و فارمولا',
     close: 'بند کریں',
     gotIt: 'سمجھ آگیا (بند کریں)',

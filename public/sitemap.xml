@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Homepage & Core Hub -->
+  <url>
+    <loc>https://poliofieldtools.org/</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://poliofieldtools.org/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="ur" href="https://poliofieldtools.org/?lang=ur" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://poliofieldtools.org/" />
+  </url>
+
+  <!-- Calculators Section -->
+  <url>
+    <loc>https://poliofieldtools.org/#calculators</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Individual Calculator Anchors for High-Intent Queries -->
+  <url>
+    <loc>https://poliofieldtools.org/#calc-1-child-age</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://poliofieldtools.org/#calc-2-vaccine-demand</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://poliofieldtools.org/#calc-3-vaccine-wastage</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://poliofieldtools.org/#calc-4-na-coverage</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://poliofieldtools.org/#calc-5-refusal-coverage</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://poliofieldtools.org/#calc-6-missed-children</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://poliofieldtools.org/#calc-7-campaign-coverage</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://poliofieldtools.org/#calc-8-daily-catch-up</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://poliofieldtools.org/#calc-9-under5-population</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Training Modules Section -->
+  <url>
+    <loc>https://poliofieldtools.org/#training</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Communication & SBC Section -->
+  <url>
+    <loc>https://poliofieldtools.org/#communication</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Videos Section -->
+  <url>
+    <loc>https://poliofieldtools.org/#videos</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Documents & Guides Section -->
+  <url>
+    <loc>https://poliofieldtools.org/#documents</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Field Resources (Provinces & Divisions) Section -->
+  <url>
+    <loc>https://poliofieldtools.org/#field-resources</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- FAQ & Operational Guidelines Section -->
+  <url>
+    <loc>https://poliofieldtools.org/#faq</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+</urlset>

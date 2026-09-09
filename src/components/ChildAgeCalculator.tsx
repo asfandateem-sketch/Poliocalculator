@@ -115,23 +115,23 @@ export const ChildAgeCalculator: React.FC<Props> = React.memo(() => {
     <div className={`saas-card p-4 sm:p-6 flex flex-col justify-between h-full ${isUrdu ? 'font-arabic' : ''}`}>
       {/* Header */}
       <div>
-        <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 mb-3.5">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="w-7 h-7 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/80 font-mono font-bold text-xs flex items-center justify-center flex-shrink-0">
-              01
-            </span>
-            <div className="min-w-0">
-              <h2 className="text-base font-bold text-slate-900 tracking-tight leading-snug">
+        <div className="pb-3 border-b border-slate-100 mb-3.5">
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="w-7 h-7 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/80 font-mono font-bold text-xs flex items-center justify-center flex-shrink-0">
+                01
+              </span>
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-snug truncate sm:whitespace-normal">
                 {strings.title}
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                {strings.purpose}
-              </p>
             </div>
+            <span className="text-[11px] sm:text-xs font-mono font-semibold text-slate-600 bg-slate-100 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md border border-slate-200/70 flex-shrink-0" dir="ltr">
+              {strings.badge}
+            </span>
           </div>
-          <span className="text-xs font-mono font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/70 flex-shrink-0" dir="ltr">
-            {strings.badge}
-          </span>
+          <p className="text-xs text-slate-500 mt-1.5 leading-normal w-full">
+            {strings.purpose}
+          </p>
         </div>
 
         {/* Content Layout: 2 Columns on md+ screens */}

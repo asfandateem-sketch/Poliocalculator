@@ -1,6 +1,6 @@
 {
-  "name": "Polio Campaign Calculator",
-  "description": "Mobile-friendly field calculator for polio campaign workers, vaccinators, supervisors, and UC staff.",
+  "name": "Polio Field Tools",
+  "description": "Practical tools and resources for polio campaign workers across Pakistan: field calculators, training SOPs, communication materials, and operational guides.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

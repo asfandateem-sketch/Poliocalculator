@@ -2,211 +2,184 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Polio Field Tools — Practical tools and resources for polio campaign workers</title>
     
-    <!-- Primary SEO & AEO Title & Description -->
-    <title>Polio Campaign Calculator | WHO, UNICEF & NEOC Field Operations Suite</title>
-    <meta
-      name="description"
-      content="Precision field calculators for polio campaign workers, vaccinators, supervisors, and UC staff. Real-time calculations for child age eligibility, vaccine demand (bOPV 20 doses/vial), wastage rates, Still NA, refusal conversion, campaign coverage (≥95%), and under-5 targeting."
-    />
-    <meta
-      name="keywords"
-      content="polio calculator, bOPV vaccine demand, polio campaign coverage, child age calculator polio, vaccine wastage calculation, Still NA polio, refusal conversion rate, missed children catch up, under 5 population polio, NEOC Pakistan polio, WHO polio eradication, UNICEF SBC immunization"
-    />
-    <meta name="author" content="National Emergency Operations Centre (NEOC) & EPI Operations" />
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-    <link rel="canonical" href="https://asfandateem-sketch.github.io/Poliocalculator/" />
+    <!-- Primary Meta Tags & Search Intent Optimization -->
+    <meta name="description" content="Practical tools and resources for polio campaign workers: field calculators (bOPV vials, wastage, refusal conversion, missed children), training SOPs, dialogue scripts, and provincial operational guidelines across Pakistan." />
+    <meta name="keywords" content="polio campaign calculator, polio field tools, polio campaign tools, polio training materials, polio communication materials, bOPV vial calculator, vaccine wastage calculator, Pakistan polio campaign, refusal conversion, missed children catch up, NEOC polio, EPI Pakistan" />
+    <meta name="author" content="Polio Field Tools Community" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://poliofieldtools.org/" />
 
-    <!-- Open Graph (OG) Protocol for Social & Search Snippets -->
-    <meta property="og:site_name" content="Polio Campaign Calculator Suite" />
-    <meta property="og:title" content="Polio Campaign Calculator | WHO, UNICEF & NEOC Field Operations Suite" />
-    <meta
-      property="og:description"
-      content="Precision field calculators for polio campaign workers, vaccinators, supervisors, and UC staff. Instant calculations for child age eligibility, bOPV vial demand, wastage, and coverage benchmarks."
-    />
+    <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://poliofieldtools.org/" />
+    <meta property="og:site_name" content="Polio Field Tools" />
+    <meta property="og:title" content="Polio Field Tools — Practical tools and resources for polio campaign workers" />
+    <meta property="og:description" content="Field calculators, SOP training modules, refusal conversion dialogue scripts, and operational resources for polio campaign workers, vaccinators, and supervisors across Pakistan." />
+    <meta property="og:image" content="https://poliofieldtools.org/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:locale:alternate" content="ur_PK" />
-    <meta property="og:image" content="/icon.svg" />
 
-    <!-- Twitter Card Data -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Polio Campaign Calculator | Field Operations Suite" />
-    <meta
-      name="twitter:description"
-      content="Field calculation tools for polio campaign teams: bOPV vials, coverage benchmarks, child age, wastage, Still NA, and refusal conversion."
-    />
-    <meta name="twitter:image" content="/icon.svg" />
+    <!-- Twitter / X Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Polio Field Tools — Practical tools and resources for polio campaign workers" />
+    <meta name="twitter:description" content="Practical tools, field calculators, training SOPs, communication guides, and provincial resources for polio campaign workers in Pakistan." />
+    <meta name="twitter:image" content="https://poliofieldtools.org/og-image.svg" />
 
-    <!-- GEO / Geographical Meta Tags for Local & Regional Campaign Targeting -->
-    <meta name="geo.region" content="PK" />
-    <meta name="geo.placename" content="Islamabad, Pakistan; National Emergency Operations Centre (NEOC) for Polio Eradication" />
-    <meta name="geo.position" content="33.6844;73.0479" />
-    <meta name="ICBM" content="33.6844, 73.0479" />
-    <meta name="DC.coverage" content="Pakistan, Afghanistan, EMRO, Global Polio Eradication Initiative (GPEI) Priority Geographies" />
-    <meta name="DC.title" content="Polio Campaign Calculator — Public Health Field Operations Suite" />
-    <meta name="DC.creator" content="National Emergency Operations Centre (NEOC) & EPI Operations" />
-    <meta name="DC.language" content="en, ur" />
-
-    <!-- PWA & Mobile Web App Meta -->
+    <!-- Mobile & PWA Theme -->
     <meta name="theme-color" content="#0d9488" />
-    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="PolioCalc" />
+    <meta name="apple-mobile-web-app-title" content="Polio Field Tools" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    <link rel="manifest" href="/manifest.json" />
 
-    <!-- Structured Data (JSON-LD) for SEO, AEO (Answer Engine Optimization), & GEO (Generative Engine Optimization) -->
+    <!-- Multi-Language Hreflang Annotations -->
+    <link rel="alternate" hreflang="en" href="https://poliofieldtools.org/?lang=en" />
+    <link rel="alternate" hreflang="ur" href="https://poliofieldtools.org/?lang=ur" />
+    <link rel="alternate" hreflang="x-default" href="https://poliofieldtools.org/" />
+
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Noto+Nastaliq+Urdu:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Structured Data (JSON-LD): WebApplication -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@graph": [
+      "@type": "WebApplication",
+      "name": "Polio Field Tools",
+      "alternateName": "پولیو فیلڈ ٹولز",
+      "description": "Practical tools and resources for polio campaign workers: 9 field calculators, training SOPs, refusal conversion communication scripts, and provincial operational guidelines.",
+      "url": "https://poliofieldtools.org/",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript",
+      "inLanguage": ["en", "ur"],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+
+    <!-- Structured Data (JSON-LD): FAQPage for AEO & Voice/AI Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
         {
-          "@type": "WebApplication",
-          "@id": "https://asfandateem-sketch.github.io/Poliocalculator/#webapp",
-          "name": "Polio Campaign Calculator",
-          "url": "https://asfandateem-sketch.github.io/Poliocalculator/",
-          "applicationCategory": "HealthApplication",
-          "operatingSystem": "All (Web, PWA, iOS, Android)",
-          "softwareVersion": "2.4.0",
-          "description": "Mobile-first offline field calculation suite for polio eradication campaign workers, vaccinators, supervisors, and UC medical officers.",
-          "inLanguage": ["en", "ur"],
-          "featureList": [
-            "Child Age Eligibility Calculator (Under 5.0 years / < 60 months)",
-            "Vaccine Vial Demand Estimator (Standard bOPV 20 doses/vial + buffer)",
-            "Vaccine Wastage Rate Calculator (Field benchmark <= 10%)",
-            "Not Available (NA) Coverage and Still NA Rate (Target <= 2%)",
-            "Refusal Coverage & Conversion Rate (Target <= 0.5%)",
-            "Missed Children Combined Coverage Assessment",
-            "Overall Campaign Coverage Benchmark (Target >= 95%)",
-            "Daily Catch-Up Rate Calculator for field sweeps",
-            "Under-5 Target Population Estimator"
-          ]
+          "@type": "Question",
+          "name": "What is Polio Field Tools and who is it for?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Polio Field Tools is an independent, mobile-first field-support web platform designed for frontline polio eradication workers across Pakistan—including Mobile Vaccination Teams, Area In-Charges, Union Council Medical Officers, and Monitors in Khyber Pakhtunkhwa, Sindh, Balochistan, and Punjab."
+          }
         },
         {
-          "@type": "MedicalWebPage",
-          "@id": "https://asfandateem-sketch.github.io/Poliocalculator/#medicalpage",
-          "url": "https://asfandateem-sketch.github.io/Poliocalculator/",
-          "name": "Polio Campaign Calculator — WHO, UNICEF & NEOC Field Standards",
-          "headline": "Field Operational Calculators for Polio Eradication Campaigns",
-          "audience": {
-            "@type": "MedicalAudience",
-            "audienceType": "Clinician, Field Vaccinator, Area Incharge, Union Council Medical Officer, Health Supervisor"
-          },
-          "about": [
-            {
-              "@type": "MedicalCondition",
-              "name": "Poliomyelitis"
-            },
-            {
-              "@type": "MedicalTherapy",
-              "name": "Bivalent Oral Polio Vaccine (bOPV)"
-            }
-          ]
+          "@type": "Question",
+          "name": "What is the fixed bOPV vial and dosage rule?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The fixed bOPV rule states: 1 child = 2 drops; 1 vial = 20 doses (covers 20 children). Multi-dose vials must be maintained at +2°C to +8°C with Stage 1 or 2 VVM."
+          }
         },
         {
-          "@type": "FAQPage",
-          "@id": "https://asfandateem-sketch.github.io/Poliocalculator/#faq",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "How many doses are in one vial of bOPV oral polio vaccine?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Each standard bOPV vial contains 20 doses (2 drops per dose). Under standard GPEI/WHO campaign planning guidelines, 1 vial immunizes 20 eligible children under 5 years of age."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What is the acceptable vaccine wastage rate for polio campaigns?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "The target acceptable vaccine wastage rate for oral polio campaigns is <= 10%. Wastage is calculated as ((Doses Issued - Doses Administered) / Doses Issued) * 100. Any wastage above 10% requires supervisor review."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What is the target coverage benchmark for polio campaigns?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "The optimal benchmark is >= 95% of target children vaccinated. Coverage between 85% and 94.9% indicates vulnerable gaps requiring catch-up sweeps. Coverage below 85% represents a critical deficit."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What is the age eligibility criteria for polio campaign vaccination?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Any child strictly under 5.0 years of age (from newborn up to 4 years, 11 months, and 29 days, or less than 60 full months) on the campaign date is eligible to receive oral polio vaccine drops."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "How is Still NA (Not Available) children coverage calculated?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Still NA % = ((Recorded NA Children - NA Children Vaccinated on Catch-Up) / Total Campaign Target) * 100. The standard field target is <= 2.0%."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "How is Refusal Conversion calculated during polio campaigns?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Refusal Conversion Rate % = (Refusal Children Successfully Vaccinated / Total Initial Refusals) * 100. Still Refusal % = (Remaining Unvaccinated Refusals / Campaign Target) * 100, with a target benchmark of <= 0.5%."
-              }
-            }
-          ]
+          "@type": "Question",
+          "name": "How is bOPV vaccine demand calculated for a campaign?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "bOPV Vaccine Demand is calculated as: ROUNDUP((Target Under-5 Children × 1.10) ÷ 20), which includes a standard 10% operational buffer stock."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between an NA child and a Refusal child?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An NA (Not Available) child is an eligible under-5 resident who was absent or sleeping during the team visit. A Refusal (R) child is present but the caregiver declines vaccination. Both are categorized as Missed Children and require targeted catch-up visits."
+          }
         }
       ]
     }
     </script>
 
-    <!-- Urdu and Latin font support: Noto Nastaliq Urdu / Noto Naskh Arabic & Plus Jakarta Sans (Non-blocking) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Noto+Naskh+Arabic:wght@500;700&family=Noto+Nastaliq+Urdu:wght@500;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
-      media="print"
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Noto+Naskh+Arabic:wght@500;700&family=Noto+Nastaliq+Urdu:wght@500;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
-      />
-    </noscript>
-
-    <!-- Google tag (gtag.js) - Deferred asynchronously to avoid blocking FCP / LCP -->
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-ZEQKRE18VY');
-
-      function loadAnalytics() {
-        if (window.__gtagLoaded) return;
-        window.__gtagLoaded = true;
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-ZEQKRE18VY';
-        document.head.appendChild(s);
-      }
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(loadAnalytics, { timeout: 2500 });
-      } else {
-        window.addEventListener('load', function() {
-          setTimeout(loadAnalytics, 1000);
-        });
-      }
+    <!-- Structured Data (JSON-LD): BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Polio Field Tools",
+          "item": "https://poliofieldtools.org/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Campaign Calculators",
+          "item": "https://poliofieldtools.org/#calculators"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Training SOPs",
+          "item": "https://poliofieldtools.org/#training"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Communication Materials",
+          "item": "https://poliofieldtools.org/#communication"
+        }
+      ]
+    }
     </script>
   </head>
-  <body class="bg-slate-50 text-slate-900 antialiased selection:bg-teal-100 selection:text-teal-900">
-    <div id="root"></div>
+  <body>
+    <div id="root">
+      <!-- Semantic crawlable HTML shell for search engine crawlers & AI models before JS hydration -->
+      <header style="padding: 1rem; text-align: center;">
+        <h1>Polio Field Tools</h1>
+        <p>Practical tools and resources for polio campaign workers</p>
+      </header>
+      <main style="max-width: 800px; margin: auto; padding: 1rem;">
+        <section id="calculators">
+          <h2>Polio Campaign Calculators</h2>
+          <p>Precision mathematical field calculators for bOPV vials, wastage, refusal conversion, and daily catch-up targets.</p>
+        </section>
+        <section id="training">
+          <h2>Vaccinator &amp; Supervisor Training Modules</h2>
+          <p>Practical field SOPs for cold chain handling, VVM stages, door and finger marking, and microplanning.</p>
+        </section>
+        <section id="communication">
+          <h2>Refusal Conversion &amp; Communication Materials</h2>
+          <p>Field-tested persuasion dialogue scripts and caregiver objection handling for hesitant families.</p>
+        </section>
+        <section id="videos">
+          <h2>Field Training Videos &amp; Demonstrations</h2>
+          <p>Visual demonstrations of finger marking, cold chain carrier conditioning, and refusal roleplay.</p>
+        </section>
+        <section id="documents">
+          <h2>Operational Forms &amp; Guides</h2>
+          <p>Standard field tally forms, monitoring checklists, cold chain logs, and transit protocols.</p>
+        </section>
+        <section id="field-resources">
+          <h2>Provincial Field Resources</h2>
+          <p>Operational profiles and high-risk strategies across Khyber Pakhtunkhwa, Sindh, Balochistan, and Punjab.</p>
+        </section>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
-

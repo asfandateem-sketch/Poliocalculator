@@ -26,15 +26,19 @@ import type { TranslationStrings } from './translations';
 
 export type PlatformCategoryKey =
   | 'calculators'
-  | 'communication_sbc'
-  | 'media_library'
-  | 'staff_resources'
-  | 'campaign_tools';
+  | 'training'
+  | 'communication'
+  | 'videos'
+  | 'documents'
+  | 'field_resources'
+  | 'faq';
 
 export interface PlatformCategory {
   key: PlatformCategoryKey;
   labelEn: string;
   labelUr: string;
+  shortLabelEn?: string;
+  shortLabelUr?: string;
   icon: LucideIcon;
   isAvailable: boolean;
   itemCount?: number;
@@ -44,7 +48,7 @@ export interface CalculatorNavItem {
   id: string;
   num: string;
   icon: LucideIcon;
-  category: PlatformCategoryKey;
+  category: 'calculators';
   getNameEn: (t: TranslationStrings) => string;
   getNameUr: (t: TranslationStrings) => string;
   getShortNameEn: (t: TranslationStrings) => string;
@@ -54,44 +58,78 @@ export interface CalculatorNavItem {
 }
 
 /**
- * Platform Categories Hierarchy (Scalable Architecture for Future Expansion)
+ * Platform Categories Hierarchy (Scalable Architecture for Field-Support Hub)
  */
 export const PLATFORM_CATEGORIES: PlatformCategory[] = [
   {
     key: 'calculators',
-    labelEn: 'Campaign Calculators',
-    labelUr: 'مہماتی حساب کار',
+    labelEn: 'Calculators',
+    labelUr: 'حساب کار',
+    shortLabelEn: 'Calculators',
+    shortLabelUr: 'کیلکولیٹرز',
     icon: Calculator,
     isAvailable: true,
     itemCount: 9,
   },
   {
-    key: 'communication_sbc',
-    labelEn: 'Communication & SBC',
-    labelUr: 'سماجی و رویہ جاتی تبدیلی (SBC)',
-    icon: MessageSquare,
-    isAvailable: false,
-  },
-  {
-    key: 'media_library',
-    labelEn: 'Media Library',
-    labelUr: 'میڈیا لائبریری',
-    icon: FileVideo,
-    isAvailable: false,
-  },
-  {
-    key: 'staff_resources',
-    labelEn: 'Staff Resources',
-    labelUr: 'اسٹاف اور فیلڈ گائیڈز',
+    key: 'training',
+    labelEn: 'Training',
+    labelUr: 'تربیت و SOPs',
+    shortLabelEn: 'Training',
+    shortLabelUr: 'تربیت',
     icon: BookOpen,
-    isAvailable: false,
+    isAvailable: true,
+    itemCount: 4,
   },
   {
-    key: 'campaign_tools',
-    labelEn: 'Planning Tools',
-    labelUr: 'مہم پلاننگ ٹولز',
+    key: 'communication',
+    labelEn: 'Communication Materials',
+    labelUr: 'کمیونیکیشن مواد',
+    shortLabelEn: 'Communication',
+    shortLabelUr: 'کمیونیکیشن',
+    icon: MessageSquare,
+    isAvailable: true,
+    itemCount: 4,
+  },
+  {
+    key: 'videos',
+    labelEn: 'Videos',
+    labelUr: 'فیلڈ ویڈیوز',
+    shortLabelEn: 'Videos',
+    shortLabelUr: 'ویڈیوز',
+    icon: FileVideo,
+    isAvailable: true,
+    itemCount: 4,
+  },
+  {
+    key: 'documents',
+    labelEn: 'Documents & Guides',
+    labelUr: 'دستاویزات و رہنمائی',
+    shortLabelEn: 'Docs & Guides',
+    shortLabelUr: 'دستاویزات',
     icon: ClipboardList,
-    isAvailable: false,
+    isAvailable: true,
+    itemCount: 4,
+  },
+  {
+    key: 'field_resources',
+    labelEn: 'Field Resources',
+    labelUr: 'صوبائی فیلڈ وسائل',
+    shortLabelEn: 'Field Resources',
+    shortLabelUr: 'فیلڈ وسائل',
+    icon: ShieldCheck,
+    isAvailable: true,
+    itemCount: 4,
+  },
+  {
+    key: 'faq',
+    labelEn: 'FAQ & Standards',
+    labelUr: 'سوالات و اصول',
+    shortLabelEn: 'FAQ',
+    shortLabelUr: 'سوالات',
+    icon: AlertCircle,
+    isAvailable: true,
+    itemCount: 5,
   },
 ];
 
