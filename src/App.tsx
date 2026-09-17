@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { LanguageProvider, useLanguage } from './LanguageContext';
 import { triggerHaptic } from './haptics';
 import {
@@ -10,6 +11,8 @@ import {
 } from 'lucide-react';
 import { CALCULATOR_ITEMS, type PlatformCategoryKey } from './platformNavigation';
 import { BrandLogo } from './components/BrandLogo';
+import { GlobalSearchBar } from './components/GlobalSearchBar';
+import type { SearchableItem } from './searchData';
 import { PlatformHubNavigation } from './components/PlatformHubNavigation';
 import { Breadcrumbs } from './components/Breadcrumbs';
 import { AttributionModal } from './components/AttributionModal';
@@ -37,6 +40,11 @@ function AppContent() {
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
   const [isAttributionOpen, setIsAttributionOpen] = useState<boolean>(false);
   const [isShared, setIsShared] = useState<boolean>(false);
+
+  // Targets passed when navigating from Global Search Bar
+  const [targetTrainingId, setTargetTrainingId] = useState<string | undefined>(undefined);
+  const [targetDocId, setTargetDocId] = useState<string | undefined>(undefined);
+  const [targetScriptId, setTargetScriptId] = useState<string | undefined>(undefined);
 
   const isProgrammaticScrollRef = useRef(false);
   const scrollEndTimerRef = useRef<number | null>(null);
@@ -163,6 +171,57 @@ function AppContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const highlightElement = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.remove('search-target-highlight');
+      // Trigger reflow to restart animation
+      void el.offsetWidth;
+      el.classList.add('search-target-highlight');
+      setTimeout(() => {
+        el.classList.remove('search-target-highlight');
+      }, 3000);
+    }
+  };
+
+  const handleSelectSearchResult = (item: SearchableItem) => {
+    triggerHaptic('medium');
+    setActivePlatformCategory(item.category);
+    const hash = item.category === 'field_resources' ? 'field-resources' : item.category;
+    window.location.hash = hash;
+
+    if (item.category === 'calculators') {
+      setActiveSection(item.targetAnchor);
+      setTimeout(() => {
+        scrollToCalculator(item.targetAnchor);
+        highlightElement(item.targetAnchor);
+      }, 100);
+    } else if (item.category === 'training') {
+      setTargetTrainingId(item.id);
+      setTimeout(() => {
+        highlightElement(item.id);
+      }, 250);
+    } else if (item.category === 'documents') {
+      setTargetDocId(item.id);
+      setTimeout(() => {
+        highlightElement(item.id);
+      }, 250);
+    } else if (item.category === 'communication') {
+      setTargetScriptId(item.id);
+      setTimeout(() => {
+        highlightElement(item.id);
+      }, 250);
+    } else {
+      setTimeout(() => {
+        const el = document.getElementById(item.targetAnchor);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          highlightElement(item.targetAnchor);
+        }
+      }, 150);
+    }
+  };
+
   const handleShare = () => {
     triggerHaptic('light');
     const shareData = {
@@ -182,14 +241,22 @@ function AppContent() {
 
   return (
     <div
-      className={`min-h-screen saas-bg text-slate-900 flex flex-col justify-between px-3 sm:px-6 lg:px-8 py-3 sm:py-5 overflow-x-clip selection:bg-teal-200 selection:text-teal-950 ${
+      className={`min-h-screen saas-bg text-slate-900 flex flex-col justify-between px-3 sm:px-6 lg:px-8 py-3 sm:py-5 overflow-x-clip selection:bg-teal-200 selection:text-teal-950 relative ${
         isUrdu ? 'font-arabic' : ''
       }`}
       dir={isUrdu ? 'rtl' : 'ltr'}
     >
-      <div className="max-w-5xl w-full mx-auto flex flex-col flex-1 min-h-0">
-        {/* Header - Compact Clean Healthcare SaaS Header */}
-        <header className="saas-header p-3 sm:p-4 mb-2.5 sm:mb-3 flex items-center justify-between flex-shrink-0 gap-2 sm:gap-3">
+      {/* Liquid Glass Ambient Fluid Light Refraction Layer */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-sky-200/45 blur-3xl" />
+        <div className="absolute top-1/4 -right-24 w-[32rem] h-[32rem] rounded-full bg-teal-200/35 blur-3xl" />
+        <div className="absolute top-2/3 -left-20 w-[28rem] h-[28rem] rounded-full bg-cyan-100/50 blur-3xl" />
+        <div className="absolute -bottom-24 right-1/4 w-[30rem] h-[30rem] rounded-full bg-blue-100/40 blur-3xl" />
+      </div>
+
+      <div className="max-w-5xl w-full mx-auto flex flex-col flex-1 min-h-0 relative z-0">
+        {/* Header - Compact Clean Liquid Glass Header */}
+        <header className="saas-header p-3 sm:p-4 mb-2.5 sm:mb-3 flex items-center justify-between flex-shrink-0 gap-2 sm:gap-3 liquid-shimmer">
           <BrandLogo size="md" isUrdu={isUrdu} />
 
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
@@ -244,12 +311,15 @@ function AppContent() {
               }}
               aria-label={isUrdu ? 'معلومات اور اصول' : 'App Information and Guidelines'}
               title={isUrdu ? 'معلومات دیکھیں' : 'View Attribution & Standards'}
-              className="w-8 h-8 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200/80 flex items-center justify-center cursor-pointer transition"
+              className="w-8 h-8 rounded-lg bg-teal-50/80 backdrop-blur-md hover:bg-teal-100/90 text-teal-800 border border-teal-200/80 flex items-center justify-center cursor-pointer transition shadow-xs"
             >
               <Info className="w-4 h-4 text-teal-700" />
             </button>
           </div>
         </header>
+
+        {/* Global Search Bar - Filter Calculators, Training Modules, Documents & Scripts */}
+        <GlobalSearchBar onSelectResult={handleSelectSearchResult} />
 
         {/* Primary Platform Hub Navigation (Calculators, Training, Communication, Videos, Documents, Field Resources, FAQ) */}
         <PlatformHubNavigation
@@ -265,91 +335,226 @@ function AppContent() {
           />
         </div>
 
-        {/* View Switcher: Calculators OR Other Hub Sections */}
-        {activePlatformCategory === 'calculators' && (
-          <>
-            {/* Sticky Horizontal Calculator Quick Selector */}
-            <TopCalculatorNavigation
-              activeSection={activeSection}
-              onSelect={scrollToCalculator}
-            />
+        {/* View Switcher: Calculators OR Other Hub Sections with Spring Transitions */}
+        <AnimatePresence mode="wait" initial={false}>
+          {activePlatformCategory === 'calculators' && (
+            <motion.div
+              key="calculators"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              className="w-full min-w-0"
+            >
+              {/* Sticky Horizontal Calculator Quick Selector */}
+              <TopCalculatorNavigation
+                activeSection={activeSection}
+                onSelect={scrollToCalculator}
+              />
 
-            {/* All 9 Calculators Aligned in Clean Full-Width Container */}
-            <main className="w-full min-w-0 space-y-6 sm:space-y-7 pb-8">
-              <section id="calc-1" className="scroll-mt-24 sm:scroll-mt-28">
-                <ChildAgeCalculator />
-              </section>
+              {/* All 9 Calculators Aligned in Clean Full-Width Container */}
+              <main className="w-full min-w-0 space-y-6 sm:space-y-7 pb-8">
+                <motion.section
+                  id="calc-1"
+                  animate={{
+                    scale: activeSection === 'calc-1' ? 1 : 0.997,
+                  }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                  className={`scroll-mt-24 sm:scroll-mt-28 transition-all duration-300 rounded-2xl ${
+                    activeSection === 'calc-1' ? 'ring-2 ring-teal-500/25 shadow-md' : ''
+                  }`}
+                >
+                  <ChildAgeCalculator />
+                </motion.section>
 
-              <section id="calc-2" className="scroll-mt-24 sm:scroll-mt-28">
-                <VaccineDemandCalculator />
-              </section>
+                <motion.section
+                  id="calc-2"
+                  animate={{
+                    scale: activeSection === 'calc-2' ? 1 : 0.997,
+                  }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                  className={`scroll-mt-24 sm:scroll-mt-28 transition-all duration-300 rounded-2xl ${
+                    activeSection === 'calc-2' ? 'ring-2 ring-teal-500/25 shadow-md' : ''
+                  }`}
+                >
+                  <VaccineDemandCalculator />
+                </motion.section>
 
-              <section id="calc-3" className="scroll-mt-24 sm:scroll-mt-28">
-                <VaccineWastageCalculator />
-              </section>
+                <motion.section
+                  id="calc-3"
+                  animate={{
+                    scale: activeSection === 'calc-3' ? 1 : 0.997,
+                  }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                  className={`scroll-mt-24 sm:scroll-mt-28 transition-all duration-300 rounded-2xl ${
+                    activeSection === 'calc-3' ? 'ring-2 ring-teal-500/25 shadow-md' : ''
+                  }`}
+                >
+                  <VaccineWastageCalculator />
+                </motion.section>
 
-              <section id="calc-4" className="scroll-mt-24 sm:scroll-mt-28">
-                <NACoverageCalculator />
-              </section>
+                <motion.section
+                  id="calc-4"
+                  animate={{
+                    scale: activeSection === 'calc-4' ? 1 : 0.997,
+                  }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                  className={`scroll-mt-24 sm:scroll-mt-28 transition-all duration-300 rounded-2xl ${
+                    activeSection === 'calc-4' ? 'ring-2 ring-teal-500/25 shadow-md' : ''
+                  }`}
+                >
+                  <NACoverageCalculator />
+                </motion.section>
 
-              <section id="calc-5" className="scroll-mt-24 sm:scroll-mt-28">
-                <RefusalCalculator />
-              </section>
+                <motion.section
+                  id="calc-5"
+                  animate={{
+                    scale: activeSection === 'calc-5' ? 1 : 0.997,
+                  }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                  className={`scroll-mt-24 sm:scroll-mt-28 transition-all duration-300 rounded-2xl ${
+                    activeSection === 'calc-5' ? 'ring-2 ring-teal-500/25 shadow-md' : ''
+                  }`}
+                >
+                  <RefusalCalculator />
+                </motion.section>
 
-              <section id="calc-6" className="scroll-mt-24 sm:scroll-mt-28">
-                <MissedChildrenCoverageCalculator />
-              </section>
+                <motion.section
+                  id="calc-6"
+                  animate={{
+                    scale: activeSection === 'calc-6' ? 1 : 0.997,
+                  }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                  className={`scroll-mt-24 sm:scroll-mt-28 transition-all duration-300 rounded-2xl ${
+                    activeSection === 'calc-6' ? 'ring-2 ring-teal-500/25 shadow-md' : ''
+                  }`}
+                >
+                  <MissedChildrenCoverageCalculator />
+                </motion.section>
 
-              <section id="calc-7" className="scroll-mt-24 sm:scroll-mt-28">
-                <CampaignCoverageCalculator />
-              </section>
+                <motion.section
+                  id="calc-7"
+                  animate={{
+                    scale: activeSection === 'calc-7' ? 1 : 0.997,
+                  }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                  className={`scroll-mt-24 sm:scroll-mt-28 transition-all duration-300 rounded-2xl ${
+                    activeSection === 'calc-7' ? 'ring-2 ring-teal-500/25 shadow-md' : ''
+                  }`}
+                >
+                  <CampaignCoverageCalculator />
+                </motion.section>
 
-              <section id="calc-8" className="scroll-mt-24 sm:scroll-mt-28">
-                <DailyCatchUpCalculator />
-              </section>
+                <motion.section
+                  id="calc-8"
+                  animate={{
+                    scale: activeSection === 'calc-8' ? 1 : 0.997,
+                  }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                  className={`scroll-mt-24 sm:scroll-mt-28 transition-all duration-300 rounded-2xl ${
+                    activeSection === 'calc-8' ? 'ring-2 ring-teal-500/25 shadow-md' : ''
+                  }`}
+                >
+                  <DailyCatchUpCalculator />
+                </motion.section>
 
-              <section id="calc-9" className="scroll-mt-24 sm:scroll-mt-28">
-                <Under5Calculator />
-              </section>
-            </main>
-          </>
-        )}
+                <motion.section
+                  id="calc-9"
+                  animate={{
+                    scale: activeSection === 'calc-9' ? 1 : 0.997,
+                  }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                  className={`scroll-mt-24 sm:scroll-mt-28 transition-all duration-300 rounded-2xl ${
+                    activeSection === 'calc-9' ? 'ring-2 ring-teal-500/25 shadow-md' : ''
+                  }`}
+                >
+                  <Under5Calculator />
+                </motion.section>
+              </main>
+            </motion.div>
+          )}
 
-        {activePlatformCategory === 'training' && (
-          <main className="w-full min-w-0 pb-8">
-            <TrainingSection />
-          </main>
-        )}
+          {activePlatformCategory === 'training' && (
+            <motion.main
+              key="training"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              className="w-full min-w-0 pb-8"
+            >
+              <TrainingSection targetModuleId={targetTrainingId} />
+            </motion.main>
+          )}
 
-        {activePlatformCategory === 'communication' && (
-          <main className="w-full min-w-0 pb-8">
-            <CommunicationSection />
-          </main>
-        )}
+          {activePlatformCategory === 'communication' && (
+            <motion.main
+              key="communication"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              className="w-full min-w-0 pb-8"
+            >
+              <CommunicationSection
+                targetScriptId={targetScriptId}
+                onNavigateToVideos={() => setActivePlatformCategory('videos')}
+              />
+            </motion.main>
+          )}
 
-        {activePlatformCategory === 'videos' && (
-          <main className="w-full min-w-0 pb-8">
-            <VideosSection />
-          </main>
-        )}
+          {activePlatformCategory === 'videos' && (
+            <motion.main
+              key="videos"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              className="w-full min-w-0 pb-8"
+            >
+              <VideosSection />
+            </motion.main>
+          )}
 
-        {activePlatformCategory === 'documents' && (
-          <main className="w-full min-w-0 pb-8">
-            <DocumentsSection />
-          </main>
-        )}
+          {activePlatformCategory === 'documents' && (
+            <motion.main
+              key="documents"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              className="w-full min-w-0 pb-8"
+            >
+              <DocumentsSection targetDocId={targetDocId} />
+            </motion.main>
+          )}
 
-        {activePlatformCategory === 'field_resources' && (
-          <main className="w-full min-w-0 pb-8">
-            <FieldResourcesSection />
-          </main>
-        )}
+          {activePlatformCategory === 'field_resources' && (
+            <motion.main
+              key="field_resources"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              className="w-full min-w-0 pb-8"
+            >
+              <FieldResourcesSection />
+            </motion.main>
+          )}
 
-        {activePlatformCategory === 'faq' && (
-          <main className="w-full min-w-0 pb-8">
-            <FaqSection />
-          </main>
-        )}
+          {activePlatformCategory === 'faq' && (
+            <motion.main
+              key="faq"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              className="w-full min-w-0 pb-8"
+            >
+              <FaqSection />
+            </motion.main>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Floating Back to Top Button */}

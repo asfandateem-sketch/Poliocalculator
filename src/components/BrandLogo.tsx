@@ -23,40 +23,41 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 
   return (
     <div className={`flex items-center gap-2.5 sm:gap-3 ${className}`} dir={isUrdu ? 'rtl' : 'ltr'}>
-      {/* Precision Brand Icon */}
+      {/* Precision 2026 Liquid Glass Brand Emblem */}
       <div
-        className={`${iconDimensions} rounded-xl bg-teal-800 text-white flex items-center justify-center shadow-xs border border-teal-700/50 flex-shrink-0 relative overflow-hidden`}
+        className={`${iconDimensions} rounded-2xl bg-gradient-to-b from-teal-500 via-teal-700 to-teal-950 text-white flex items-center justify-center shadow-md shadow-teal-950/20 border border-teal-300/40 flex-shrink-0 relative overflow-hidden`}
         aria-hidden="true"
       >
+        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/10 to-white/30 pointer-events-none" />
         <svg
           viewBox="0 0 512 512"
-          className="w-full h-full p-1"
+          className="w-full h-full p-1 relative z-10"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
           {/* Outer Shield Crest */}
           <path
             d="M 256 70 C 336 70 390 100 390 100 L 390 252 C 390 350 292 410 256 435 C 220 410 122 350 122 252 L 122 100 C 122 100 176 70 256 70 Z"
-            fill="#0f766e"
+            fill="#0d9488"
             stroke="#5eead4"
             strokeWidth="12"
           />
           {/* Two Drops Motif */}
           <path
             d="M 226 210 C 226 175 246 150 246 150 C 246 150 266 175 266 210 C 266 230 248 244 246 244 C 244 244 226 230 226 210 Z"
-            fill="#5eead4"
+            fill="#a7f3d0"
           />
           <path
             d="M 252 235 C 252 195 276 168 276 168 C 276 168 300 195 300 235 C 300 260 279 276 276 276 C 273 276 252 260 252 235 Z"
-            fill="#2dd4bf"
-            opacity="0.9"
+            fill="#34d399"
+            opacity="0.95"
           />
           {/* Caliper / Measurement Grid Accents */}
           <line x1="210" y1="320" x2="302" y2="320" stroke="#ffffff" strokeWidth="12" strokeLinecap="round" />
           <line x1="230" y1="305" x2="230" y2="320" stroke="#ffffff" strokeWidth="8" strokeLinecap="round" />
           <line x1="256" y1="298" x2="256" y2="320" stroke="#5eead4" strokeWidth="10" strokeLinecap="round" />
           <line x1="282" y1="305" x2="282" y2="320" stroke="#ffffff" strokeWidth="8" strokeLinecap="round" />
-          <circle cx="256" cy="355" r="16" fill="#0d9488" stroke="#ffffff" strokeWidth="6" />
+          <circle cx="256" cy="355" r="16" fill="#0f766e" stroke="#ffffff" strokeWidth="6" />
         </svg>
       </div>
 
@@ -67,8 +68,9 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
             <span className="text-sm sm:text-base md:text-lg font-extrabold text-slate-900 tracking-tight leading-snug truncate">
               {isUrdu ? 'پولیو فیلڈ ٹولز' : 'Polio Field Tools'}
             </span>
-            <span className="hidden sm:inline-block px-2 py-0.5 text-[11px] font-semibold text-teal-800 bg-teal-50 border border-teal-200/80 rounded-md">
-              {isUrdu ? 'فیلڈ ریسورسز' : 'Field Hub'}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold text-teal-900 bg-teal-500/10 border border-teal-500/20 rounded-full backdrop-blur-md shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              {isUrdu ? '2026 ایڈیشن' : '2026 Edition'}
             </span>
           </div>
           {tagline && (

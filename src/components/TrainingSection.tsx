@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../LanguageContext';
 import { triggerHaptic } from '../haptics';
 import {
@@ -169,10 +169,27 @@ const TRAINING_MODULES: TrainingModule[] = [
   },
 ];
 
-export const TrainingSection: React.FC = () => {
+interface TrainingSectionProps {
+  targetModuleId?: string;
+}
+
+export const TrainingSection: React.FC<TrainingSectionProps> = ({ targetModuleId }) => {
   const { isUrdu } = useLanguage();
   const [expandedId, setExpandedId] = useState<string>('train-1');
   const [activeCategory, setActiveCategory] = useState<string>('all');
+
+  useEffect(() => {
+    if (targetModuleId) {
+      setExpandedId(targetModuleId);
+      setActiveCategory('all');
+      setTimeout(() => {
+        const el = document.getElementById(targetModuleId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  }, [targetModuleId]);
 
   const toggleExpand = (id: string) => {
     triggerHaptic('light');
@@ -245,6 +262,7 @@ export const TrainingSection: React.FC = () => {
           return (
             <div
               key={module.id}
+              id={module.id}
               className={`saas-card transition-all duration-200 overflow-hidden ${
                 isExpanded ? 'ring-1 ring-teal-500/40 shadow-sm' : ''
               }`}

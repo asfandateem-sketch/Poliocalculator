@@ -17,14 +17,14 @@ export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen, onCl
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
     >
       <div
-        className="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]"
+        className="liquid-glass-modal w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden border border-white/90 flex flex-col max-h-[90vh] liquid-shimmer"
         dir={isUrdu ? 'rtl' : 'ltr'}
       >
         {/* Header */}
-        <div className="p-4 bg-teal-800 text-white flex items-center justify-between">
+        <div className="p-4 bg-gradient-to-r from-teal-800 via-teal-700 to-teal-800 text-white flex items-center justify-between border-b border-teal-600/30">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-teal-700/80 flex items-center justify-center flex-shrink-0">
               <Shield className="w-4 h-4 text-white" />

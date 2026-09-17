@@ -1,0 +1,635 @@
+import type { PlatformCategoryKey } from './platformNavigation';
+
+export type SearchItemType =
+  | 'calculator'
+  | 'training'
+  | 'document'
+  | 'communication'
+  | 'video'
+  | 'field_resources'
+  | 'faq';
+
+export interface SearchableItem {
+  id: string;
+  category: PlatformCategoryKey;
+  type: SearchItemType;
+  typeLabelEn: string;
+  typeLabelUr: string;
+  titleEn: string;
+  titleUr: string;
+  descriptionEn: string;
+  descriptionUr: string;
+  badgeEn: string;
+  badgeUr: string;
+  keywords: string[];
+  targetAnchor: string;
+  formulaOrCode?: string;
+  highlightTextEn?: string;
+  highlightTextUr?: string;
+}
+
+export const SEARCHABLE_ITEMS: SearchableItem[] = [
+  // ================= CALCULATORS (9 Items) =================
+  {
+    id: 'calc-1',
+    category: 'calculators',
+    type: 'calculator',
+    typeLabelEn: 'Calculator',
+    typeLabelUr: 'کیلکولیٹر',
+    titleEn: 'Child Age Calculator (< 5 Years Eligibility)',
+    titleUr: 'بچے کی عمر کا کیلکولیٹر (5 سال سے کم اہلیت)',
+    descriptionEn: 'Calculate exact child age in years, months, and days from Date of Birth. Verifies strictly under 5th birthday (0 to 59 months) for oral polio vaccine eligibility.',
+    descriptionUr: 'تاریخ پیدائش سے بچے کی اصل عمر سالوں، مہینوں اور دنوں میں معلوم کریں۔ 5ویں سالگرہ سے پہلے (0 تا 59 ماہ) پولیو قطرے پینے کی اہلیت کی تصدیق کرتا ہے۔',
+    badgeEn: '0–59 Months',
+    badgeUr: '0 تا 59 ماہ',
+    keywords: ['age', 'child', 'dob', 'date of birth', 'months', 'years', 'days', 'under 5', '59 months', '5th birthday', 'eligibility', 'عمر', 'پیدائش', 'تاریخ', 'اہلیت', 'مہینے', 'سال'],
+    targetAnchor: 'calc-1',
+    formulaOrCode: 'DOB → Years, Months, Days (Strictly < 5 Years)',
+  },
+  {
+    id: 'calc-2',
+    category: 'calculators',
+    type: 'calculator',
+    typeLabelEn: 'Calculator',
+    typeLabelUr: 'کیلکولیٹر',
+    titleEn: 'bOPV Vaccine Demand Calculator (Vials & Buffer)',
+    titleUr: 'bOPV ویکسین طلب کیلکولیٹر (وائلز اور بفر)',
+    descriptionEn: 'Calculate exact bOPV vials needed for campaign target with standard +10% operational buffer (Fixed bOPV Rule: 1 vial = 20 doses, 2 drops per child).',
+    descriptionUr: 'مہماتی ہدف کے لیے 10 فیصد لاجسٹک بفر کے ساتھ درکار bOPV وائلز کا تعین کریں۔ مقررہ اصول: 1 وائل = 20 خوراکیں، 2 قطرے فی بچہ۔',
+    badgeEn: 'Fixed 20 Doses/Vial',
+    badgeUr: '20 خوراکیں فی وائل',
+    keywords: ['demand', 'vaccine', 'bopv', 'vials', 'buffer', '10%', 'doses', 'drops', 'target', 'order', 'stock', 'طلب', 'وائل', 'خوراکیں', 'بفر', 'ویکسین', 'قطرے', 'سٹاک'],
+    targetAnchor: 'calc-2',
+    formulaOrCode: 'ROUNDUP((Target × 1.10) ÷ 20)',
+  },
+  {
+    id: 'calc-3',
+    category: 'calculators',
+    type: 'calculator',
+    typeLabelEn: 'Calculator',
+    typeLabelUr: 'کیلکولیٹر',
+    titleEn: 'Vaccine Wastage & bOPV Utilization Calculator',
+    titleUr: 'ویکسین کا ضیاع اور استعمال کی شرح کیلکولیٹر',
+    descriptionEn: 'Calculate vaccine wastage rate (%) and wastage factor. Reconcile total doses issued, children vaccinated, and discarded/unusable vials.',
+    descriptionUr: 'ویکسین کے ضیاع کی شرح فیصد اور ویسٹیج فیکٹر معلوم کریں۔ استعمال شدہ وائلز، ویکسینیٹڈ بچوں اور ضائع شدہ خوراکوں کا موازنہ کریں۔',
+    badgeEn: 'Wastage Factor',
+    badgeUr: 'ضیاع کی شرح',
+    keywords: ['wastage', 'waste', 'rate', 'factor', 'utilization', 'discarded', 'loss', 'expired', 'vials used', 'ضیاع', 'نقصان', 'شرح', 'استعمال', 'وائلز'],
+    targetAnchor: 'calc-3',
+    formulaOrCode: '((Total Doses - Vaccinated) ÷ Total Doses) × 100',
+  },
+  {
+    id: 'calc-4',
+    category: 'calculators',
+    type: 'calculator',
+    typeLabelEn: 'Calculator',
+    typeLabelUr: 'کیلکولیٹر',
+    titleEn: 'NA (Not Available) Coverage & Recovery Calculator',
+    titleUr: 'غیر موجود (NA) بچوں کی کوریج اور ریکوری کیلکولیٹر',
+    descriptionEn: 'Calculate percentage of Not Available (NA) children successfully recovered during evening sweeps and catch-up rounds. Benchmark target is strictly ≥ 90%.',
+    descriptionUr: 'شام کے راؤنڈز اور کیچ اپ کے دوران کور کیے گئے غیر حاضر (NA) بچوں کی شرح نکالیں۔ سرکاری بینچ مارک ہدف کم از کم 90 فیصد ہے۔',
+    badgeEn: 'Target ≥ 90%',
+    badgeUr: 'ہدف ≥ 90%',
+    keywords: ['na', 'not available', 'absent', 'recovery', 'sleeping', 'market', 'school', 'sweep', 'catch-up', 'revisit', 'غیر حاضر', 'غیر موجود', 'ریکوری', 'شام کا چکر'],
+    targetAnchor: 'calc-4',
+    formulaOrCode: '(Covered NA ÷ Reported NA) × 100',
+  },
+  {
+    id: 'calc-5',
+    category: 'calculators',
+    type: 'calculator',
+    typeLabelEn: 'Calculator',
+    typeLabelUr: 'کیلکولیٹر',
+    titleEn: 'Refusal & Parental Hesitancy Conversion Calculator',
+    titleUr: 'انکاری کیسز اور شکوک کنورژن کیلکولیٹر',
+    descriptionEn: 'Track refusal conversion rate (%) and identify remaining unaddressed refusals requiring Area In-Charge (AIC) or religious scholar intervention.',
+    descriptionUr: 'انکاری والدین کی کنورژن کی شرح نکالیں اور باقی ماندہ انکاری کیسز کا تعین کریں جن کے لیے ایریا انچارج یا علمائے کرام کی مدد درکار ہے۔',
+    badgeEn: 'Conversion Rate',
+    badgeUr: 'کنورژن کی شرح',
+    keywords: ['refusal', 'conversion', 'hesitancy', 'resistance', 'parental objection', 'converted', 'r cases', 'انکار', 'انکاری', 'کنورژن', 'شکوک', 'اعتراضات'],
+    targetAnchor: 'calc-5',
+    formulaOrCode: '(Covered Refusals ÷ Reported Refusals) × 100',
+  },
+  {
+    id: 'calc-6',
+    category: 'calculators',
+    type: 'calculator',
+    typeLabelEn: 'Calculator',
+    typeLabelUr: 'کیلکولیٹر',
+    titleEn: 'Combined Missed Children (NA + Refusal) Coverage',
+    titleUr: 'مجموعی مسڈ بچے (NA اور انکار) کوریج کیلکولیٹر',
+    descriptionEn: 'Comprehensive deficit tracker combining NA and Refusal children. Computes overall recovery percentage and bOPV vials needed for catch-up teams.',
+    descriptionUr: 'غیر حاضر اور انکاری بچوں کا مشترکہ حساب کتاب۔ مجموعی ریکوری فیصد اور کیچ اپ ٹیموں کے لیے درکار اضافی وائلز معلوم کریں۔',
+    badgeEn: 'Combined Deficit',
+    badgeUr: 'مشترکہ کمی',
+    keywords: ['missed', 'combined', 'na refusal', 'total missed', 'deficit', 'recovery', 'vials needed', 'مسڈ بچے', 'مجموعی', 'غیر حاضر و انکار', 'کمی'],
+    targetAnchor: 'calc-6',
+    formulaOrCode: 'Total Missed = NA + Refusals; Vials = ROUNDUP((Missed × 1.10) ÷ 20)',
+  },
+  {
+    id: 'calc-7',
+    category: 'calculators',
+    type: 'calculator',
+    typeLabelEn: 'Calculator',
+    typeLabelUr: 'کیلکولیٹر',
+    titleEn: 'Campaign Coverage Target Calculator',
+    titleUr: 'مہماتی کوریج ہدف کیلکولیٹر',
+    descriptionEn: 'Measure cumulative campaign achievement against target under-5 population. Official international benchmark requires ≥ 95% total coverage.',
+    descriptionUr: '5 سال سے کم عمر بچوں کے مجموعی ہدف کے مقابلے میں حاصل شدہ کوریج کی پیمائش کریں۔ مہم کی کامیابی کا معیار کم از کم 95 فیصد ہے۔',
+    badgeEn: 'Benchmark ≥ 95%',
+    badgeUr: 'معیار ≥ 95%',
+    keywords: ['coverage', 'campaign target', 'achievement', 'percentage', 'vaccinated', 'benchmark', '95%', 'کوریج', 'ہدف', 'حصول', 'فیصد', 'ویکسینیٹڈ'],
+    targetAnchor: 'calc-7',
+    formulaOrCode: '(Vaccinated ÷ Target) × 100 (Benchmark ≥ 95%)',
+  },
+  {
+    id: 'calc-8',
+    category: 'calculators',
+    type: 'calculator',
+    typeLabelEn: 'Calculator',
+    typeLabelUr: 'کیلکولیٹر',
+    titleEn: 'Daily Catch-Up Target Calculator',
+    titleUr: 'یومیہ کیچ اپ ہدف کیلکولیٹر',
+    descriptionEn: 'Determine the exact daily vaccination pace required across remaining campaign days to achieve 100% target coverage and avoid campaign backlog.',
+    descriptionUr: 'مہم کے بقیہ دنوں میں 100 فیصد ہدف مکمل کرنے کے لیے روزانہ درکار بچوں کی تعداد کا درست حساب لگائیں۔',
+    badgeEn: 'Daily Pace',
+    badgeUr: 'یومیہ ہدف',
+    keywords: ['catch-up', 'daily target', 'remaining days', 'pace', 'backlog', 'daily catchup', 'کیچ اپ', 'یومیہ', 'بقیہ دن', 'روزانہ ہدف'],
+    targetAnchor: 'calc-8',
+    formulaOrCode: 'ROUNDUP((Target - Vaccinated) ÷ Remaining Days)',
+  },
+  {
+    id: 'calc-9',
+    category: 'calculators',
+    type: 'calculator',
+    typeLabelEn: 'Calculator',
+    typeLabelUr: 'کیلکولیٹر',
+    titleEn: 'Target Under-5 Children Cohort Estimator (15% Rule)',
+    titleUr: '5 سال سے کم عمر بچوں کا کوہاورٹ کیلکولیٹر (15 فیصد اصول)',
+    descriptionEn: 'Estimate target under-5 child population from total Union Council or village population using standard 15% epidemiological demographic distribution.',
+    descriptionUr: 'یونین کونسل یا محلے کی کل آبادی سے 15 فیصد کے مقررہ اصول کے تحت 5 سال سے کم عمر بچوں کا ہدف معلوم کریں۔',
+    badgeEn: '15% Standard Ratio',
+    badgeUr: '15 فیصد تناسب',
+    keywords: ['cohort', 'population', 'under-5', '15%', 'estimate', 'demographic', 'uc target', 'آبادی', 'کوہاورٹ', 'تخمینہ', '15 فیصد', 'بچے'],
+    targetAnchor: 'calc-9',
+    formulaOrCode: 'ROUNDUP(Total Population × 15%)',
+  },
+
+  // ================= TRAINING SOPs (4 Items) =================
+  {
+    id: 'train-1',
+    category: 'training',
+    type: 'training',
+    typeLabelEn: 'Training SOP',
+    typeLabelUr: 'تربیت و SOP',
+    titleEn: 'bOPV Vaccine Vial Handling & VVM Interpretation SOP',
+    titleUr: 'bOPV ویکسین وائل ہینڈلنگ اور VVM کی جانچ کا معیاری طریقہ',
+    descriptionEn: 'Cold chain maintenance (+2°C to +8°C), conditioning 4 ice packs, foam pad usage in blue vaccine carrier, and interpreting Vaccine Vial Monitor Stages 1 to 4.',
+    descriptionUr: 'کولڈ چین کا تحفظ (+2°C تا +8°C)، 4 آئس پیکس کی کنڈیشننگ، کیرئیر میں فوم پیڈ کا استعمال اور VVM کے چاروں مراحل کی جانچ۔',
+    badgeEn: 'Cold Chain & VVM',
+    badgeUr: 'کولڈ چین و VVM',
+    keywords: ['vvm', 'vvm stage', 'vvm 1', 'vvm 2', 'vvm 3', 'vvm 4', 'cold chain', 'ice packs', 'foam pad', 'vaccine carrier', 'temperature', 'sloshing', '+2 to +8', 'وی وی ایم', 'کولڈ چین', 'آئس پیکس', 'درجہ حرارت'],
+    targetAnchor: 'train-1',
+    highlightTextEn: 'Stage 1 & 2 = Safe to Use | Stage 3 & 4 = DO NOT USE (Discard)',
+    highlightTextUr: 'اسٹیج 1 اور 2 = استعمال کریں | اسٹیج 3 اور 4 = ہرگز استعمال نہ کریں',
+  },
+  {
+    id: 'train-2',
+    category: 'training',
+    type: 'training',
+    typeLabelEn: 'Training SOP',
+    typeLabelUr: 'تربیت و SOP',
+    titleEn: 'Standard House Marking & Finger Marking Protocol SOP',
+    titleUr: 'گھروں پر چاک مارکنگ اور بچے کی انگلی پر نشان لگانے کا طریقہ',
+    descriptionEn: 'Chalk marking on household entrance doors in 4-quadrant format (Date, Team No., Target/Vaccinated, NA/R) and indelible ink on child LEFT little finger cuticle.',
+    descriptionUr: 'گھر کے مرکزی دروازے پر چار خانوں میں چاک مارکنگ اور بچے کے بائیں ہاتھ کی چھوٹی انگلی کے ناخن و جلد پر انمٹ سیاہی لگانے کا طریقہ۔',
+    badgeEn: 'Chalk & Finger Inking',
+    badgeUr: 'چاک اور انگلی کا نشان',
+    keywords: ['marking', 'house marking', 'door marking', 'chalk', 'finger marking', 'finger mark', 'left pinky', 'indelible ink', 'cuticle', 'quadrant', 'مارکنگ', 'چاک', 'انگلی کا نشان', 'سیاہی', 'دروازہ', 'بایاں ہاتھ'],
+    targetAnchor: 'train-2',
+    highlightTextEn: 'Always mark LEFT little finger; Never pre-mark doors without vaccinating',
+    highlightTextUr: 'ہمیشہ بائیں ہاتھ کی چھوٹی انگلی پر نشان لگائیں؛ تصدیق کے بغیر دروازے پر پیشگی مارکنگ ممنوع ہے',
+  },
+  {
+    id: 'train-3',
+    category: 'training',
+    type: 'training',
+    typeLabelEn: 'Training SOP',
+    typeLabelUr: 'تربیت و SOP',
+    titleEn: 'Catchment Area Microplanning & Workload Calculation SOP',
+    titleUr: 'کیچمنٹ ایریا مائیکرو پلاننگ اور ٹیم ورک لوڈ کی تقسیم',
+    descriptionEn: 'Microplanning guidance for Area In-Charges (AICs): dividing Union Councils into day-wise clusters, setting mobile team workloads (80–150 children/day), and route maps.',
+    descriptionUr: 'ایریا انچارجز کے لیے یوسی مائیکرو پلاننگ: علاقوں کی یومیہ کلسٹرز میں تقسیم، موبائل ٹیموں کا ورک لوڈ (80 تا 150 بچے) اور روٹ میپس۔',
+    badgeEn: 'Microplanning & AIC',
+    badgeUr: 'مائیکرو پلاننگ',
+    keywords: ['microplan', 'microplanning', 'workload', 'aic', 'supervisor', 'clusters', 'routes', '80-150 children', 'catchment', 'ucmo', 'مائیکرو پلاننگ', 'ورک لوڈ', 'ایریا انچارج', 'نقشہ', 'کلسٹر'],
+    targetAnchor: 'train-3',
+    highlightTextEn: 'Urban: 120–150 children/day | Rural: 80–100 children/day',
+    highlightTextUr: 'شہری علاقے: 120 تا 150 بچے فی دن | دیہی علاقے: 80 تا 100 بچے',
+  },
+  {
+    id: 'train-4',
+    category: 'training',
+    type: 'training',
+    typeLabelEn: 'Training SOP',
+    typeLabelUr: 'تربیت و SOP',
+    titleEn: 'Identification of Zero-Dose & High-Risk Mobile Populations SOP',
+    titleUr: 'زیرو ڈوز اور متحرک آبادیوں (خانہ بدوش، مہاجرین) کی ٹریکنگ',
+    descriptionEn: 'Surveillance strategies for identifying unregistered newborns, zero-dose children missing routine EPI, brick kiln settlements, and seasonal migrant families.',
+    descriptionUr: 'نوزائیدہ بچوں، اینٹوں کے بھٹہ مزدوروں، خانہ بدوش قبائل اور روٹین حفاظتی ٹیکوں سے محروم زیرو ڈوز بچوں کی تلاش کا طریقہ کار۔',
+    badgeEn: 'Zero-Dose & Migrants',
+    badgeUr: 'زیرو ڈوز اور مہاجرین',
+    keywords: ['zero dose', 'zero-dose', 'newborn', 'brick kiln', 'migrants', 'nomads', 'refugees', 'surveillance', 'lhw', 'epi card', 'زیرو ڈوز', 'نوزائیدہ', 'بھٹہ', 'خانہ بدوش', 'مہاجرین'],
+    targetAnchor: 'train-4',
+    highlightTextEn: 'Newborns < 14 days strictly eligible for birth dose; Cross-check EPI cards',
+    highlightTextUr: 'پیدائش سے 14 دن تک کے نوزائیدہ بچے کو زیرو ڈوز لازمی پلائیں',
+  },
+
+  // ================= DOCUMENTS & FORMS (4 Items) =================
+  {
+    id: 'doc-1',
+    category: 'documents',
+    type: 'document',
+    typeLabelEn: 'Document / Form',
+    typeLabelUr: 'دستاویز و فارم',
+    titleEn: 'FORM-A: Mobile Team Daily Tally Sheet',
+    titleUr: 'فارم اے: موبائل ٹیم کا یومیہ ٹیلی شیٹ فارم',
+    descriptionEn: 'The primary daily operational tally record filled house-to-house. Tracks door numbers, under-5 children present, vaccinated with 2 drops, NA reasons, and refusals.',
+    descriptionUr: 'موبائل ٹیموں کا یومیہ ٹیلی فارم۔ اس میں گھر نمبر، کل بچے، ویکسینیٹڈ بچے، غیر حاضری (NA) کی وجوہات اور انکار درج کیے جاتے ہیں۔',
+    badgeEn: 'FORM-A • 2 Pages',
+    badgeUr: 'فارم اے • 2 صفحات',
+    keywords: ['form a', 'form-a', 'tally sheet', 'daily tally', 'record', 'household tally', 'mobile team form', 'left little finger mark', 'فارم اے', 'ٹیلی شیٹ', 'روزانہ ریکارڈ', 'موبائل ٹیم فارم'],
+    targetAnchor: 'doc-1',
+    highlightTextEn: 'Reconciled daily at 4:00 PM evening UC debriefing meeting',
+    highlightTextUr: 'روزانہ شام 4 بجے یونین کونسل کے جائزہ اجلاس میں جمع کروایا جاتا ہے',
+  },
+  {
+    id: 'doc-2',
+    category: 'documents',
+    type: 'document',
+    typeLabelEn: 'Document / Form',
+    typeLabelUr: 'دستاویز و فارم',
+    titleEn: 'FORM-B: Area Supervisor Monitoring & Validation Checklist',
+    titleUr: 'فارم بی: ایریا سپروائزر مانیٹرنگ اور تصدیقی چیک لسٹ',
+    descriptionEn: 'Supervisory monitoring checklist used by Area Supervisors to spot-check 10 randomly selected households per team to validate finger marks, door marking, and route.',
+    descriptionUr: 'ایریا سپروائزر کا تصدیقی فارم: ہر موبائل ٹیم کے علاقے سے 10 گھروں کا بے ترتیب انتخاب کر کے انگلی کے نشانات اور چاک مارکنگ کی تصدیق۔',
+    badgeEn: 'FORM-B • 3 Pages',
+    badgeUr: 'فارم بی • 3 صفحات',
+    keywords: ['form b', 'form-b', 'supervisor form', 'validation', 'monitoring checklist', 'spot check', '10 houses', 'aic checklist', 'فارم بی', 'سپروائزر', 'مانیٹرنگ', 'تصدیقی فارم'],
+    targetAnchor: 'doc-2',
+    highlightTextEn: 'Cross-check 10 houses per team route to verify ink marks & chalk accuracy',
+    highlightTextUr: 'ہر ٹیم کے روٹ سے 10 گھروں کی تصدیق اور انگلی کے نشانات کی جانچ',
+  },
+  {
+    id: 'doc-3',
+    category: 'documents',
+    type: 'document',
+    typeLabelEn: 'Document / Form',
+    typeLabelUr: 'دستاویز و فارم',
+    titleEn: 'FORM-C: Cold Chain & bOPV Inventory Log Sheet',
+    titleUr: 'فارم سی: کولڈ چین اور bOPV انوینٹری لاگ شیٹ',
+    descriptionEn: 'Official stock ledger maintained at UC Cold Chain Points. Logs daily bOPV vials received, returned usable, discarded/wasted, and morning/evening carrier temperatures.',
+    descriptionUr: 'یونین کونسل کولڈ چین پوائنٹ کا سرکاری رجسٹر۔ جاری کردہ وائلز، قابل استعمال واپسی، ضائع شدہ وائلز اور صبح و شام کا درجہ حرارت درج ہوتا ہے۔',
+    badgeEn: 'FORM-C • 1 Page Log',
+    badgeUr: 'فارم سی • 1 صفحہ',
+    keywords: ['form c', 'form-c', 'cold chain log', 'inventory', 'stock sheet', 'vials issued', 'vials returned', 'carrier temperature', 'فارم سی', 'انوینٹری', 'اسٹاک لاگ', 'کولڈ چین لاگ'],
+    targetAnchor: 'doc-3',
+    highlightTextEn: 'Track batch numbers, expiration dates, and morning/evening temperatures',
+    highlightTextUr: 'بیچ نمبر، ایکسپائری اور صبح و شام کا درجہ حرارت ریکارڈ کریں',
+  },
+  {
+    id: 'doc-4',
+    category: 'documents',
+    type: 'document',
+    typeLabelEn: 'Document / Form',
+    typeLabelUr: 'دستاویز و فارم',
+    titleEn: 'SOP-PTP: Permanent Transit Post Protocol & Roster',
+    titleUr: 'ٹرانزٹ پوسٹ پروٹوکول: بس اڈوں، ٹول پلازوں اور ریلوے پر ویکسینیشن',
+    descriptionEn: 'Operating guidelines for fixed transit teams stationed at high-volume movement hubs: bus terminals, railway stations, toll plazas, and provincial borders.',
+    descriptionUr: 'بس ٹرمینلز، ریلوے اسٹیشنز، ٹول پلازوں اور صوبائی بارڈرز پر قائم مستقل ٹرانزٹ پوسٹس (PTPs) کے لیے فیلڈ ضابطہ کار۔',
+    badgeEn: 'SOP-PTP • Protocol',
+    badgeUr: 'ٹرانزٹ پروٹوکول',
+    keywords: ['ptp', 'sop ptp', 'transit post', 'bus stand', 'railway station', 'toll plaza', 'border crossing', 'traveling children', 'ٹرانزٹ پوائنٹ', 'بس اڈہ', 'ریلوے', 'ٹول پلازہ', 'مسافر بچے'],
+    targetAnchor: 'doc-4',
+    highlightTextEn: 'Verify ink marks on all inbound and outbound children; Shift handover logs',
+    highlightTextUr: 'داخل ہونے اور نکلنے والے تمام بچوں کی انگلیوں کے نشانات کی جانچ',
+  },
+
+  // ================= COMMUNICATION SCRIPTS (4 Items) =================
+  {
+    id: 'comm-1',
+    category: 'communication',
+    type: 'communication',
+    typeLabelEn: 'Dialogue Script',
+    typeLabelUr: 'مکالماتی سکرپٹ',
+    titleEn: 'Repeated Doses: "Why Does My Child Need Drops Again?"',
+    titleUr: 'بار بار مہم کا سوال: "میرے بچے نے پچھلے ماہ بھی قطرے پیے، اب دوبارہ کیوں؟"',
+    descriptionEn: 'Field persuasion script explaining why polio drops are repeated: each dose builds an invisible shield layer of gut immunity against environmental poliovirus.',
+    descriptionUr: 'والدین کو سمجھانے کے لیے سکرپٹ کہ ہر خوراک بچے کی آنتوں میں مدافعت کی ایک نئی مضبوط حفاظتی تہہ بناتی ہے۔',
+    badgeEn: 'Gut Immunity Shield',
+    badgeUr: 'حفاظتی ڈھال',
+    keywords: ['repeated doses', 'again and again', 'why drops again', 'multiple doses', 'gut immunity', 'shield', 'persuasion script', 'بار بار', 'قطرے دوبارہ', 'قوت مدافعت', 'ڈھال', 'سکرپٹ'],
+    targetAnchor: 'comm-1',
+    highlightTextEn: 'Use the "layer of armor" analogy; Never blame or argue with parents',
+    highlightTextUr: 'حفاظتی ڈھال یا تہہ کی مثال دیں؛ والدین سے کبھی بحث نہ کریں',
+  },
+  {
+    id: 'comm-2',
+    category: 'communication',
+    type: 'communication',
+    typeLabelEn: 'Dialogue Script',
+    typeLabelUr: 'مکالماتی سکرپٹ',
+    titleEn: 'Child Sickness: "My Child Has a Mild Fever or Cough Today"',
+    titleUr: 'بیماری یا نزلہ زکام: "بچے کو ہلکا بخار ہے، اس لیے قطرے نہیں پلوانے"',
+    descriptionEn: 'Dialogue points reassuring caregivers that bOPV is safe in mild illness, cough, or diarrhea, and sick children need protection even more due to vulnerable immunity.',
+    descriptionUr: 'والدین کو مطمئن کریں کہ ہلکے بخار یا نزلہ زکام میں قطرے بالکل محفوظ ہیں اور بیمار بچے کو وائرس سے تحفظ کی زیادہ ضرورت ہوتی ہے۔',
+    badgeEn: 'Safe in Mild Illness',
+    badgeUr: 'ہلکے بخار میں محفوظ',
+    keywords: ['fever', 'cough', 'illness', 'sick child', 'mild fever', 'diarrhea', 'safety', 'بخار', 'بیمار بچہ', 'کھانسی', 'نزلہ', 'حفاظت'],
+    targetAnchor: 'comm-2',
+    highlightTextEn: 'Drops do not interact with antibiotics or increase fever; Safe & gentle',
+    highlightTextUr: 'قطرے بخار نہیں بڑھاتے اور نہ ہی ادویات میں رکاوٹ بنتے ہیں',
+  },
+  {
+    id: 'comm-3',
+    category: 'communication',
+    type: 'communication',
+    typeLabelEn: 'Dialogue Script',
+    typeLabelUr: 'مکالماتی سکرپٹ',
+    titleEn: 'Halal Certification & Islamic Scholars Endorsement Script',
+    titleUr: 'حلال حیثیت و شرعی فتوے: "کیا ویکسین حلال ہے؟"',
+    descriptionEn: 'Clear explanation citing unanimous Fatwas from Islamic Council of Ideology Pakistan, Al-Azhar, and Grand Muftis confirming bOPV contains no prohibited ingredients.',
+    descriptionUr: 'اسلامی نظریاتی کونسل پاکستان اور جامعہ الازہر کے فتاویٰ کے حوالے سے وضاحت کہ پولیو ویکسین 100 فیصد حلال اور پاک اجزاء پر مشتمل ہے۔',
+    badgeEn: '100% Halal Fatwa',
+    badgeUr: '100% حلال فتاویٰ',
+    keywords: ['halal', 'fatwa', 'islamic', 'religious', 'al-azhar', 'council of islamic ideology', 'ingredients', 'haram', 'حلال', 'فتویٰ', 'شرعی حیثیت', 'اسلامی نظریاتی کونسل', 'مفتی'],
+    targetAnchor: 'comm-3',
+    highlightTextEn: 'Unanimously endorsed by Islamic Council of Ideology Pakistan & Al-Azhar',
+    highlightTextUr: 'اسلامی نظریاتی کونسل اور جامعہ الازہر کے متفقہ فتاویٰ کی تائید',
+  },
+  {
+    id: 'comm-4',
+    category: 'communication',
+    type: 'communication',
+    typeLabelEn: 'Dialogue Script',
+    typeLabelUr: 'مکالماتی سکرپٹ',
+    titleEn: 'Newborn Eligibility: "My Baby Is Only 2 Days Old"',
+    titleUr: 'نوزائیدہ بچہ: "میرا بچہ صرف 2 دن کا ہے، کیا اتنے چھوٹے کو قطرے دے سکتے ہیں؟"',
+    descriptionEn: 'Script explaining why newborns are the most vulnerable and must receive bOPV Zero Dose from day 1 for immediate mucosal defense before returning home.',
+    descriptionUr: 'والدین کو سمجھائیں کہ نومولود بچے کو پیدائش کے پہلے دن سے ہی زیرو ڈوز دینا لازمی ہے تاکہ فوری تحفظ حاصل ہو۔',
+    badgeEn: 'Eligible from Day 1',
+    badgeUr: 'پہلے دن سے اہل',
+    keywords: ['newborn', 'infant', 'baby', 'day 1', 'birth dose', 'zero dose', 'mother', 'نوزائیدہ', 'پیدائش', 'پہلا دن', 'نومولود'],
+    targetAnchor: 'comm-4',
+    highlightTextEn: 'Newborns strictly eligible from day 1; bOPV birth dose is gentle & vital',
+    highlightTextUr: 'پہلے دن سے اہل؛ پیدائشی خوراک بچے کی زندگی بچانے کے لیے ناگزیر ہے',
+  },
+
+  // ================= PROVINCIAL RESOURCES & FAQ (High Intent) =================
+  {
+    id: 'res-kp',
+    category: 'field_resources',
+    type: 'field_resources',
+    typeLabelEn: 'Field Resource',
+    typeLabelUr: 'صوبائی رہنمائی',
+    titleEn: 'Khyber Pakhtunkhwa & Merged Districts Field Strategy',
+    titleUr: 'خیبر پختونخوا اور ضم شدہ قبائلی اضلاع کی فیلڈ حکمت عملی',
+    descriptionEn: 'Operational guidelines for South KP (Waziristan, Bannu, Lakki Marwat, Tank) and Peshawar block: CBV deployment, security protocols, and jirga advocacy.',
+    descriptionUr: 'جنوبی اضلاع اور پشاور زون میں پولیو مہم کے حفاظتی اور آپریشنل پروٹوکولز اور جرگہ مکالمہ۔',
+    badgeEn: 'KP Strategy',
+    badgeUr: 'خیبر پختونخوا',
+    keywords: ['kp', 'khyber pakhtunkhwa', 'waziristan', 'bannu', 'peshawar', 'merged districts', 'fata', 'خیبر پختونخوا', 'وزیرستان', 'بنوں', 'پشاور'],
+    targetAnchor: 'field_resources',
+  },
+  {
+    id: 'res-sindh',
+    category: 'field_resources',
+    type: 'field_resources',
+    typeLabelEn: 'Field Resource',
+    typeLabelUr: 'صوبائی رہنمائی',
+    titleEn: 'Sindh & Karachi Urban Informal Settlements Strategy',
+    titleUr: 'سندھ اور کراچی کی کچی آبادیوں و گنجان علاقوں کی حکمت عملی',
+    descriptionEn: 'Protocols for Karachi high-risk union councils: Gadap, Baldia, Orangi, Site, and Keamari. Multi-lingual teams, evening sweep tactics, and transit coverage.',
+    descriptionUr: 'کراچی کی ہائی رسک یوسیز (گڈاپ، بلدیہ، اورنگی، کیماڑی) میں کثیر لسانی ٹیموں اور ایوننگ سویپ کی حکمت عملی۔',
+    badgeEn: 'Sindh & Karachi',
+    badgeUr: 'سندھ و کراچی',
+    keywords: ['sindh', 'karachi', 'gadap', 'baldia', 'orangi', 'urban informal', 'katchi abadi', 'سندھ', 'کراچی', 'گڈاپ', 'بلدیہ'],
+    targetAnchor: 'field_resources',
+  },
+  {
+    id: 'faq-fixed-rule',
+    category: 'faq',
+    type: 'faq',
+    typeLabelEn: 'FAQ & Standards',
+    typeLabelUr: 'سوال و جواب',
+    titleEn: 'Fixed bOPV Rule: 1 Vial = 20 Doses (2 Drops/Child)',
+    titleUr: 'لازمی اصول: 1 وائل = 20 خوراکیں اور 2 قطرے فی بچہ',
+    descriptionEn: 'Official technical justification for the fixed 20 doses per vial standard. Why dilution or altering drop counts is strictly forbidden.',
+    descriptionUr: 'ہر وائل میں 20 معیاری خوراکوں اور 2 قطرے فی بچہ کے عالمی فارمولے کی تکنیکی وضاحت۔',
+    badgeEn: 'Rule Standard',
+    badgeUr: 'معیاری اصول',
+    keywords: ['fixed rule', '1 vial 20 doses', '2 drops', 'dosage', 'dilution', 'faq', 'اصول', 'خوراکیں', 'قطرے'],
+    targetAnchor: 'faq',
+  },
+
+  // ================= COMMUNICATION RESOURCES & VIDEO FOLDERS (High Intent) =================
+  {
+    id: 'vid-folder-hcp',
+    category: 'videos',
+    type: 'video',
+    typeLabelEn: 'Video Folder',
+    typeLabelUr: 'ویڈیو فولڈر',
+    titleEn: 'Health Care Professionals Videos (Folder)',
+    titleUr: 'ہیلتھ کیئر پروفیشنلز ویڈیوز (فولڈر)',
+    descriptionEn: 'Endorsements from Pediatricians, Chief Medical Officers, and Immunization Specialists regarding bOPV safety, multiple doses, and mild sickness protocols.',
+    descriptionUr: 'ماہرین اطفال، میڈیکل آفیسرز اور حفاظتی ٹیکہ جات کے ماہرین کے مستند طبی پیغامات برائے حفاظت، بار بار خوراک اور بخار۔',
+    badgeEn: 'Pediatric & Clinical',
+    badgeUr: 'طبی و اطفال',
+    keywords: ['healthcare', 'health care', 'pediatrician', 'doctor', 'medical', 'fever', 'safety', 'halth care', '1lhdR4hNbFfSYtkff86vclmH-r4vzUmgP', 'drive folder', 'google drive', 'ہیلتھ کیئر', 'ڈاکٹر', 'طبی', 'اطفال', 'بخار'],
+    targetAnchor: 'videos',
+    highlightTextEn: 'Pediatric masterclasses & clinical statements in Google Drive folder (Drive: 1lhdR4hNbFfSYtkff86vclmH-r4vzUmgP)',
+    highlightTextUr: 'ماہرین اطفال کے مستند بیانات اور کلینیکل پیغامات (گوگل ڈرائیو فولڈر 1lhdR4hNbFfSYtkff86vclmH-r4vzUmgP)',
+  },
+  {
+    id: 'vid-folder-comm',
+    category: 'videos',
+    type: 'video',
+    typeLabelEn: 'Video Folder',
+    typeLabelUr: 'ویڈیو فولڈر',
+    titleEn: 'Community Influencers Videos (Folder)',
+    titleUr: 'کمیونٹی انفلوئنسرز ویڈیوز (فولڈر)',
+    descriptionEn: 'Tribal elders, Jirga chiefs, school headmasters, and lady health champions advocating door-to-door acceptance.',
+    descriptionUr: 'قبائلی عمائدین، جرگہ مشران، سکول ہیڈ ماسٹرز اور لیڈی ہیلتھ چیمپئنز کے مؤثر پیغامات برائے عوامی قبولیت۔',
+    badgeEn: 'Tribal & Civic',
+    badgeUr: 'عوامی و قبائلی',
+    keywords: ['community', 'influencers', 'jirga', 'elders', 'school', 'headmaster', 'کمیونٹی', 'جرگہ', 'عمائدین', 'سکول'],
+    targetAnchor: 'videos',
+  },
+  {
+    id: 'vid-folder-rel',
+    category: 'videos',
+    type: 'video',
+    typeLabelEn: 'Video Folder',
+    typeLabelUr: 'ویڈیو فولڈر',
+    titleEn: 'Religious Influencers Videos (Folder)',
+    titleUr: 'علمائے کرام و مذہبی رہنما ویڈیوز (فولڈر)',
+    descriptionEn: 'Grand Muftis, Mosque Imams, and Council of Islamic Ideology scholars confirming 100% Halal certification and Shariah obligation of health preservation.',
+    descriptionUr: 'اسلامی نظریاتی کونسل، جامعہ الازہر اور جید مفتیان کرام کے تصدیق شدہ فتاویٰ برائے حلال حیثیت و تحفظ صحت۔',
+    badgeEn: 'Fatwas & Shariah',
+    badgeUr: 'فتاویٰ و شرعی احکام',
+    keywords: ['religious', 'ulema', 'fatwa', 'halal', 'islamic', 'cii', '1RmIO_PT5WOd07DYy17gwpQtKO8SW9QVi', 'drive folder', 'google drive', 'مذہبی', 'علماء', 'فتویٰ', 'حلال', 'شریعت'],
+    targetAnchor: 'videos',
+    highlightTextEn: 'Religious Influencers Videos synced from Google Drive (Folder ID: 1RmIO_PT5WOd07DYy17gwpQtKO8SW9QVi)',
+    highlightTextUr: 'علمائے کرام و مذہبی رہنما ویڈیوز گوگل ڈرائیو سنک (فولڈر 1RmIO_PT5WOd07DYy17gwpQtKO8SW9QVi)',
+  },
+  {
+    id: 'vid-folder-pol',
+    category: 'videos',
+    type: 'video',
+    typeLabelEn: 'Video Folder',
+    typeLabelUr: 'ویڈیو فولڈر',
+    titleEn: 'Political & Administrative Videos (Folder)',
+    titleUr: 'سیاسی و انتظامی رہنما ویڈیوز (فولڈر)',
+    descriptionEn: 'Deputy Commissioners, Health Ministers, and Local Government Chairpersons committing state backing, cold chain audits, and security oversight.',
+    descriptionUr: 'ڈپٹی کمشنرز، وزرائے صحت اور بلدیاتی نمائندگان کی جانب سے مہم کی حکومتی سرپرستی اور سکیورٹی یقین دہانی۔',
+    badgeEn: 'Administration',
+    badgeUr: 'انتظامی و سیاسی',
+    keywords: ['political', 'deputy commissioner', 'dc', 'minister', 'administration', 'سیاسی', 'ڈپٹی کمشنر', 'انتظامیہ'],
+    targetAnchor: 'videos',
+  },
+  {
+    id: 'vid-folder-other',
+    category: 'videos',
+    type: 'video',
+    typeLabelEn: 'Video Folder',
+    typeLabelUr: 'ویڈیو فولڈر',
+    titleEn: 'Other Videos & Field Masterclasses (Folder)',
+    titleUr: 'دیگر ویڈیوز اور عملی مظاہرے (فولڈر)',
+    descriptionEn: 'Polio survivor personal journeys, finger ink validation standards, cold chain conditioning, and door chalk marking tutorials.',
+    descriptionUr: 'پولیو سے متاثرہ افراد کے ذاتی پیغامات، انگلی پر انمٹ سیاہی لگانے کا طریقہ، اور دروازے پر چاک مارکنگ کے معیارات۔',
+    badgeEn: 'SOPs & Stories',
+    badgeUr: 'مظاہرے و کہانیاں',
+    keywords: ['other videos', 'survivor', 'chalk marking', 'cold chain', 'sop', 'دیگر', 'سروائیور', 'چاک مارکنگ', 'کولڈ چین'],
+    targetAnchor: 'videos',
+  },
+  {
+    id: 'vid-dr-bawar-shah',
+    category: 'videos',
+    type: 'video',
+    typeLabelEn: 'Pediatric Video Endorsement',
+    typeLabelUr: 'ماہر اطفال ویڈیو پیغام',
+    titleEn: 'Dr. Syed Bawar Shah (President PPA KP): Polio Vaccine Safety Endorsement',
+    titleUr: 'ڈاکٹر سید باور شاہ (صدر پاکستان پیڈیاٹرک ایسوسی ایشن کے پی): پولیو قطرے مکمل محفوظ ہیں',
+    descriptionEn: 'Official pediatric endorsement by PPA KP President addressing caregiver hesitation, fertility rumors, and repeated doses safety.',
+    descriptionUr: 'پاکستان پیڈیاٹرک ایسوسی ایشن کے پی کے صدر کا باضابطہ ویڈیو بیان: والدین کے شبہات اور بار بار قطروں کی سائنسی اہمیت کا حل۔',
+    badgeEn: 'PPA KP Leadership',
+    badgeUr: 'قیادت پی پی اے',
+    keywords: ['bawar', 'syed bawar shah', 'dr bawar', 'ppa', 'paediatrician', 'pediatric', 'doctor', 'safety', '1lhdR4hNbFfSYtkff86vclmH-r4vzUmgP', 'باور', 'سید باور شاہ', 'پی پی اے', 'ڈاکٹر'],
+    targetAnchor: 'videos',
+    highlightTextEn: 'Dr. Syed Bawar Shah (President PPA KP) video endorsement in Health Care Professionals folder',
+    highlightTextUr: 'ڈاکٹر سید باور شاہ (صدر پی پی اے کے پی) کا تصدیق شدہ ویڈیو پیغام برائے صحت اطفال',
+  },
+  {
+    id: 'vid-dr-qasim-khan',
+    category: 'videos',
+    type: 'video',
+    typeLabelEn: 'Pediatric Video Endorsement',
+    typeLabelUr: 'ماہر اطفال ویڈیو پیغام',
+    titleEn: 'Prof. Dr. Muhammad Qasim Khan: Clinical Protocol for bOPV & Newborn Safety',
+    titleUr: 'پروفیسر ڈاکٹر محمد قاسم خان: نوزائیدہ بچوں کے لیے پولیو قطروں کی طبی حفاظت',
+    descriptionEn: 'MMC Mardan Pediatric Chairman explaining why oral polio drops are completely safe for newborns, teething infants, and children with mild illness.',
+    descriptionUr: 'ایم ایم سی مردان کے چیئرمین شعبہ اطفال کی نوزائیدہ اور ہلکے بیمار بچوں کو قطرے پلانے کے طبی فوائد پر رہنمائی۔',
+    badgeEn: 'Pediatric Protocol',
+    badgeUr: 'طبی پروٹوکول',
+    keywords: ['qasim', 'dr qasim', 'qasim khan', 'muhammad qasim', 'mmc mardan', 'newborn', 'fever', 'pediatrician', 'doctor', 'قاسم', 'ڈاکٹر قاسم', 'محمد قاسم خان', 'نوزائیدہ', 'مردان'],
+    targetAnchor: 'videos',
+    highlightTextEn: 'Prof. Dr. Muhammad Qasim Khan clinical video endorsement with portrait thumbnail',
+    highlightTextUr: 'پروفیسر ڈاکٹر محمد قاسم خان کا نوزائیدہ بچوں کی ویکسین پر ویڈیو پیغام',
+  },
+  {
+    id: 'vid-dr-ghulam-qadir',
+    category: 'videos',
+    type: 'video',
+    typeLabelEn: 'Pediatric Video Endorsement',
+    typeLabelUr: 'ماہر اطفال ویڈیو پیغام',
+    titleEn: 'Dr. Ghulam Qadir: Addressing Caregiver Concerns & Vaccine Efficacy',
+    titleUr: 'ڈاکٹر غلام قادر: والدین کے تحفظات کا ازالہ اور ویکسین کی افادیت',
+    descriptionEn: 'Senior consultant pediatrician addressing community queries on multiple campaign rounds, cold chain indicators, and clinical reassurance.',
+    descriptionUr: 'سینئر کنسلٹنٹ پیڈیاٹریشن کا بار بار قطروں اور کولڈ چین کے معیار پر شکوک دور کرنے کا ویڈیو پیغام۔',
+    badgeEn: 'Clinical Endorsement',
+    badgeUr: 'کلینیکل توثیق',
+    keywords: ['ghulam', 'qadir', 'dr ghulam qadir', 'ghulam qadir', 'pediatrician', 'cold chain', 'doctor', 'غلام', 'قادر', 'ڈاکٹر غلام قادر', 'ماہر اطفال'],
+    targetAnchor: 'videos',
+    highlightTextEn: 'Dr. Ghulam Qadir clinical video endorsement with portrait thumbnail',
+    highlightTextUr: 'ڈاکٹر غلام قادر کا ویکسین کی افادیت اور کولڈ چین پر ویڈیو پیغام',
+  },
+  {
+    id: 'vid-gdrive-sync',
+    category: 'videos',
+    type: 'video',
+    typeLabelEn: 'Google Drive Resource',
+    typeLabelUr: 'گوگل ڈرائیو ریسورس',
+    titleEn: 'Google Drive Communication Resources Hub',
+    titleUr: 'گوگل ڈرائیو کمیونیکیشن ریسورسز حب',
+    descriptionEn: 'Access and synchronize your Google Drive folders (Healthcare, Community, Religious, Political, Other) directly within Polio Field Tools.',
+    descriptionUr: 'اپنے گوگل ڈرائیو کے فولڈرز (ہیلتھ کیئر، کمیونٹی، مذہبی، سیاسی، دیگر) کو براہ راست ایپ میں سنک اور براؤز کریں۔',
+    badgeEn: 'Drive Synced',
+    badgeUr: 'گوگل ڈرائیو سنک',
+    keywords: ['google drive', 'drive', 'gdrive', 'folder', 'sync', 'videos', 'گوگل ڈرائیو', 'ڈرائیو', 'فولڈر', 'ویڈیوز'],
+    targetAnchor: 'videos',
+  },
+];
+
+/**
+ * Filter items by query and optional category filter
+ */
+export function searchItems(
+  query: string,
+  categoryFilter: string = 'all',
+  isUrdu: boolean = false
+): SearchableItem[] {
+  const cleanQuery = query.trim().toLowerCase();
+
+  // If no query and filter is all, return empty (search suggestions will be shown instead)
+  if (!cleanQuery && categoryFilter === 'all') {
+    return [];
+  }
+
+  return SEARCHABLE_ITEMS.filter((item) => {
+    // Check category filter
+    if (categoryFilter !== 'all' && item.category !== categoryFilter) {
+      return false;
+    }
+
+    // If query is empty, return all items in that category
+    if (!cleanQuery) {
+      return true;
+    }
+
+    // Split search terms for multi-keyword matching (e.g. "vvm stage" or "vial demand")
+    const terms = cleanQuery.split(/\s+/).filter(Boolean);
+
+    const title = (isUrdu ? item.titleUr : item.titleEn).toLowerCase();
+    const altTitle = (isUrdu ? item.titleEn : item.titleUr).toLowerCase();
+    const desc = (isUrdu ? item.descriptionUr : item.descriptionEn).toLowerCase();
+    const badge = (isUrdu ? item.badgeUr : item.badgeEn).toLowerCase();
+    const formula = (item.formulaOrCode || '').toLowerCase();
+    const keywords = item.keywords.join(' ').toLowerCase();
+
+    const haystack = `${title} ${altTitle} ${desc} ${badge} ${formula} ${keywords}`;
+
+    // All search terms must match haystack
+    return terms.every((term) => haystack.includes(term));
+  }).sort((a, b) => {
+    if (!cleanQuery) return 0;
+    // Boost exact title matches to the top
+    const aTitle = (isUrdu ? a.titleUr : a.titleEn).toLowerCase();
+    const bTitle = (isUrdu ? b.titleUr : b.titleEn).toLowerCase();
+    const aMatchesTitle = aTitle.includes(cleanQuery);
+    const bMatchesTitle = bTitle.includes(cleanQuery);
+
+    if (aMatchesTitle && !bMatchesTitle) return -1;
+    if (!aMatchesTitle && bMatchesTitle) return 1;
+    return 0;
+  });
+}

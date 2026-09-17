@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   CALCULATOR_ITEMS,
   getLocalizedCalcName,
@@ -138,11 +139,11 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
       className="sticky top-2 z-20 mb-5 w-full transition-all"
       dir={isUrdu ? 'rtl' : 'ltr'}
     >
-      <div className="saas-card bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-sm rounded-2xl p-2 sm:p-2.5">
+      <div className="saas-card bg-white/78 backdrop-blur-xl border border-white/85 shadow-[0_12px_28px_-6px_rgba(15,35,65,0.06)] rounded-2xl p-2 sm:p-2.5 liquid-shimmer">
         {/* Top Mini Header with Active Indicator & Quick Overview Trigger */}
         <div className="flex items-center justify-between px-2 pb-2 mb-1 border-b border-slate-100/90 gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-teal-50 border border-teal-200/70 text-teal-800 flex-shrink-0">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-teal-50/80 backdrop-blur-xs border border-teal-200/70 text-teal-800 flex-shrink-0 shadow-2xs">
               <Calculator className="w-3.5 h-3.5 text-teal-700" />
               <span className="text-[11px] font-mono font-bold tracking-tight">
                 {currentCalc.num} / 09
@@ -153,21 +154,32 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
               <span className="text-[11px] font-semibold text-slate-500 hidden sm:inline uppercase tracking-wider font-mono">
                 {isUrdu ? 'موجودہ ٹول:' : 'Active Tool:'}
               </span>
-              <span className="text-xs font-bold text-slate-900 truncate">
-                {currentCalcName}
-              </span>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={currentCalc.id}
+                  initial={{ opacity: 0, y: 3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -3 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                  className="text-xs font-bold text-slate-900 truncate inline-block"
+                >
+                  {currentCalcName}
+                </motion.span>
+              </AnimatePresence>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {/* 9-Tools Grid Overview Modal Trigger */}
-            <button
+            <motion.button
               id="top-nav-overview-btn"
               type="button"
               onClick={handleOpenOverview}
+              whileTap={{ scale: 0.94 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 30 }}
               aria-expanded={isOverviewOpen}
               aria-controls="calculator-overview-modal"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100/80 border border-teal-200/80 transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-teal-800 bg-teal-50/90 hover:bg-teal-100/90 backdrop-blur-xs border border-teal-200/80 transition cursor-pointer shadow-2xs"
               title={isUrdu ? 'تمام 9 ٹولز کی فہرست کھولیں' : 'View all 9 tools in grid'}
             >
               <LayoutGrid className="w-3.5 h-3.5 text-teal-700 flex-shrink-0" />
@@ -175,7 +187,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
                 {isUrdu ? 'تمام ٹولز' : 'All 9 Tools'}
               </span>
               <span className="xs:hidden">9</span>
-            </button>
+            </motion.button>
           </div>
         </div>
 
@@ -187,7 +199,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
               type="button"
               onClick={() => handleScroll('left')}
               aria-label={isUrdu ? 'دائیں سکرول کریں' : 'Scroll left'}
-              className="hidden md:flex absolute left-0 z-10 w-7 h-8 items-center justify-center rounded-lg bg-white/95 text-slate-700 hover:text-teal-700 shadow-md border border-slate-200/80 hover:bg-slate-50 transition -ml-1 cursor-pointer"
+              className="hidden md:flex absolute left-0 z-10 w-7 h-8 items-center justify-center rounded-lg bg-white/90 backdrop-blur-md text-slate-700 hover:text-teal-700 shadow-md border border-white/90 hover:bg-white transition -ml-1 cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -208,7 +220,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
               const shortName = getLocalizedCalcShortName(calc, t, isUrdu);
 
               return (
-                <button
+                <motion.button
                   key={calc.id}
                   id={`top-nav-item-${calc.id}`}
                   role="tab"
@@ -217,15 +229,26 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
                   type="button"
                   onClick={() => handleSelectCalculator(calc.id)}
                   title={fullName}
-                  className={`group relative flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 flex-shrink-0 cursor-pointer ${
+                  whileTap={{ scale: 0.94 }}
+                  transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+                  className={`group relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap flex-shrink-0 cursor-pointer select-none transition-colors duration-150 ${
                     isActive
-                      ? 'bg-teal-700 text-white shadow-sm ring-2 ring-teal-700/20'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200/70'
+                      ? 'text-white'
+                      : 'bg-white/70 hover:bg-white/95 text-slate-700 hover:text-slate-950 border border-white/85 shadow-2xs hover:shadow-xs'
                   }`}
                 >
+                  {/* Spring-animated Active Pill Background */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeCalculatorPill"
+                      className="absolute inset-0 rounded-xl bg-gradient-to-b from-teal-600 via-teal-700 to-teal-900 shadow-[0_6px_16px_rgba(13,148,136,0.32),inset_0_1px_1px_rgba(255,255,255,0.45)] border border-teal-400/50 ring-1 ring-white/25 z-0"
+                      transition={{ type: 'spring', stiffness: 420, damping: 32, mass: 0.8 }}
+                    />
+                  )}
+
                   {/* Number Badge */}
                   <span
-                    className={`w-5 h-5 rounded-md font-mono font-bold text-[10.5px] flex items-center justify-center flex-shrink-0 transition-colors ${
+                    className={`relative z-10 w-5 h-5 rounded-md font-mono font-bold text-[10.5px] flex items-center justify-center flex-shrink-0 transition-colors duration-150 ${
                       isActive
                         ? 'bg-white text-teal-950 font-black shadow-xs'
                         : 'bg-slate-200 text-slate-800 group-hover:bg-slate-300'
@@ -236,14 +259,14 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
 
                   {/* Icon */}
                   <Icon
-                    className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${
+                    className={`relative z-10 w-3.5 h-3.5 flex-shrink-0 transition-colors duration-150 ${
                       isActive ? 'text-teal-100' : 'text-slate-500 group-hover:text-slate-700'
                     }`}
                   />
 
                   {/* Label: Short name on small screens, full name on medium+ */}
                   <span
-                    className={`font-semibold tracking-tight leading-none ${
+                    className={`relative z-10 font-semibold tracking-tight leading-none ${
                       isUrdu ? 'font-arabic text-[12.5px]' : 'text-xs'
                     }`}
                   >
@@ -253,9 +276,13 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
 
                   {/* Active bottom glow bar */}
                   {isActive && (
-                    <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-teal-300 rounded-full" />
+                    <motion.span
+                      layoutId="activeCalculatorGlowBar"
+                      className="absolute bottom-0 left-3 right-3 h-0.5 bg-cyan-300 rounded-full shadow-[0_0_8px_#67e8f9] z-10"
+                      transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                    />
                   )}
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -266,7 +293,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
               type="button"
               onClick={() => handleScroll('right')}
               aria-label={isUrdu ? 'بائیں سکرول کریں' : 'Scroll right'}
-              className="hidden md:flex absolute right-0 z-10 w-7 h-8 items-center justify-center rounded-lg bg-white/95 text-slate-700 hover:text-teal-700 shadow-md border border-slate-200/80 hover:bg-slate-50 transition -mr-1 cursor-pointer"
+              className="hidden md:flex absolute right-0 z-10 w-7 h-8 items-center justify-center rounded-lg bg-white/90 backdrop-blur-md text-slate-700 hover:text-teal-700 shadow-md border border-white/90 hover:bg-white transition -mr-1 cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -275,154 +302,166 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
       </div>
 
       {/* Grid Overview Modal / Drawer (when clicking "All 9 Tools") */}
-      {isOverviewOpen && (
-        <div
-          id="calculator-overview-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-label={isUrdu ? 'تمام 9 مہماتی حساب کار' : 'All 9 Campaign Calculators'}
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
-        >
-          {/* Backdrop */}
+      <AnimatePresence>
+        {isOverviewOpen && (
           <div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            onClick={() => setIsOverviewOpen(false)}
-            aria-hidden="true"
-          />
-
-          {/* Modal Content */}
-          <div
-            className={`relative z-10 w-full max-w-3xl bg-white shadow-2xl rounded-2xl overflow-hidden border border-slate-200 animate-micro-fade-in flex flex-col max-h-[90vh] ${
-              isUrdu ? 'font-arabic' : ''
-            }`}
+            id="calculator-overview-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={isUrdu ? 'تمام 9 مہماتی حساب کار' : 'All 9 Campaign Calculators'}
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4"
           >
-            {/* Header */}
-            <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/90 flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-800 text-white flex items-center justify-center shadow-xs">
-                  <Calculator className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
-                      {isUrdu ? 'تمام 9 مہماتی حساب کار' : 'All 9 Campaign Calculators'}
-                    </h2>
-                    <span className="px-2 py-0.5 text-[11px] font-mono font-bold bg-teal-50 text-teal-800 border border-teal-200/70 rounded">
-                      WHO / UNICEF / NEOC
-                    </span>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm"
+              onClick={() => setIsOverviewOpen(false)}
+              aria-hidden="true"
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 12 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className={`relative z-10 w-full max-w-3xl liquid-glass-modal rounded-2xl overflow-hidden flex flex-col max-h-[90vh] liquid-shimmer ${
+                isUrdu ? 'font-arabic' : ''
+              }`}
+            >
+              {/* Header */}
+              <div className="p-4 sm:p-5 border-b border-slate-200/70 flex items-center justify-between bg-white/50 backdrop-blur-md flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-teal-800 text-white flex items-center justify-center shadow-xs">
+                    <Calculator className="w-5 h-5" />
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {isUrdu
-                      ? 'مطلوبہ حساب کار پر کلک کر کے براہِ راست وہاں پہنچیں'
-                      : 'Select any calculator to jump directly to its section'}
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                        {isUrdu ? 'تمام 9 مہماتی حساب کار' : 'All 9 Campaign Calculators'}
+                      </h2>
+                      <span className="px-2 py-0.5 text-[11px] font-mono font-bold bg-teal-50 text-teal-800 border border-teal-200/70 rounded">
+                        WHO / UNICEF / NEOC
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {isUrdu
+                        ? 'مطلوبہ حساب کار پر کلک کر کے براہِ راست وہاں پہنچیں'
+                        : 'Select any calculator to jump directly to its section'}
+                    </p>
+                  </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={handleCloseOverview}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
+                  aria-label={isUrdu ? 'بند کریں' : 'Close'}
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={handleCloseOverview}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
-                aria-label={isUrdu ? 'بند کریں' : 'Close'}
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+              {/* 3x3 Responsive Grid */}
+              <div className="p-4 sm:p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {CALCULATOR_ITEMS.map((calc) => {
+                  const Icon = calc.icon;
+                  const isActive = activeSection === calc.id;
+                  const fullName = getLocalizedCalcName(calc, t, isUrdu);
+                  const purpose = calc.getPurpose(t);
+                  const badge = calc.getBadge(t);
 
-            {/* 3x3 Responsive Grid */}
-            <div className="p-4 sm:p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {CALCULATOR_ITEMS.map((calc) => {
-                const Icon = calc.icon;
-                const isActive = activeSection === calc.id;
-                const fullName = getLocalizedCalcName(calc, t, isUrdu);
-                const purpose = calc.getPurpose(t);
-                const badge = calc.getBadge(t);
+                  return (
+                    <motion.button
+                      key={calc.id}
+                      type="button"
+                      onClick={() => handleSelectCalculator(calc.id)}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+                      className={`group relative text-start p-3.5 rounded-xl border transition-all duration-150 flex flex-col justify-between gap-2.5 cursor-pointer ${
+                        isActive
+                          ? 'bg-teal-50/90 border-teal-500/70 shadow-[0_8px_20px_-4px_rgba(13,148,136,0.25)] ring-1 ring-teal-500/40'
+                          : 'bg-white/80 hover:bg-white border-white/85 hover:border-teal-200/80 shadow-2xs hover:shadow-md'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2 w-full">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`w-7 h-7 rounded-lg font-mono font-bold text-xs flex items-center justify-center flex-shrink-0 ${
+                              isActive
+                                ? 'bg-teal-700 text-white'
+                                : 'bg-slate-100 text-slate-700 group-hover:bg-teal-100 group-hover:text-teal-900'
+                            }`}
+                          >
+                            {calc.num}
+                          </span>
+                          <Icon
+                            className={`w-4 h-4 ${
+                              isActive ? 'text-teal-700' : 'text-slate-400 group-hover:text-teal-700'
+                            }`}
+                          />
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 group-hover:bg-slate-200/80">
+                          {badge}
+                        </span>
+                      </div>
 
-                return (
-                  <button
-                    key={calc.id}
-                    type="button"
-                    onClick={() => handleSelectCalculator(calc.id)}
-                    className={`group relative text-start p-3.5 rounded-xl border transition-all duration-150 flex flex-col justify-between gap-2.5 cursor-pointer ${
-                      isActive
-                        ? 'bg-teal-50/90 border-teal-600 shadow-sm ring-1 ring-teal-600'
-                        : 'bg-white hover:bg-slate-50/90 border-slate-200 hover:border-teal-300'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2 w-full">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`w-7 h-7 rounded-lg font-mono font-bold text-xs flex items-center justify-center flex-shrink-0 ${
-                            isActive
-                              ? 'bg-teal-700 text-white'
-                              : 'bg-slate-100 text-slate-700 group-hover:bg-teal-100 group-hover:text-teal-900'
+                      <div>
+                        <h3
+                          className={`text-xs sm:text-sm font-bold leading-tight ${
+                            isActive ? 'text-teal-950' : 'text-slate-900 group-hover:text-teal-950'
                           }`}
                         >
-                          {calc.num}
-                        </span>
-                        <Icon
-                          className={`w-4 h-4 ${
-                            isActive ? 'text-teal-700' : 'text-slate-400 group-hover:text-teal-700'
-                          }`}
-                        />
+                          {fullName}
+                        </h3>
+                        <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                          {purpose}
+                        </p>
                       </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 group-hover:bg-slate-200/80">
-                        {badge}
-                      </span>
-                    </div>
 
-                    <div>
-                      <h3
-                        className={`text-xs sm:text-sm font-bold leading-tight ${
-                          isActive ? 'text-teal-950' : 'text-slate-900 group-hover:text-teal-950'
-                        }`}
-                      >
-                        {fullName}
-                      </h3>
-                      <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                        {purpose}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] pt-2 border-t border-slate-100/90 text-slate-400">
-                      <span className="font-mono text-[10px] text-slate-400">
-                        #{calc.id}
-                      </span>
-                      {isActive ? (
-                        <span className="flex items-center gap-1 text-teal-700 font-bold text-[11px]">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          {isUrdu ? 'فعال' : 'Active'}
+                      <div className="flex items-center justify-between text-[11px] pt-2 border-t border-slate-100/90 text-slate-400">
+                        <span className="font-mono text-[10px] text-slate-400">
+                          #{calc.id}
                         </span>
-                      ) : (
-                        <span className="text-teal-700 font-medium group-hover:underline">
-                          {isUrdu ? 'کھولیں ←' : 'Open →'}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Campaign Protocol Rules Footer in Modal */}
-            <div className="p-3.5 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
-              <div className="flex items-center gap-2 text-[11px]">
-                <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-                <span>
-                  <strong className="text-slate-800">Rule:</strong> 1 vial = 20 doses bOPV | Coverage Target ≥ 95%
-                </span>
+                        {isActive ? (
+                          <span className="flex items-center gap-1 text-teal-700 font-bold text-[11px]">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            {isUrdu ? 'فعال' : 'Active'}
+                          </span>
+                        ) : (
+                          <span className="text-teal-700 font-medium group-hover:underline">
+                            {isUrdu ? 'کھولیں ←' : 'Open →'}
+                          </span>
+                        )}
+                      </div>
+                    </motion.button>
+                  );
+                })}
               </div>
-              <button
-                type="button"
-                onClick={handleCloseOverview}
-                className="saas-btn-secondary px-3.5 py-1 text-xs font-semibold cursor-pointer"
-              >
-                {isUrdu ? 'بند کریں' : 'Close'}
-              </button>
-            </div>
+
+              {/* Campaign Protocol Rules Footer in Modal */}
+              <div className="p-3.5 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
+                <div className="flex items-center gap-2 text-[11px]">
+                  <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+                  <span>
+                    <strong className="text-slate-800">Rule:</strong> 1 vial = 20 doses bOPV | Coverage Target ≥ 95%
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCloseOverview}
+                  className="saas-btn-secondary px-3.5 py-1 text-xs font-semibold cursor-pointer"
+                >
+                  {isUrdu ? 'بند کریں' : 'Close'}
+                </button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </nav>
   );
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../LanguageContext';
 import { triggerHaptic } from '../haptics';
 import {
@@ -10,7 +10,12 @@ import {
   FileCheck2,
   Eye,
   X,
+  HardDrive,
+  FolderSync,
+  ExternalLink,
+  Sparkles,
 } from 'lucide-react';
+import { MASTER_FOLDER_URL } from '../data/coreVideos';
 
 interface DocumentItem {
   id: string;
@@ -144,9 +149,50 @@ const DOCUMENT_ITEMS: DocumentItem[] = [
   },
 ];
 
-export const DocumentsSection: React.FC = () => {
+interface DocumentsSectionProps {
+  targetDocId?: string;
+}
+
+export const DocumentsSection: React.FC<DocumentsSectionProps> = ({ targetDocId }) => {
   const { isUrdu } = useLanguage();
   const [selectedDoc, setSelectedDoc] = useState<DocumentItem | null>(null);
+  const [activeDriveDoc, setActiveDriveDoc] = useState<any | null>(null);
+
+  // Synced documents strictly from user's Google Drive "Polio Tool Kit" folder
+  const [driveDocs, setDriveDocs] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('polio_drive_synced_videos_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(
+            (item) =>
+              item.fileType === 'document' ||
+              (item.category && item.category.toLowerCase().includes('document')) ||
+              (item.originalCategory && item.originalCategory.toLowerCase().includes('document')) ||
+              (item.folderName && item.folderName.toLowerCase().includes('document')) ||
+              (item.originalFilename && /\.(pdf|doc|docx|xlsx|xls|ppt|pptx|txt)$/i.test(item.originalFilename))
+          );
+        }
+      }
+    } catch {}
+    return [];
+  });
+
+  useEffect(() => {
+    if (targetDocId) {
+      const match = DOCUMENT_ITEMS.find((d) => d.id === targetDocId);
+      if (match) {
+        setSelectedDoc(match);
+      }
+      setTimeout(() => {
+        const el = document.getElementById(targetDocId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  }, [targetDocId]);
 
   const openDoc = (doc: DocumentItem) => {
     triggerHaptic('light');
@@ -158,30 +204,198 @@ export const DocumentsSection: React.FC = () => {
     setSelectedDoc(null);
   };
 
+  const handleDownloadDoc = (doc: any) => {
+    triggerHaptic('medium');
+    const fileId = doc.driveFileId;
+    const downloadUrl = doc.downloadUrl || (fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : doc.driveUrl);
+    if (!downloadUrl) return;
+
+    const rawTitle = (doc.titleEn || doc.name || 'polio_document').trim();
+    const cleanTitle = rawTitle.replace(/[/\\?%*:|"<>]/g, '-');
+    const filename = cleanTitle.includes('.') ? cleanTitle : `${cleanTitle}.pdf`;
+
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadTemplate = (doc: DocumentItem) => {
+    triggerHaptic('medium');
+    const content = `=====================================================
+PAKISTAN POLIO ERADICATION PROGRAMME
+${doc.code}: ${doc.titleEn}
+${doc.titleUr}
+=====================================================
+Category: ${doc.categoryEn} (${doc.categoryUr})
+Format: ${doc.format} | ${doc.pages}
+
+[OPERATIONAL PURPOSE & PROTOCOL]
+${doc.operationalUsageEn}
+Urdu: ${doc.operationalUsageUr}
+
+[DESCRIPTION]
+${doc.descriptionEn}
+Urdu: ${doc.descriptionUr}
+
+[REQUIRED KEY FIELDS & COLUMNS]
+${doc.keyFieldsEn.map((f, i) => `${i + 1}. ${f}`).join('\n')}
+
+URDU KEY FIELDS:
+${doc.keyFieldsUr.map((f, i) => `${i + 1}. ${f}`).join('\n')}
+
+=====================================================
+Generated from Polio Field Companion Toolkit
+`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${doc.code}_${doc.titleEn.replace(/\s+/g, '_')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <section id="documents" className="w-full space-y-4">
+    <section id="documents" className="w-full space-y-5">
       {/* Header Card */}
-      <div className="saas-card p-4 sm:p-6 border-l-4 border-teal-600">
+      <div className="saas-card p-4 sm:p-6 border-l-4 border-teal-600 bg-white/95">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-800 border border-teal-200/80 flex items-center justify-center flex-shrink-0">
               <FileText className="w-5 h-5 text-teal-700" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                {isUrdu ? 'مہماتی دستاویزات، فارمز اور فیلڈ گائیڈز' : 'Operational Forms, Guides & SOP Documents'}
-              </h2>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                  {isUrdu ? 'مہماتی دستاویزات، فارمز اور فیلڈ گائیڈز' : 'Operational Forms, Guides & SOP Documents'}
+                </h2>
+                {driveDocs.length > 0 && (
+                  <span className="px-2 py-0.5 text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-full flex items-center gap-1">
+                    <FolderSync className="w-3 h-3 text-emerald-600" />
+                    <span>{driveDocs.length} Drive Documents Synced</span>
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-slate-500 mt-0.5">
                 {isUrdu
-                  ? 'ٹیلی شیٹ فارم اے، سپروائزر چیک لسٹ، کولڈ چین لاگ اور ٹرانزٹ پروٹوکولز'
-                  : 'Standardized field tally forms, monitoring checklists, temperature logs, and transit protocols'}
+                  ? 'گوگل ڈرائیو سے سنک شدہ رہنمائی گائیڈز، ٹیلی شیٹ فارم اے، سپروائزر چیک لسٹ اور مہم پروٹوکولز'
+                  : 'Google Drive synced guides, field tally forms, monitoring checklists, and transit protocols'}
               </p>
             </div>
           </div>
-          <span className="self-start sm:self-auto text-xs font-mono font-semibold px-2.5 py-1 rounded-md bg-teal-50 text-teal-800 border border-teal-200/80">
-            {isUrdu ? '4 اہم دستاویزات' : '4 Core Documents'}
-          </span>
+          <div className="flex items-center gap-2">
+            <a
+              href={MASTER_FOLDER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200/80 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <HardDrive className="w-3.5 h-3.5 text-teal-700" />
+              <span>{isUrdu ? 'ڈرائیو فولڈر' : 'Open Drive'}</span>
+              <ExternalLink className="w-3 h-3 text-slate-400" />
+            </a>
+          </div>
         </div>
+      </div>
+
+      {/* 1. Google Drive Synced Documents Section (if present) */}
+      {driveDocs.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                {isUrdu ? 'گوگل ڈرائیو سنک شدہ دستاویزات' : 'Google Drive Synced Documents & Guides'}
+              </h3>
+            </div>
+            <span className="text-[11px] font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+              {driveDocs.length} {isUrdu ? 'فائلیں' : 'Files'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {driveDocs.map((doc) => (
+              <div
+                key={doc.id}
+                className="saas-card p-3.5 flex flex-col justify-between space-y-3 border-emerald-200/60 bg-emerald-50/20 hover:border-emerald-400 transition-colors"
+              >
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-1 text-[10px]">
+                    <span className="font-mono font-bold px-2 py-0.5 rounded bg-white text-emerald-800 border border-emerald-200">
+                      {doc.category || 'Documents & Guides'}
+                    </span>
+                    <span className="font-mono text-slate-400">
+                      {doc.fileSizeFormatted || 'Drive File'}
+                    </span>
+                  </div>
+
+                  <h4 className="text-xs font-bold text-slate-900 leading-snug line-clamp-2">
+                    {isUrdu ? doc.titleUr : doc.titleEn}
+                  </h4>
+
+                  {doc.summaryEn && (
+                    <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
+                      {isUrdu ? doc.summaryUr : doc.summaryEn}
+                    </p>
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setActiveDriveDoc(doc);
+                      }}
+                      className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-teal-900 bg-teal-50 hover:bg-teal-100 border border-teal-200 transition cursor-pointer flex items-center gap-1.5 min-h-[32px]"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-teal-700" />
+                      <span>{isUrdu ? 'دستاویز دیکھیں' : 'View File'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadDoc(doc)}
+                      className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer flex items-center gap-1 min-h-[32px]"
+                      title={isUrdu ? 'ڈاؤنلوڈ کریں' : 'Download Document'}
+                    >
+                      <Download className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>{isUrdu ? 'ڈاؤنلوڈ' : 'Download'}</span>
+                    </button>
+                  </div>
+
+                  <a
+                    href={doc.driveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition cursor-pointer flex items-center gap-1 min-h-[32px]"
+                  >
+                    <span>{isUrdu ? 'ڈرائیو' : 'Drive'}</span>
+                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 2. Core Operational Templates Header */}
+      <div className="pt-2 flex items-center justify-between">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+          {isUrdu ? 'معیاری فیلڈ ٹیمپلیٹس و آپریشنل ایس او پیز' : 'Core Operational Templates & SOP Forms'}
+        </h3>
+        <span className="text-[11px] font-mono text-slate-500">
+          {DOCUMENT_ITEMS.length} {isUrdu ? 'فارمز' : 'Forms'}
+        </span>
       </div>
 
       {/* Documents Grid */}
@@ -189,6 +403,7 @@ export const DocumentsSection: React.FC = () => {
         {DOCUMENT_ITEMS.map((doc) => (
           <div
             key={doc.id}
+            id={doc.id}
             className="saas-card p-4 sm:p-5 flex flex-col justify-between space-y-3.5 hover:border-teal-300 transition-colors"
           >
             <div>
@@ -210,7 +425,7 @@ export const DocumentsSection: React.FC = () => {
               </p>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
               <span className="text-[11px] font-semibold text-slate-600">
                 {isUrdu ? doc.categoryUr : doc.categoryEn}
               </span>
@@ -218,8 +433,18 @@ export const DocumentsSection: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
+                  onClick={() => handleDownloadTemplate(doc)}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer flex items-center gap-1 min-h-[32px]"
+                  title={isUrdu ? 'ٹیمپلیٹ ڈاؤنلوڈ کریں' : 'Download Template text'}
+                >
+                  <Download className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>{isUrdu ? 'ڈاؤنلوڈ' : 'Download'}</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => openDoc(doc)}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100/70 border border-teal-200/70 transition cursor-pointer flex items-center gap-1"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100/70 border border-teal-200/70 transition cursor-pointer flex items-center gap-1 min-h-[32px]"
                 >
                   <Eye className="w-3.5 h-3.5 text-teal-700" />
                   <span>{isUrdu ? 'تفصیلات دیکھیں' : 'View Template'}</span>
@@ -285,23 +510,115 @@ export const DocumentsSection: React.FC = () => {
               </div>
 
               {/* Action Bar */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    window.print();
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/80 font-semibold cursor-pointer hover:bg-teal-100/80"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>{isUrdu ? 'پرنٹ فارم' : 'Print / Export'}</span>
-                </button>
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadTemplate(selectedDoc)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold cursor-pointer hover:bg-emerald-100 min-h-[34px]"
+                  >
+                    <Download className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>{isUrdu ? 'ٹیمپلیٹ ڈاؤنلوڈ' : 'Download SOP'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('light');
+                      window.print();
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/80 font-semibold cursor-pointer hover:bg-teal-100/80 min-h-[34px]"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>{isUrdu ? 'پرنٹ فارم' : 'Print / Export'}</span>
+                  </button>
+                </div>
 
                 <button
                   type="button"
                   onClick={closeDoc}
-                  className="px-3.5 py-1.5 rounded-lg bg-slate-900 text-white font-semibold cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-lg bg-slate-900 text-white font-semibold cursor-pointer min-h-[34px]"
+                >
+                  {isUrdu ? 'بند کریں' : 'Close'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Drive Document Preview Modal */}
+      {activeDriveDoc && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4"
+        >
+          <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
+            <div className="p-3.5 bg-slate-900 text-white flex items-center justify-between">
+              <div className="min-w-0 pr-3">
+                <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider">
+                  {activeDriveDoc.category || 'Google Drive File'}
+                </span>
+                <h3 className="text-sm font-bold truncate text-white">
+                  {isUrdu ? activeDriveDoc.titleUr : activeDriveDoc.titleEn}
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDownloadDoc(activeDriveDoc)}
+                  className="px-2.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center gap-1 transition cursor-pointer shadow-xs min-h-[32px]"
+                  title={isUrdu ? 'ڈاؤنلوڈ کریں' : 'Download file directly'}
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{isUrdu ? 'ڈاؤنلوڈ' : 'Download'}</span>
+                </button>
+                <a
+                  href={activeDriveDoc.driveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold flex items-center gap-1 transition min-h-[32px]"
+                >
+                  <span>{isUrdu ? 'گوگل ڈرائیو' : 'Open in Drive'}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setActiveDriveDoc(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 w-full bg-slate-100 relative">
+              <iframe
+                src={activeDriveDoc.embedUrl || `https://drive.google.com/file/d/${activeDriveDoc.driveFileId}/preview`}
+                title={activeDriveDoc.titleEn}
+                className="w-full h-full border-0"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              />
+            </div>
+
+            <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs flex-wrap gap-2">
+              <span className="text-slate-500 font-mono text-[11px]">
+                ID: {activeDriveDoc.driveFileId}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDownloadDoc(activeDriveDoc)}
+                  className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold cursor-pointer flex items-center gap-1.5 min-h-[34px]"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{isUrdu ? 'ڈاؤنلوڈ کریں' : 'Download File'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveDriveDoc(null)}
+                  className="px-4 py-1.5 rounded-xl bg-slate-900 text-white font-semibold cursor-pointer min-h-[34px]"
                 >
                   {isUrdu ? 'بند کریں' : 'Close'}
                 </button>

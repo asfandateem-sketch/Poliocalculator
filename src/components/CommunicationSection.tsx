@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../LanguageContext';
 import { triggerHaptic } from '../haptics';
 import {
@@ -11,6 +11,9 @@ import {
   Heart,
   Volume2,
   Sparkles,
+  FileVideo,
+  ArrowRight,
+  ExternalLink,
 } from 'lucide-react';
 
 interface CommunicationScript {
@@ -82,10 +85,30 @@ const COMMUNICATION_SCRIPTS: CommunicationScript[] = [
   },
 ];
 
-export const CommunicationSection: React.FC = () => {
+interface CommunicationSectionProps {
+  targetScriptId?: string;
+  onNavigateToVideos?: () => void;
+}
+
+export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
+  targetScriptId,
+  onNavigateToVideos,
+}) => {
   const { isUrdu } = useLanguage();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('all');
+
+  useEffect(() => {
+    if (targetScriptId) {
+      setActiveCategory('all');
+      setTimeout(() => {
+        const el = document.getElementById(targetScriptId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  }, [targetScriptId]);
 
   const copyScript = (id: string, text: string) => {
     triggerHaptic('light');
@@ -153,6 +176,44 @@ export const CommunicationSection: React.FC = () => {
         </div>
       </div>
 
+      {/* Cross-Link Banner to Communication Resources Video Folders */}
+      {onNavigateToVideos && (
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-teal-900 via-slate-900 to-teal-950 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-teal-500/30">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-300 border border-teal-400/30 flex items-center justify-center flex-shrink-0">
+              <FileVideo className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono text-teal-300 font-bold uppercase tracking-wider bg-teal-500/20 px-1.5 py-0.5 rounded">
+                  {isUrdu ? 'گوگل ڈرائیو سنک' : 'Drive Synced'}
+                </span>
+                <h3 className="text-xs sm:text-sm font-bold text-white">
+                  {isUrdu ? 'ویڈیو ریسورسز: ہیلتھ کیئر، کمیونٹی، اور مذہبی رہنما فولڈرز' : 'Communication Video Library: 5 Influencer & SOP Folders'}
+                </h3>
+              </div>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                {isUrdu
+                  ? 'ماہرین اطفال، علماء کرام اور جرگہ مشران کے تصدیق شدہ ویڈیو بیانات اور واٹس ایپ پیغامات دستیاب ہیں۔'
+                  : 'Browse clinical endorsements from Pediatricians, Fatwas from Ulema, and Jirga speeches with Google Drive sync.'}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('light');
+              onNavigateToVideos();
+            }}
+            className="self-start sm:self-auto px-3.5 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition active:scale-[0.98] cursor-pointer whitespace-nowrap"
+          >
+            <span>{isUrdu ? 'ویڈیو فولڈرز کھولیں' : 'Open Video Folders'}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Script Cards Grid */}
       <div className="grid grid-cols-1 gap-4">
         {filteredScripts.map((script) => {
@@ -162,6 +223,7 @@ export const CommunicationSection: React.FC = () => {
           return (
             <div
               key={script.id}
+              id={script.id}
               className="saas-card p-4 sm:p-5 flex flex-col justify-between space-y-4 hover:border-teal-300/80 transition-colors"
             >
               {/* Question / Hesitation Prompt */}

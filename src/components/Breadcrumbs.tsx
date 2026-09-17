@@ -13,11 +13,8 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ activeTab, onTabChange
 
   const tabLabels: Record<string, { en: string; ur: string }> = {
     calculators: { en: 'Calculators (9)', ur: 'کیلکولیٹرز (9)' },
-    training: { en: 'Training SOPs', ur: 'ٹریننگ ماڈیولز' },
-    communication: { en: 'Communication & SBC', ur: 'کمیونیکیشن سکرپٹس' },
-    videos: { en: 'Field Videos', ur: 'فیلڈ ویڈیوز' },
+    videos: { en: 'Communication Resources', ur: 'مواصلاتی وسائل' },
     documents: { en: 'Documents & Guides', ur: 'دستاویزات و فارمز' },
-    field_resources: { en: 'Field Resources', ur: 'صوبائی وسائل' },
     faq: { en: 'FAQ & Standards', ur: 'سوالات و اصول' },
   };
 
