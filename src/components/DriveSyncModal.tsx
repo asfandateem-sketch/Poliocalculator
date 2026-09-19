@@ -257,34 +257,108 @@ function createJsonResponse(data) {
     setTimeout(() => setCopiedCode(false), 2500);
   };
 
-  // Dedicated Test Connection
+  // Dedicated Test Connection with browser-direct & server-fallback support
   const handleTestConnection = async () => {
     setIsTesting(true);
     setTestResult(null);
     setSyncStatusMsg(null);
 
+    const targetUrl = appsScriptUrl.trim();
+    const targetFolder = masterFolderId.trim() || MASTER_FOLDER_ID;
+
+    // 1. Direct browser test for Apps Script (works on GitHub Pages static deployment)
+    if (method === 'apps_script' && targetUrl) {
+      try {
+        const u = new URL(targetUrl);
+        u.searchParams.set('folderId', targetFolder);
+        u.searchParams.set('_t', Date.now().toString());
+
+        const directRes = await fetch(u.toString(), {
+          headers: { Accept: 'application/json' },
+          cache: 'no-store',
+          redirect: 'follow',
+        });
+
+        const text = await directRes.text();
+        if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+          setTestResult({
+            success: false,
+            diagnostic: 'AUTH_REDIRECT_HTML',
+            message: 'Web App returned an HTML page instead of JSON. Ensure your Apps Script deployment is configured with "Who has access: Anyone".',
+          });
+          setIsTesting(false);
+          return;
+        }
+
+        const data = JSON.parse(text);
+        const count = Array.isArray(data?.files) ? data.files.length : (Array.isArray(data) ? data.length : 0);
+        setTestResult({
+          success: true,
+          message: `Live Google Drive connected! Found ${count} resources in "${data.rootFolderName || 'Polio Tool Kit'}".`,
+          data,
+        });
+        setIsTesting(false);
+        return;
+      } catch (err: any) {
+        console.warn('[DriveSyncModal] Direct test error:', err.message);
+      }
+    }
+
+    // 2. Direct browser test for Google Drive API v3
+    if (method === 'drive_api' && apiKey.trim()) {
+      try {
+        const q = `'${targetFolder}' in parents and trashed = false`;
+        const testApiUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&pageSize=5&key=${encodeURIComponent(apiKey.trim())}&_t=${Date.now()}`;
+        const res = await fetch(testApiUrl);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData?.error?.message || `Google Drive API responded with status ${res.status}`);
+        }
+        const data = await res.json();
+        setTestResult({
+          success: true,
+          message: `Google Drive API v3 connected successfully! Verified access to folder.`,
+          data,
+        });
+        setIsTesting(false);
+        return;
+      } catch (apiErr: any) {
+        setTestResult({
+          success: false,
+          diagnostic: 'DRIVE_API_ERROR',
+          message: apiErr.message || 'Google Drive API test failed. Check API key and folder permissions.',
+        });
+        setIsTesting(false);
+        return;
+      }
+    }
+
+    // 3. Fallback: Local Express backend proxy (when testing locally)
     try {
       const response = await fetch('/api/drive/test-connection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          scriptUrl: appsScriptUrl.trim(),
-          folderId: masterFolderId.trim() || MASTER_FOLDER_ID,
+          scriptUrl: targetUrl,
+          folderId: targetFolder,
           apiKey: apiKey.trim(),
         }),
       });
 
-      const data = await response.json();
-      setTestResult(data);
-    } catch (err: any) {
-      setTestResult({
-        success: false,
-        diagnostic: 'NETWORK_ERROR',
-        message: err.message || 'Failed to reach local server diagnostic endpoint.',
-      });
-    } finally {
-      setIsTesting(false);
-    }
+      if (response.ok) {
+        const data = await response.json();
+        setTestResult(data);
+        setIsTesting(false);
+        return;
+      }
+    } catch {}
+
+    setTestResult({
+      success: false,
+      diagnostic: 'NETWORK_ERROR',
+      message: 'Could not connect to Google Drive endpoint. Please check the URL / API key and verify internet connectivity.',
+    });
+    setIsTesting(false);
   };
 
   const handleSaveAndSync = async () => {

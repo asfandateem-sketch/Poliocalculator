@@ -2,7 +2,7 @@
  * Polio Field Tools - Offline Service Worker
  * Enables reliable offline access for frontline workers in low/no connectivity areas.
  */
-const CACHE_NAME = 'polio-field-tools-v1';
+const CACHE_NAME = 'polio-field-tools-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -43,6 +43,20 @@ self.addEventListener('fetch', (event) => {
 
   // Exclude chrome extensions or non-http
   if (!url.protocol.startsWith('http')) return;
+
+  // CRITICAL: NEVER cache Google Drive, Apps Script, or live dynamic API requests!
+  // Google Drive must remain the live source of truth. Bypassing event.respondWith
+  // lets the browser perform a fresh network fetch with full cache-control.
+  if (
+    url.hostname.includes('script.google.com') ||
+    url.hostname.includes('script.googleusercontent.com') ||
+    url.hostname.includes('googleapis.com') ||
+    url.hostname.includes('drive.google.com') ||
+    url.pathname.includes('/api/') ||
+    url.searchParams.has('_t')
+  ) {
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {

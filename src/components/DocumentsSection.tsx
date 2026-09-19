@@ -179,6 +179,29 @@ export const DocumentsSection: React.FC<DocumentsSectionProps> = ({ targetDocId 
     return [];
   });
 
+  // Listen for real-time live Google Drive updates
+  useEffect(() => {
+    const handleDriveSync = (e: any) => {
+      const items = e?.detail?.items;
+      if (Array.isArray(items)) {
+        const filteredDocs = items.filter(
+          (item) =>
+            item.fileType === 'document' ||
+            (item.category && item.category.toLowerCase().includes('document')) ||
+            (item.originalCategory && item.originalCategory.toLowerCase().includes('document')) ||
+            (item.folderName && item.folderName.toLowerCase().includes('document')) ||
+            (item.originalFilename && /\.(pdf|doc|docx|xlsx|xls|ppt|pptx|txt)$/i.test(item.originalFilename))
+        );
+        setDriveDocs(filteredDocs);
+      }
+    };
+
+    window.addEventListener('polio_drive_synced', handleDriveSync);
+    return () => {
+      window.removeEventListener('polio_drive_synced', handleDriveSync);
+    };
+  }, []);
+
   useEffect(() => {
     if (targetDocId) {
       const match = DOCUMENT_ITEMS.find((d) => d.id === targetDocId);
