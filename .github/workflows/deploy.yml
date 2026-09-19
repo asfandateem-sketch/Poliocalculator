@@ -51,11 +51,15 @@ jobs:
             echo "::error::'dist/index.html' does not exist!"
             exit 1
           fi
+          if [ ! -f "dist/data/drive_resources.json" ]; then
+            echo "::error::'dist/data/drive_resources.json' does not exist!"
+            exit 1
+          fi
           # Guarantee .nojekyll is present to prevent Jekyll from skipping asset files
           touch dist/.nojekyll
           # SPA routing support for GitHub Pages: copy index.html to 404.html
           cp dist/index.html dist/404.html
-          echo "Verified: dist directory and assets successfully generated from latest commit."
+          echo "Verified: dist directory, drive_resources.json, and assets successfully generated from latest commit."
           ls -lh dist
 
       - name: Setup GitHub Pages

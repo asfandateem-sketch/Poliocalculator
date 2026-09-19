@@ -181,6 +181,31 @@ export const DocumentsSection: React.FC<DocumentsSectionProps> = ({ targetDocId 
 
   // Listen for real-time live Google Drive updates
   useEffect(() => {
+    // Also attempt loading from data/drive_resources.json for mobile
+    const loadStaticDocs = async () => {
+      try {
+        const base = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '') + '/';
+        const res = await fetch(`${base}data/drive_resources.json?_t=${Date.now()}`, { cache: 'no-store' });
+        if (res.ok) {
+          const items = await res.json();
+          if (Array.isArray(items)) {
+            const filteredDocs = items.filter(
+              (item) =>
+                item.fileType === 'document' ||
+                (item.category && item.category.toLowerCase().includes('document')) ||
+                (item.originalCategory && item.originalCategory.toLowerCase().includes('document')) ||
+                (item.folderName && item.folderName.toLowerCase().includes('document')) ||
+                (item.originalFilename && /\.(pdf|doc|docx|xlsx|xls|ppt|pptx|txt)$/i.test(item.originalFilename))
+            );
+            if (filteredDocs.length > 0) {
+              setDriveDocs(filteredDocs);
+            }
+          }
+        }
+      } catch {}
+    };
+    loadStaticDocs();
+
     const handleDriveSync = (e: any) => {
       const items = e?.detail?.items;
       if (Array.isArray(items)) {

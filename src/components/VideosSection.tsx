@@ -353,14 +353,21 @@ export const VideosSection: React.FC = () => {
       const saved = localStorage.getItem(DRIVE_SYNC_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           const sanitized = sanitizeSyncedVideos(parsed);
-          localStorage.setItem(DRIVE_SYNC_STORAGE_KEY, JSON.stringify(sanitized));
+          try {
+            localStorage.setItem(DRIVE_SYNC_STORAGE_KEY, JSON.stringify(sanitized));
+          } catch {}
           return sanitized;
         }
       }
     } catch {}
-    return [];
+    // Baseline fallback to verified 31 Google Drive resources so mobile devices never load empty
+    const initial = sanitizeSyncedVideos(CORE_VIDEO_ITEMS);
+    try {
+      localStorage.setItem(DRIVE_SYNC_STORAGE_KEY, JSON.stringify(initial));
+    } catch {}
+    return initial;
   });
 
   // AUTOMATIC LIVE DRIVE SOURCE OF TRUTH:
@@ -369,7 +376,33 @@ export const VideosSection: React.FC = () => {
     let isSubscribed = true;
 
     const performLiveFetch = async () => {
-      // If neither Apps Script URL nor API key is configured yet, do not throw error; wait for setup
+      // Step 1: Immediately check if data/drive_resources.json is available from deployment
+      // This ensures mobile browsers with strict localStorage or no cache instantly get all 31 synced items
+      try {
+        const base = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '') + '/';
+        const staticUrl = `${base}data/drive_resources.json?_t=${Date.now()}`;
+        const res = await fetch(staticUrl, { cache: 'no-store' });
+        if (res.ok) {
+          const staticData = await res.json();
+          if (isSubscribed && Array.isArray(staticData) && staticData.length > 0) {
+            const sanitized = sanitizeSyncedVideos(staticData);
+            setDriveSyncedVideos((prev) => {
+              if (!prev || prev.length <= sanitized.length) {
+                try {
+                  localStorage.setItem(DRIVE_SYNC_STORAGE_KEY, JSON.stringify(sanitized));
+                } catch {}
+                return sanitized;
+              }
+              return prev;
+            });
+            console.log('[VideosSection] Hydrated', sanitized.length, 'resources from drive_resources.json');
+          }
+        }
+      } catch (e) {
+        // Silent catch for static fetch
+      }
+
+      // Step 2: If Apps Script URL or API key is configured, perform live query to Google Drive
       if (!syncConfig.appsScriptUrl && !syncConfig.apiKey) {
         return;
       }
@@ -570,6 +603,13 @@ export const VideosSection: React.FC = () => {
     // 2. User custom added videos (if any)
     for (const vid of userVideos) {
       map.set(vid.id, vid);
+    }
+
+    // 3. Guaranteed baseline fallback: if map is somehow empty, populate from CORE_VIDEO_ITEMS
+    if (map.size === 0) {
+      for (const vid of CORE_VIDEO_ITEMS) {
+        map.set(vid.id, vid);
+      }
     }
 
     return Array.from(map.values());

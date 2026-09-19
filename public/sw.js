@@ -2,15 +2,15 @@
  * Polio Field Tools - Offline Service Worker
  * Enables reliable offline access for frontline workers in low/no connectivity areas.
  */
-const CACHE_NAME = 'polio-field-tools-v2';
+const CACHE_NAME = 'polio-field-tools-v3';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon.svg',
-  '/og-image.svg',
-  '/robots.txt',
-  '/sitemap.xml'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon.svg',
+  './og-image.svg',
+  './robots.txt',
+  './sitemap.xml'
 ];
 
 self.addEventListener('install', (event) => {
@@ -27,6 +27,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
+            console.log('[SW] Purging outdated cache:', key);
             return caches.delete(key);
           }
         })
@@ -53,6 +54,7 @@ self.addEventListener('fetch', (event) => {
     url.hostname.includes('googleapis.com') ||
     url.hostname.includes('drive.google.com') ||
     url.pathname.includes('/api/') ||
+    url.pathname.includes('drive_resources.json') ||
     url.searchParams.has('_t')
   ) {
     return;

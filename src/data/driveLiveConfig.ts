@@ -1,4 +1,5 @@
-import { DriveSyncConfig } from '../types';
+import { DriveSyncConfig, VideoItem } from '../types';
+import { CORE_VIDEO_ITEMS } from './coreVideos';
 
 /**
  * ==============================================================================
@@ -82,3 +83,27 @@ export function saveEffectiveDriveSyncConfig(config: DriveSyncConfig): void {
     console.warn('[DriveConfig] Could not save config to localStorage', e);
   }
 }
+
+/**
+ * Retrieves initial Drive resources for instantaneous mobile and first-time loading:
+ * 1. Reads from localStorage if available and populated
+ * 2. Falls back seamlessly to the verified CORE_VIDEO_ITEMS dataset
+ * This ensures mobile users NEVER open to an empty screen after deployment!
+ */
+export function getInitialDriveResources(): VideoItem[] {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const saved = localStorage.getItem(DRIVE_SYNC_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[DriveConfig] Error reading cached Drive resources:', e);
+  }
+  return CORE_VIDEO_ITEMS;
+}
+
