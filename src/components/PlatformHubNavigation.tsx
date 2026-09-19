@@ -10,6 +10,7 @@ import {
   ClipboardList,
   Compass,
   HelpCircle,
+  Newspaper,
 } from 'lucide-react';
 import type { PlatformCategoryKey } from '../platformNavigation';
 
@@ -32,6 +33,7 @@ export const PlatformHubNavigation: React.FC<PlatformHubNavigationProps> = ({
     shortLabelUr: string;
     icon: React.ElementType;
     badge?: string;
+    spanMobile?: boolean;
   }> = [
     {
       key: 'calculators',
@@ -61,13 +63,23 @@ export const PlatformHubNavigation: React.FC<PlatformHubNavigationProps> = ({
       badge: 'SOPs',
     },
     {
+      key: 'updates',
+      labelEn: '4. Updates',
+      labelUr: '۴۔ اپڈیٹس',
+      shortLabelEn: 'Updates',
+      shortLabelUr: 'اپڈیٹس',
+      icon: Newspaper,
+      badge: 'News',
+    },
+    {
       key: 'faq',
-      labelEn: '4. FAQs',
-      labelUr: '۴۔ اکثر پوچھے گئے سوالات',
+      labelEn: '5. FAQs',
+      labelUr: '۵۔ اکثر پوچھے گئے سوالات',
       shortLabelEn: 'FAQs',
       shortLabelUr: 'سوالات',
       icon: HelpCircle,
       badge: 'Info',
+      spanMobile: true,
     },
   ];
 
@@ -77,7 +89,7 @@ export const PlatformHubNavigation: React.FC<PlatformHubNavigationProps> = ({
       aria-label="Platform Sections"
       className="w-full mb-3.5 sm:mb-4 bg-white/90 backdrop-blur-2xl rounded-2xl border border-white/90 shadow-[0_12px_32px_-8px_rgba(15,35,65,0.06),inset_0_1px_1px_rgba(255,255,255,1)] p-1.5 sm:p-2 overflow-x-auto no-scrollbar"
     >
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 w-full">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-2 w-full">
         {navItems.map((item) => {
           const isActive = activeCategory === item.key;
           const Icon = item.icon;
@@ -95,6 +107,8 @@ export const PlatformHubNavigation: React.FC<PlatformHubNavigationProps> = ({
               whileTap={{ scale: 0.96 }}
               transition={{ type: 'spring', stiffness: 450, damping: 30 }}
               className={`group relative flex items-center justify-between sm:justify-center gap-1.5 px-3 py-2.5 sm:py-2.5 min-h-[44px] rounded-xl text-xs font-bold select-none cursor-pointer transition-colors duration-150 ${
+                item.spanMobile ? 'col-span-2 sm:col-span-1' : ''
+              } ${
                 isActive
                   ? 'text-white'
                   : 'text-slate-700 hover:text-slate-950 bg-slate-50/80 sm:bg-transparent hover:bg-white/80 border border-slate-100 sm:border-transparent'

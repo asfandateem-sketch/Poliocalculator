@@ -27,7 +27,7 @@ export const FaqSection: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [expandedFaqIds, setExpandedFaqIds] = useState<Set<string>>(
-    () => new Set(['sbc-1', 'med-1'])
+    () => new Set(['med-1'])
   );
   const [copiedId, setCopiedId] = useState<string | null>(null);
 

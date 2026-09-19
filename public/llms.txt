@@ -1,0 +1,47 @@
+# Polio Field Tools
+
+> Official field calculators, campaign SOPs, refusal conversion scripts, and verified campaign dispatches from official Pakistani health authorities (EOC Pakhtunkhwa & Pakistan Polio Eradication Initiative).
+
+## About
+Polio Field Tools is an independent, mobile-first field utility and operational portal developed to support Pakistan's frontline polio eradication workforce: Mobile Vaccination Teams (MTs), Area In-Charges (AICs), Union Council Medical Officers (UCMOs), and Independent Monitors.
+
+## Geographic Coverage (GEO)
+- Primary Jurisdiction: Islamic Republic of Pakistan (PK)
+- Focused Provinces & Divisions:
+  - Khyber Pakhtunkhwa (Peshawar, Bannu, Dera Ismail Khan, North Waziristan, South Waziristan, Tank, Lakki Marwat)
+  - Balochistan (Quetta Block, Pishin, Killa Abdullah, Chaman)
+  - Sindh (Karachi divisions, Hyderabad, Sukkur)
+  - Punjab (Rawalpindi, Lahore, Multan, Faisalabad)
+  - Islamabad Capital Territory (ICT)
+
+## Official Sourced Facebook Channels
+The platform aggregates verified bulletins directly from official public health Facebook handles:
+1. EOC Pakhtunkhwa: https://www.facebook.com/eocpakhtunkhwa (Official KP Emergency Operations Centre)
+2. Pakistan Polio Eradication Initiative: https://www.facebook.com/polioeradicationinitiative (Official National NEOC)
+3. Khyber Pakhtunkhwa Polio Programme: https://www.facebook.com/profile.php?id=100077497336541
+
+## Core Operational Helplines & Numbers
+- National Polio Helpline (Sehat Muhafiz): 1166 (Toll-Free, 24/7 across Pakistan, available in Urdu, Pashto, Sindhi, Balochi, English)
+- Purpose: Caregivers can call 1166 to report missed or not-available children to dispatch mobile teams.
+
+## Key Mathematical Formulas for Field Calculators
+- bOPV Vial Demand Formula: ROUNDUP((Target Children * 1.10) / 20)
+  - 1 vial = 20 doses
+  - 1 child dose = 2 drops
+  - 10% operational buffer stock included
+- Vaccine Wastage Rate Formula: ((Vials Received - Vials Returned Unopened) * 20 - Doses Administered) / ((Vials Received - Vials Returned Unopened) * 20) * 100
+- Still NA Rate: (Remaining NA Children on Day N / Initial Day 1 Recorded NA Children) * 100
+- Refusal Conversion Rate: (Converted Children / Total Recorded Refusal Children) * 100
+- Campaign Coverage Rate: (Total Vaccinated Under-5 Children / Total Target Population) * 100
+
+## Cold Chain & VVM Standards
+- Temperature range: +2°C to +8°C in conditioned vaccine carriers
+- VVM (Vaccine Vial Monitor) Stages:
+  - Stage 1: Inner square lighter than outer circle -> USE
+  - Stage 2: Inner square still lighter than outer circle -> USE FIRST
+  - Stage 3: Inner square matches outer circle color -> DO NOT USE / DISCARD
+  - Stage 4: Inner square darker than outer circle -> DO NOT USE / DISCARD
+
+## Bilingual Support
+- English (en)
+- Urdu (ur, اردو) with complete right-to-left (RTL) typography

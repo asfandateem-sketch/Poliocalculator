@@ -29,6 +29,8 @@ import { Under5Calculator } from './components/Under5Calculator';
 import { TrainingSection } from './components/TrainingSection';
 import { CommunicationSection } from './components/CommunicationSection';
 import { VideosSection } from './components/VideosSection';
+import { UpdatesSection } from './components/UpdatesSection';
+import { HomeLatestUpdates } from './components/HomeLatestUpdates';
 import { DocumentsSection } from './components/DocumentsSection';
 import { FieldResourcesSection } from './components/FieldResourcesSection';
 import { FaqSection } from './components/FaqSection';
@@ -45,6 +47,7 @@ function AppContent() {
   const [targetTrainingId, setTargetTrainingId] = useState<string | undefined>(undefined);
   const [targetDocId, setTargetDocId] = useState<string | undefined>(undefined);
   const [targetScriptId, setTargetScriptId] = useState<string | undefined>(undefined);
+  const [targetUpdateId, setTargetUpdateId] = useState<string | undefined>(undefined);
 
   const isProgrammaticScrollRef = useRef(false);
   const scrollEndTimerRef = useRef<number | null>(null);
@@ -53,8 +56,17 @@ function AppContent() {
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.replace('#', '');
-      if (['training', 'communication', 'videos', 'documents', 'field-resources', 'field_resources', 'faq'].includes(hash)) {
-        setActivePlatformCategory(hash === 'field-resources' ? 'field_resources' : (hash as PlatformCategoryKey));
+      if (['training', 'communication', 'videos', 'updates', 'documents', 'field-resources', 'field_resources', 'faq'].includes(hash) || hash.startsWith('updates')) {
+        if (hash.startsWith('updates')) {
+          setActivePlatformCategory('updates');
+          if (hash.startsWith('updates/')) {
+            setTargetUpdateId(hash.replace('updates/', ''));
+          } else {
+            setTargetUpdateId(undefined);
+          }
+        } else {
+          setActivePlatformCategory(hash === 'field-resources' ? 'field_resources' : (hash as PlatformCategoryKey));
+        }
       } else if (hash.startsWith('calc-') || hash === 'calculators') {
         setActivePlatformCategory('calculators');
         if (hash.startsWith('calc-')) {
@@ -211,6 +223,9 @@ function AppContent() {
       setTimeout(() => {
         highlightElement(item.id);
       }, 250);
+    } else if (item.category === 'updates') {
+      setTargetUpdateId(item.id);
+      window.location.hash = `updates/${item.id}`;
     } else {
       setTimeout(() => {
         const el = document.getElementById(item.targetAnchor);
@@ -350,6 +365,21 @@ function AppContent() {
               <TopCalculatorNavigation
                 activeSection={activeSection}
                 onSelect={scrollToCalculator}
+              />
+
+              {/* Homepage Compact Latest Updates Feed */}
+              <HomeLatestUpdates
+                onNavigateToUpdates={(id) => {
+                  setActivePlatformCategory('updates');
+                  if (id) {
+                    setTargetUpdateId(id);
+                    window.location.hash = `updates/${id}`;
+                  } else {
+                    setTargetUpdateId(undefined);
+                    window.location.hash = 'updates';
+                  }
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
               />
 
               {/* All 9 Calculators Aligned in Clean Full-Width Container */}
@@ -526,6 +556,33 @@ function AppContent() {
               className="w-full min-w-0 pb-8"
             >
               <DocumentsSection targetDocId={targetDocId} />
+            </motion.main>
+          )}
+
+          {activePlatformCategory === 'updates' && (
+            <motion.main
+              key="updates"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              className="w-full min-w-0 pb-8"
+            >
+              <UpdatesSection
+                initialUpdateId={targetUpdateId}
+                onSelectCalculator={(calcId) => {
+                  setActivePlatformCategory('calculators');
+                  setActiveSection(calcId);
+                  setTimeout(() => {
+                    scrollToCalculator(calcId);
+                    highlightElement(calcId);
+                  }, 120);
+                }}
+                onCloseDetail={() => {
+                  setTargetUpdateId(undefined);
+                  window.location.hash = 'updates';
+                }}
+              />
             </motion.main>
           )}
 

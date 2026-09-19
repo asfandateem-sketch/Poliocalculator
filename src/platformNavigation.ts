@@ -21,6 +21,7 @@ import {
   FileVideo,
   BookOpen,
   ClipboardList,
+  Newspaper,
 } from 'lucide-react';
 import type { TranslationStrings } from './translations';
 
@@ -29,6 +30,7 @@ export type PlatformCategoryKey =
   | 'training'
   | 'communication'
   | 'videos'
+  | 'updates'
   | 'documents'
   | 'field_resources'
   | 'faq';
@@ -88,6 +90,16 @@ export const PLATFORM_CATEGORIES: PlatformCategory[] = [
     shortLabelEn: 'Docs & Guides',
     shortLabelUr: 'دستاویزات',
     icon: ClipboardList,
+    isAvailable: true,
+    itemCount: 4,
+  },
+  {
+    key: 'updates',
+    labelEn: 'Updates',
+    labelUr: 'تازہ ترین اپڈیٹس',
+    shortLabelEn: 'Updates',
+    shortLabelUr: 'اپڈیٹس',
+    icon: Newspaper,
     isAvailable: true,
     itemCount: 4,
   },

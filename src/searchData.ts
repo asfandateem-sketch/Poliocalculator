@@ -7,6 +7,7 @@ export type SearchItemType =
   | 'communication'
   | 'video'
   | 'field_resources'
+  | 'update'
   | 'faq';
 
 export interface SearchableItem {
@@ -577,6 +578,67 @@ export const SEARCHABLE_ITEMS: SearchableItem[] = [
     badgeUr: 'گوگل ڈرائیو سنک',
     keywords: ['google drive', 'drive', 'gdrive', 'folder', 'sync', 'videos', 'گوگل ڈرائیو', 'ڈرائیو', 'فولڈر', 'ویڈیوز'],
     targetAnchor: 'videos',
+  },
+  // ================= UPDATES & ANNOUNCEMENTS (4 Items) =================
+  {
+    id: '2026-09-18-kp-campaign-launch',
+    category: 'updates',
+    type: 'update',
+    typeLabelEn: 'Campaign Update',
+    typeLabelUr: 'مہماتی اپڈیٹ',
+    titleEn: 'Khyber Pakhtunkhwa Launches September Polio Vaccination Campaign',
+    titleUr: 'خیبر پختونخوا میں ستمبر پولیو ویکسینیشن مہم کا باقاعدہ آغاز',
+    descriptionEn: 'Khyber Pakhtunkhwa has launched its September polio campaign (21–27 September 2026), targeting ~7.3M children under 5 with ~35,000 teams mobilised.',
+    descriptionUr: 'خیبر پختونخوا میں ستمبر مہم (21 تا 27 ستمبر 2026) کا آغاز، 35 ہزار ٹیموں کے ذریعے 7.3 ملین بچوں کو قطرے پلانے کا ہدف۔',
+    badgeEn: '21–27 Sep 2026',
+    badgeUr: '21 تا 27 ستمبر',
+    keywords: ['kp', 'khyber pakhtunkhwa', 'september', 'campaign', '7.3 million', '35000', 'teams', 'peoc', 'launch', 'خیبر پختونخوا', 'ستمبر', 'مہم', 'پولیو'],
+    targetAnchor: 'updates',
+  },
+  {
+    id: '2026-09-15-national-september-campaign',
+    category: 'updates',
+    type: 'update',
+    typeLabelEn: 'National Campaign',
+    typeLabelUr: 'قومی مہم',
+    titleEn: 'Pakistan to Vaccinate More Than 31 Million Children in September Campaign',
+    titleUr: 'پاکستان میں ستمبر مہم کے دوران 31 ملین سے زائد بچوں کی ویکسینیشن کا ہدف',
+    descriptionEn: 'Nationwide polio campaign from 21–27 September 2026 targeting over 31 million children under 5 across 115 high-risk districts with 273,000 frontline workers.',
+    descriptionUr: '21 تا 27 ستمبر 2026 کو ملک کے 115 ہائی رسک اضلاع میں 31 ملین سے زائد بچوں کو قطرے پلانے کے لیے 273,000 فرنٹ لائن ورکرز تعینات۔',
+    badgeEn: '31M+ Children',
+    badgeUr: '31 ملین بچے',
+    keywords: ['national', 'pakistan', '31 million', 'september', '115 districts', '273000', 'frontline', 'neoc', 'قومی مہم', 'پاکستان'],
+    targetAnchor: 'updates',
+  },
+  {
+    id: '2026-09-15-national-polio-briefing',
+    category: 'updates',
+    type: 'update',
+    typeLabelEn: 'Programme Update',
+    typeLabelUr: 'پروگرام اپڈیٹ',
+    titleEn: 'Pakistan Intensifies Polio Eradication Efforts Ahead of September Campaign',
+    titleUr: 'پاکستان بھر میں ستمبر مہم سے قبل انسداد پولیو کے جامع اقدامات اور سیکیورٹی جائزہ',
+    descriptionEn: 'National leadership review at NEOC Islamabad on environmental surveillance, transit post vaccination, mobile population tracking, and frontline team security.',
+    descriptionUr: 'اسلام آباد میں این ای او سی جائزہ اجلاس، ماحولیاتی سرویلنس، ٹرانزٹ پوائنٹس اور سیکیورٹی پلان کی توثیق۔',
+    badgeEn: 'NEOC Briefing',
+    badgeUr: 'این ای او سی',
+    keywords: ['neoc', 'islamabad', 'briefing', 'environmental', 'transit', 'security', 'microplanning', 'این ای او سی', 'اسلام آباد', 'جائزہ'],
+    targetAnchor: 'updates',
+  },
+  {
+    id: '2026-09-11-fourth-polio-case-context',
+    category: 'updates',
+    type: 'update',
+    typeLabelEn: 'Programme Update',
+    typeLabelUr: 'پروگرام اپڈیٹ',
+    titleEn: 'Pakistan Reports Fourth Polio Case of 2026; Southern KP Remains a Key Focus',
+    titleUr: 'پاکستان میں 2026 کے چوتھے پولیو کیس کی تصدیق؛ جنوبی خیبر پختونخوا بدستور ترجیحی توجہ کا مرکز',
+    descriptionEn: 'NIH Regional Reference Laboratory confirmed fourth WPV1 case of 2026 from southern KP; outbreak response, mop-up immunization and contact tracing initiated.',
+    descriptionUr: 'این آئی ایچ نے جنوبی کے پی سے 2026 کے چوتھے پولیو کیس کی تصدیق کی، ہنگامی رسپانس اور موپ اپ مہم جاری۔',
+    badgeEn: 'Case 4 (2026)',
+    badgeUr: 'چوتھا کیس',
+    keywords: ['case', 'fourth', 'wpv1', 'southern kp', 'nih', 'surveillance', 'mop-up', 'کیس', 'چوتھا', 'جنوبی کے پی'],
+    targetAnchor: 'updates',
   },
 ];
 
