@@ -30,6 +30,7 @@ import {
   Clock,
   Sparkles,
   AlertCircle,
+  AlertTriangle,
   X,
   Trash2,
   Edit3,
@@ -171,28 +172,46 @@ export const VideoThumbnail: React.FC<{
   );
 };
 
-// Removed/blocked folder IDs that should not appear in navigation
+// System/root folder IDs that should not appear as subcategories in navigation
 const BLOCKED_FOLDER_IDS = new Set([
-  'hcp',
-  'political_influencers',
-  'political',
-  'politics',
-  'political_administrative',
-  'community_influencers',
+  'polio_tools_kit',
+  'polio_tool_kit',
   'communication_resources',
-  'communication_resources_having_18_videos',
-  'communication_resources_having_13_videos',
-  'training_documents',
-  'tors',
-  'faq_communication',
-  'operational_documents',
+  'root',
 ]);
 
-// Normalizes resources so that doctor videos go ONLY to Health Care Professionals and religious videos go ONLY to Religious leaders
+// Normalizes resources so that doctor videos go ONLY to Health Care Professionals and religious videos go ONLY to Religious leaders,
+// while preserving user moves to other configured Drive folders (e.g. Other videos, Community Influencers)
 export const sanitizeSyncedVideos = (items: VideoItem[]): VideoItem[] => {
   if (!Array.isArray(items) || items.length === 0) return [];
 
   return items.map((item) => {
+    const rawCategory = (item.folderName || item.category || '').trim();
+    const rawLower = rawCategory.toLowerCase();
+
+    // If item was explicitly placed in another configured Drive folder (e.g. "Other videos")
+    const isExplicitOtherCategory =
+      rawCategory &&
+      !rawLower.includes('health') &&
+      !rawLower.includes('doctor') &&
+      !rawLower.includes('hcp') &&
+      !rawLower.includes('religio') &&
+      !rawLower.includes('scholar') &&
+      !rawLower.includes('ulema') &&
+      !['polio tools kit', 'polio tool kit', 'communication resources', 'root'].includes(rawLower);
+
+    if (isExplicitOtherCategory) {
+      return {
+        ...item,
+        folderId: item.folderId || slugify(rawCategory),
+        category: rawCategory,
+        folderName: rawCategory,
+        originalCategory: rawCategory,
+        badgeEn: rawCategory,
+        badgeUr: rawCategory,
+      };
+    }
+
     const textToScan = `${item.titleEn || ''} ${item.name || ''} ${item.originalFilename || ''} ${item.speakerEn || ''} ${item.description || ''} ${item.summaryEn || ''} ${item.category || ''} ${item.folderName || ''}`.toLowerCase();
     
     // Check doctor indicators strictly
@@ -227,8 +246,8 @@ export const sanitizeSyncedVideos = (items: VideoItem[]): VideoItem[] => {
       };
     }
 
-    // If already categorized as religious_leaders_videos, ensure doctors are expelled to HCP
-    if (item.folderId === 'religious_leaders_videos' || item.category === 'Health are Religious leaders videos') {
+    // If already in religious leaders category, expel any doctors to HCP
+    if (item.folderId === 'religious_leaders_videos' || rawLower.includes('religio') || rawLower.includes('scholar')) {
       if (isDoctor) {
         return {
           ...item,
@@ -251,56 +270,16 @@ export const sanitizeSyncedVideos = (items: VideoItem[]): VideoItem[] => {
       };
     }
 
-    // If already categorized as healthcare_professionals_videos, ensure religious leaders are expelled to Religious
-    if (item.folderId === 'healthcare_professionals_videos' || item.category === 'Health Care Professionals videos') {
-      if (isReligious) {
-        return {
-          ...item,
-          folderId: 'religious_leaders_videos',
-          category: 'Health are Religious leaders videos',
-          folderName: 'Health are Religious leaders videos',
-          originalCategory: 'Health are Religious leaders videos',
-          badgeEn: 'Religious Leaders',
-          badgeUr: 'مذہبی رہنما',
-        };
-      }
-      return {
-        ...item,
-        folderId: 'healthcare_professionals_videos',
-        category: 'Health Care Professionals videos',
-        folderName: 'Health Care Professionals videos',
-        originalCategory: 'Health Care Professionals videos',
-        badgeEn: 'Health Care Professionals',
-        badgeUr: 'ہیلتھ کیئر پروفیشنلز',
-      };
-    }
-
-    // Fallbacks based on keywords
-    if (isDoctor) {
-      return {
-        ...item,
-        folderId: 'healthcare_professionals_videos',
-        category: 'Health Care Professionals videos',
-        folderName: 'Health Care Professionals videos',
-        originalCategory: 'Health Care Professionals videos',
-        badgeEn: 'Health Care Professionals',
-        badgeUr: 'ہیلتھ کیئر پروفیشنلز',
-      };
-    }
-
-    if (isReligious) {
-      return {
-        ...item,
-        folderId: 'religious_leaders_videos',
-        category: 'Health are Religious leaders videos',
-        folderName: 'Health are Religious leaders videos',
-        originalCategory: 'Health are Religious leaders videos',
-        badgeEn: 'Religious Leaders',
-        badgeUr: 'مذہبی رہنما',
-      };
-    }
-
-    return item;
+    // Default to Health Care Professionals
+    return {
+      ...item,
+      folderId: 'healthcare_professionals_videos',
+      category: 'Health Care Professionals videos',
+      folderName: 'Health Care Professionals videos',
+      originalCategory: 'Health Care Professionals videos',
+      badgeEn: 'Health Care Professionals',
+      badgeUr: 'ہیلتھ کیئر پروفیشنلز',
+    };
   });
 };
 
@@ -323,8 +302,10 @@ export const VideosSection: React.FC = () => {
     return getEffectiveDriveSyncConfig();
   });
 
-  // Live fetching states
-  const [isLiveFetching, setIsLiveFetching] = useState<boolean>(false);
+  // Live fetching states — Google Drive is the live source of truth
+  const [isLiveFetching, setIsLiveFetching] = useState<boolean>(true);
+  const [isLiveLoaded, setIsLiveLoaded] = useState<boolean>(false);
+  const [isEmergencyFallback, setIsEmergencyFallback] = useState<boolean>(false);
   const [liveFetchError, setLiveFetchError] = useState<string | null>(null);
   const [lastLiveSyncTime, setLastLiveSyncTime] = useState<Date | null>(() => {
     try {
@@ -347,89 +328,54 @@ export const VideosSection: React.FC = () => {
     return [];
   });
 
-  // Synced videos from Drive (sanitized to cleanly map the 18 HCP and 13 Religious leaders videos)
+  // Live synced videos from Google Drive
+  // Empty initially so live request is the primary source of truth
   const [driveSyncedVideos, setDriveSyncedVideos] = useState<VideoItem[]>(() => {
     try {
       const saved = localStorage.getItem(DRIVE_SYNC_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const sanitized = sanitizeSyncedVideos(parsed);
-          try {
-            localStorage.setItem(DRIVE_SYNC_STORAGE_KEY, JSON.stringify(sanitized));
-          } catch {}
-          return sanitized;
+          return sanitizeSyncedVideos(parsed);
         }
       }
     } catch {}
-    // Baseline fallback to verified 31 Google Drive resources so mobile devices never load empty
-    const initial = sanitizeSyncedVideos(CORE_VIDEO_ITEMS);
-    try {
-      localStorage.setItem(DRIVE_SYNC_STORAGE_KEY, JSON.stringify(initial));
-    } catch {}
-    return initial;
+    return [];
   });
 
   // AUTOMATIC LIVE DRIVE SOURCE OF TRUTH:
-  // On component mount and whenever configuration updates, fetch fresh resources from Drive
+  // On component mount and whenever configuration updates, fetch fresh resources directly from Apps Script
   useEffect(() => {
     let isSubscribed = true;
 
     const performLiveFetch = async () => {
-      // Step 1: Immediately check if data/drive_resources.json is available from deployment
-      // This ensures mobile browsers with strict localStorage or no cache instantly get all 31 synced items
-      try {
-        const base = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '') + '/';
-        const staticUrl = `${base}data/drive_resources.json?_t=${Date.now()}`;
-        const res = await fetch(staticUrl, { cache: 'no-store' });
-        if (res.ok) {
-          const staticData = await res.json();
-          if (isSubscribed && Array.isArray(staticData) && staticData.length > 0) {
-            const sanitized = sanitizeSyncedVideos(staticData);
-            setDriveSyncedVideos((prev) => {
-              if (!prev || prev.length <= sanitized.length) {
-                try {
-                  localStorage.setItem(DRIVE_SYNC_STORAGE_KEY, JSON.stringify(sanitized));
-                } catch {}
-                return sanitized;
-              }
-              return prev;
-            });
-            console.log('[VideosSection] Hydrated', sanitized.length, 'resources from drive_resources.json');
-          }
-        }
-      } catch (e) {
-        // Silent catch for static fetch
-      }
-
-      // Step 2: If Apps Script URL or API key is configured, perform live query to Google Drive
-      if (!syncConfig.appsScriptUrl && !syncConfig.apiKey) {
-        return;
-      }
-
       setIsLiveFetching(true);
       setLiveFetchError(null);
 
       try {
-        console.log('[VideosSection] Querying live Google Drive contents on mount...');
-        const result = await fetchLiveDriveResources(syncConfig, driveSyncedVideos);
+        console.log('[VideosSection] Starting live fetch from Google Drive Apps Script Web App...');
+        const result = await fetchLiveDriveResources(syncConfig, []);
         if (!isSubscribed) return;
 
-        if (result.success && result.allSyncedItems.length > 0) {
+        if (result.success && Array.isArray(result.allSyncedItems) && result.allSyncedItems.length > 0) {
           const sanitized = sanitizeSyncedVideos(result.allSyncedItems);
           setDriveSyncedVideos(sanitized);
+          setIsLiveLoaded(true);
+          setIsEmergencyFallback(false);
           setLastLiveSyncTime(new Date());
           try {
             localStorage.setItem(DRIVE_SYNC_STORAGE_KEY, JSON.stringify(sanitized));
           } catch {}
-          console.log('[VideosSection] Live Drive fetch updated state with', sanitized.length, 'resources.');
-        } else if (result.error && !result.error.includes('No connection credentials')) {
-          setLiveFetchError(result.error);
+          console.log('[VideosSection] Live Drive fetch populated', sanitized.length, 'resources.');
+        } else {
+          const errMsg = result.error || 'Unable to load the latest communication resources from Google Drive.';
+          console.warn('[VideosSection] Live Drive fetch returned non-success:', errMsg);
+          setLiveFetchError(errMsg);
         }
       } catch (err: any) {
         if (isSubscribed) {
-          console.warn('[VideosSection] Automatic live Drive fetch note:', err?.message || err);
-          setLiveFetchError(err?.message || 'Live Drive fetch attempt failed');
+          console.warn('[VideosSection] Live Drive fetch error:', err?.message || err);
+          setLiveFetchError(err?.message || 'Unable to load the latest communication resources.');
         }
       } finally {
         if (isSubscribed) {
@@ -440,13 +386,15 @@ export const VideosSection: React.FC = () => {
 
     performLiveFetch();
 
-    // Listen for cross-component sync events (e.g., from DocumentsSection or DriveSyncModal)
+    // Listen for cross-component sync events
     const handleExternalSync = (e: any) => {
       if (!isSubscribed) return;
       const items = e?.detail?.items;
       if (Array.isArray(items) && items.length > 0) {
         const sanitized = sanitizeSyncedVideos(items);
         setDriveSyncedVideos(sanitized);
+        setIsLiveLoaded(true);
+        setIsEmergencyFallback(false);
         setLastLiveSyncTime(new Date());
       }
     };
@@ -457,6 +405,44 @@ export const VideosSection: React.FC = () => {
       window.removeEventListener('polio_drive_synced', handleExternalSync);
     };
   }, [syncConfig.appsScriptUrl, syncConfig.apiKey, syncConfig.method]);
+
+  // Handler to manually retry live connection
+  const handleRetryLiveFetch = () => {
+    triggerHaptic('medium');
+    setIsLiveFetching(true);
+    setLiveFetchError(null);
+    fetchLiveDriveResources(syncConfig, [])
+      .then((result) => {
+        if (result.success && Array.isArray(result.allSyncedItems) && result.allSyncedItems.length > 0) {
+          const sanitized = sanitizeSyncedVideos(result.allSyncedItems);
+          setDriveSyncedVideos(sanitized);
+          setIsLiveLoaded(true);
+          setIsEmergencyFallback(false);
+          setLastLiveSyncTime(new Date());
+          setSyncToast(isUrdu ? 'گوگل ڈرائیو سے لائیو مواد کامیابی سے لوڈ ہو گیا!' : 'Successfully loaded live resources from Google Drive!');
+        } else {
+          setLiveFetchError(result.error || 'Unable to load the latest communication resources.');
+        }
+      })
+      .catch((err) => {
+        setLiveFetchError(err?.message || 'Unable to load the latest communication resources.');
+      })
+      .finally(() => {
+        setIsLiveFetching(false);
+        setTimeout(() => setSyncToast(null), 3500);
+      });
+  };
+
+  // Explicit user-triggered emergency fallback when offline
+  const handleLoadEmergencyFallback = () => {
+    triggerHaptic('medium');
+    const fallback = sanitizeSyncedVideos(CORE_VIDEO_ITEMS);
+    setDriveSyncedVideos(fallback);
+    setIsEmergencyFallback(true);
+    setLiveFetchError(null);
+    setSyncToast(isUrdu ? 'آف لائن فال بیک مواد لوڈ کیا گیا' : 'Loaded offline fallback resources');
+    setTimeout(() => setSyncToast(null), 3500);
+  };
 
   // File type view filter: 'all' | 'video' | 'document' | 'image'
   const [fileTypeFilter, setFileTypeFilter] = useState<'all' | 'video' | 'document' | 'image'>('all');
@@ -1089,8 +1075,35 @@ export const VideosSection: React.FC = () => {
           </div>
         </div>
 
+        {/* Emergency Fallback Banner */}
+        {isEmergencyFallback && (
+          <div className="mt-2.5 p-3 rounded-xl bg-amber-50 border border-amber-300 text-xs text-amber-950 flex items-start justify-between gap-3">
+            <div className="flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">
+                  {isUrdu ? 'آف لائن فال بیک ڈیٹا فعال ہے' : 'Offline Fallback Resources Active'}
+                </p>
+                <p className="text-[11px] text-amber-800 mt-0.5">
+                  {isUrdu
+                    ? 'یہ ڈیٹا صرف آف لائن یا فال بیک کی صورت میں دکھایا جا رہا ہے۔ لائیو گوگل ڈرائیو سے جڑنے کے لیے ری ٹرائی کریں۔'
+                    : 'Displaying offline fallback data because the live Google Drive request was unavailable. Click retry to connect live.'}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleRetryLiveFetch}
+              className="px-3 py-1.5 text-xs font-bold bg-amber-700 hover:bg-amber-800 text-white rounded-lg transition cursor-pointer flex items-center gap-1.5 flex-shrink-0"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>{isUrdu ? 'لائیو کنیکٹ کریں' : 'Connect Live'}</span>
+            </button>
+          </div>
+        )}
+
         {/* Live fetch notice banner if any configuration issue arises */}
-        {liveFetchError && (
+        {liveFetchError && !isEmergencyFallback && (
           <div className="mt-2.5 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
@@ -1353,7 +1366,62 @@ export const VideosSection: React.FC = () => {
       </div>
 
       {/* 5. Video Gallery Grid */}
-      {filteredVideos.length === 0 ? (
+      {isLiveFetching && allVideos.length === 0 ? (
+        <div className="saas-card p-12 sm:p-16 text-center space-y-4 bg-white/95 border border-teal-200/80 shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center mx-auto border border-teal-200 shadow-sm animate-pulse">
+            <RefreshCw className="w-7 h-7 text-teal-700 animate-spin" />
+          </div>
+          <div className="space-y-1.5">
+            <h3 className="text-base font-bold text-slate-900">
+              {isUrdu ? 'مواصلاتی مواد لوڈ ہو رہا ہے...' : 'Loading communication resources…'}
+            </h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              {isUrdu
+                ? 'گوگل ڈرائیو اور Apps Script سے براہ راست تازہ ترین ویڈیوز حاصل کی جا رہی ہیں...'
+                : 'Fetching live resources directly from Google Drive Apps Script Web App…'}
+            </p>
+          </div>
+        </div>
+      ) : !isLiveFetching && liveFetchError && allVideos.length === 0 ? (
+        <div className="saas-card p-8 sm:p-12 text-center space-y-4 bg-white/95 border border-red-200 shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto border border-red-200 shadow-sm">
+            <AlertCircle className="w-7 h-7" />
+          </div>
+          <div className="space-y-1.5 max-w-md mx-auto">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">
+              {isUrdu ? 'تازہ ترین مواصلاتی مواد لوڈ کرنے میں ناکامی ہوئی' : 'Unable to load the latest communication resources.'}
+            </h3>
+            <p className="text-xs text-slate-600">
+              {isUrdu
+                ? 'گوگل ڈرائیو لائیو سروس سے رابطہ نہیں ہو سکا۔ براہ کرم اپنا انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔'
+                : 'Could not connect to the live Google Drive Apps Script endpoint. Please check your connection and retry.'}
+            </p>
+            {liveFetchError && (
+              <p className="text-[11px] font-mono text-red-700 bg-red-50 p-2 rounded-lg break-words border border-red-200">
+                {liveFetchError}
+              </p>
+            )}
+          </div>
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={handleRetryLiveFetch}
+              className="saas-btn-primary px-5 py-2.5 text-xs font-extrabold flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white shadow-md cursor-pointer"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>{isUrdu ? 'دوبارہ کوشش کریں' : 'Retry'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleLoadEmergencyFallback}
+              className="saas-btn-secondary px-4 py-2.5 text-xs font-semibold flex items-center gap-2 border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer"
+            >
+              <HardDrive className="w-4 h-4 text-slate-500" />
+              <span>{isUrdu ? 'آف لائن فال بیک دیکھیں' : 'View Offline Fallback Resources'}</span>
+            </button>
+          </div>
+        </div>
+      ) : filteredVideos.length === 0 ? (
         <div className="saas-card p-12 text-center space-y-3 bg-white/90">
           <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
             <Search className="w-6 h-6" />

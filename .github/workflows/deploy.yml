@@ -39,6 +39,8 @@ jobs:
         run: npm ci || npm install
 
       - name: npm run build
+        env:
+          VITE_DRIVE_APPS_SCRIPT_URL: ${{ secrets.VITE_DRIVE_APPS_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbxsqco2rUMrN_a36AuYOmKkB27cKQk9Npmcvi8N0r8EwzP4IVa_NvEmOuGBvKgOWQLl/exec' }}
         run: npm run build
 
       - name: dist generated

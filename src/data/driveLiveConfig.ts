@@ -36,6 +36,10 @@ export const DRIVE_SYNC_STORAGE_KEY = 'polio_drive_synced_videos_v1';
 export const DRIVE_CONFIG_STORAGE_KEY = 'polio_drive_sync_config_v1';
 export const DRIVE_LAST_FETCH_TIMESTAMP_KEY = 'polio_drive_last_live_fetch_ts';
 
+// Verified production Apps Script Web App for Google Drive Polio Tool Kit
+export const DEFAULT_APPS_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycbxsqco2rUMrN_a36AuYOmKkB27cKQk9Npmcvi8N0r8EwzP4IVa_NvEmOuGBvKgOWQLl/exec';
+
 // Environment variable fallbacks (if configured in Vite/Build/Hosting)
 export const ENV_APPS_SCRIPT_URL =
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DRIVE_APPS_SCRIPT_URL) || '';
@@ -45,9 +49,9 @@ export const ENV_DRIVE_API_KEY =
 
 /**
  * Retrieves the effective Drive sync configuration with cascading priority:
- * 1. User/Admin configured setting in localStorage
- * 2. Environment variables (VITE_DRIVE_APPS_SCRIPT_URL or VITE_GOOGLE_DRIVE_API_KEY)
- * 3. Default fallback values
+ * 1. User/Admin configured setting in localStorage (if non-empty)
+ * 2. Environment variable (VITE_DRIVE_APPS_SCRIPT_URL)
+ * 3. Default verified Apps Script Web App URL
  */
 export function getEffectiveDriveSyncConfig(): DriveSyncConfig {
   let stored: Partial<DriveSyncConfig> = {};
@@ -58,7 +62,12 @@ export function getEffectiveDriveSyncConfig(): DriveSyncConfig {
     }
   } catch {}
 
-  const appsScriptUrl = (stored.appsScriptUrl || ENV_APPS_SCRIPT_URL || '').trim();
+  const appsScriptUrl = (
+    stored.appsScriptUrl ||
+    ENV_APPS_SCRIPT_URL ||
+    DEFAULT_APPS_SCRIPT_URL
+  ).trim();
+
   const apiKey = (stored.apiKey || ENV_DRIVE_API_KEY || '').trim();
   const masterFolderId = (stored.masterFolderId || MASTER_FOLDER_ID).trim();
   const method = stored.method || (appsScriptUrl ? 'apps_script' : (apiKey ? 'drive_api' : 'apps_script'));

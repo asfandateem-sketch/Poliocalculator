@@ -102,45 +102,41 @@ export function normalizeDriveResource(
   const fileType: SupportedFileType = raw.fileType || classifyFileType(name, raw.mimeType);
   const mimeType = raw.mimeType || '';
 
-  // Folder & Category
-  let category = raw.category || raw.folderName || 'Health Care Professionals videos';
-  let folderName = raw.folderName || category;
-  let folderId = (raw.folderId && typeof raw.folderId === 'string' && !raw.folderId.includes(' ') && raw.folderId.length > 3)
-    ? raw.folderId
-    : slugify(category);
+  // Folder & Category mapping from Google Drive
+  const rawFolder = (raw.folderName || raw.category || '').trim();
+  const folderLower = rawFolder.toLowerCase();
+  const textToScan = `${name} ${raw.speakerEn || ''} ${raw.titleEn || ''}`.toLowerCase();
+  const isReligiousFile = /mufti|molana|maulana|ulema|scholar|imam|taqi|islam|fatwa|deen|halal|shariah|masjid|council|religio/.test(textToScan);
+  const isDoctorFile = /\bdr\b|doctor|pediatric|bawar|qasim|ghulam|qadir|hospital|medical|dhq|thq|specialist|physician|surgeon|mbbs/.test(textToScan);
 
-  const textToScan = `${name} ${raw.speakerEn || ''} ${category} ${folderName} ${raw.titleEn || ''}`.toLowerCase();
-  const isReligious = /mufti|molana|maulana|ulema|scholar|imam|taqi|islam|fatwa|deen|halal|shariah|masjid|council|religio/.test(textToScan);
-  const isDoctor = /\bdr\b|doctor|pediatric|bawar|qasim|ghulam|qadir|health|hospital|medical|dhq|thq|specialist|proffession|physician|surgeon|mbbs|medical officer/.test(textToScan);
+  let category = rawFolder || 'Health Care Professionals';
+  let folderName = rawFolder || category;
+  let folderId = 'healthcare_professionals_videos';
 
-  if (isReligious && !isDoctor) {
+  if (folderLower.includes('religio') || folderLower.includes('scholar') || folderLower.includes('ulema')) {
     folderId = 'religious_leaders_videos';
-    category = 'Health are Religious leaders videos';
-    folderName = 'Health are Religious leaders videos';
-  } else if (isDoctor && !isReligious) {
+    category = 'Religious Influencers';
+    folderName = 'Religious Influencers';
+  } else if (folderLower.includes('health') || folderLower.includes('doctor') || folderLower.includes('hcp') || folderLower.includes('profess')) {
     folderId = 'healthcare_professionals_videos';
-    category = 'Health Care Professionals videos';
-    folderName = 'Health Care Professionals videos';
-  } else if (folderId === 'religious_leaders_videos' && isDoctor) {
-    folderId = 'healthcare_professionals_videos';
-    category = 'Health Care Professionals videos';
-    folderName = 'Health Care Professionals videos';
-  } else if (folderId === 'healthcare_professionals_videos' && isReligious) {
-    folderId = 'religious_leaders_videos';
-    category = 'Health are Religious leaders videos';
-    folderName = 'Health are Religious leaders videos';
-  } else if (
-    folderId === 'religious_leaders_videos' ||
-    folderId === 'religious_influencers' ||
-    isReligious
-  ) {
-    folderId = 'religious_leaders_videos';
-    category = 'Health are Religious leaders videos';
-    folderName = 'Health are Religious leaders videos';
+    category = 'Health Care Professionals';
+    folderName = 'Health Care Professionals';
+  } else if (rawFolder && !['polio tools kit', 'polio tool kit', 'communication resources', 'root', ''].includes(folderLower)) {
+    // Exact user-configured Drive folder (e.g. "Other videos", "Community Influencers", etc.)
+    folderId = slugify(rawFolder);
+    category = rawFolder;
+    folderName = rawFolder;
   } else {
-    folderId = 'healthcare_professionals_videos';
-    category = 'Health Care Professionals videos';
-    folderName = 'Health Care Professionals videos';
+    // Generic root folder - classify by content
+    if (isReligiousFile && !isDoctorFile) {
+      folderId = 'religious_leaders_videos';
+      category = 'Religious Influencers';
+      folderName = 'Religious Influencers';
+    } else {
+      folderId = 'healthcare_professionals_videos';
+      category = 'Health Care Professionals';
+      folderName = 'Health Care Professionals';
+    }
   }
 
   // Metadata & Timestamps
@@ -470,7 +466,6 @@ export async function fetchAppsScriptData(
     console.log('[DriveSync] Direct live fetch to Apps Script URL:', targetUrl.toString());
 
     const directRes = await fetch(targetUrl.toString(), {
-      headers: { Accept: 'application/json' },
       cache: 'no-store',
       redirect: 'follow',
     });
