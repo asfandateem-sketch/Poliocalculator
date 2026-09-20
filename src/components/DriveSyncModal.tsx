@@ -410,7 +410,7 @@ function createJsonResponse(data) {
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
-                <span>{isUrdu ? 'گوگل ڈرائیو ماسٹر سنک سیٹنگز' : 'Polio Tool Kit — Google Drive Sync'}</span>
+                <span>{isUrdu ? 'کلاؤڈ ریپوزٹری سنک سیٹنگز' : 'Polio Tool Kit — Repository Sync'}</span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/30 text-teal-100 border border-teal-400/30">
                   Strict Scope
                 </span>
@@ -446,8 +446,8 @@ function createJsonResponse(data) {
             </div>
             <p className="text-emerald-800 text-[11px] leading-relaxed">
               {isUrdu
-                ? 'ویب سائٹ آپ کی ذاتی گوگل ڈرائیو یا دیگر فولڈرز کو کبھی اسکین نہیں کرے گی۔ صرف نامزد پولیو ماسٹر فولڈر اور اس کے تمام ذیلی فولڈرز (Community Influencers, HCPs, Political, Religious, Training, TORs وغیرہ) کو کیٹیگریز کے طور پر پڑھا جائے گا۔'
-                : 'The synchronization engine operates exclusively inside the configured "Polio Tool Kit" folder. It will never scan your personal Google Drive or unrelated files. Subfolders automatically become website categories with support for Videos (MP4/WebM/MOV), Documents (PDF/DOCX/PPTX), and Images.'}
+                ? 'ویب سائٹ صرف نامزد پولیو ماسٹر فولڈر اور اس کے تمام ذیلی فولڈرز (Community Influencers, HCPs, Political, Religious, Training, TORs وغیرہ) کو کیٹیگریز کے طور پر پڑھے گی۔'
+                : 'The synchronization engine operates exclusively inside the configured "Polio Tool Kit" folder. Subfolders automatically become website categories with support for Videos (MP4/WebM/MOV), Documents (PDF/DOCX/PPTX), and Images.'}
             </p>
             <div className="flex items-center gap-2 pt-1 font-mono text-[11px] text-emerald-800">
               <span className="font-semibold text-emerald-950">Root Folder:</span>
@@ -731,7 +731,7 @@ function createJsonResponse(data) {
                 {isSyncing
                   ? isUrdu
                     ? 'سنک جاری ہے...'
-                    : 'Syncing Drive...'
+                    : 'Syncing...'
                   : isUrdu
                   ? 'محفوظ اور سنک کریں'
                   : 'Save & Sync Now'}

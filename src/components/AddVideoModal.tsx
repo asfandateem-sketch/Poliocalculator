@@ -61,7 +61,7 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
   const handleAiAutoFill = async () => {
     const raw = driveUrl.trim() || titleEn.trim();
     if (!raw) {
-      setErrorMsg(isUrdu ? 'پہلے گوگل ڈرائیو لنک یا فائل کا نام درج کریں۔' : 'Please provide a Google Drive link or filename first.');
+      setErrorMsg(isUrdu ? 'پہلے ویڈیو لنک یا فائل کا نام درج کریں۔' : 'Please provide a video link or filename first.');
       return;
     }
 
@@ -115,8 +115,8 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
     if (!fileId) {
       setErrorMsg(
         isUrdu
-          ? 'برائے مہربانی درست گوگل ڈرائیو لنک یا فائل آئی ڈی درج کریں۔'
-          : 'Please enter a valid Google Drive link or file ID (e.g. https://drive.google.com/file/d/...)'
+          ? 'برائے مہربانی درست میڈیا لنک یا فائل آئی ڈی درج کریں۔'
+          : 'Please enter a valid video link or file ID (e.g. https://drive.google.com/file/d/...)'
       );
       return;
     }
@@ -131,19 +131,19 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
       titleUr: cleanTitleUr,
       speakerEn: speakerEn.trim() || 'Health Professional / Champion',
       speakerUr: speakerUr.trim() || 'طبی ماہر / کمیونٹی چیمپئن',
-      designationEn: designationEn.trim() || 'Drive Resource',
-      designationUr: designationUr.trim() || 'ڈرائیو ریسورس',
+      designationEn: designationEn.trim() || 'Official Resource',
+      designationUr: designationUr.trim() || 'مستند ریسورس',
       duration: duration.trim() || '3:30 mins',
       driveFileId: fileId,
       driveUrl: driveUrl.startsWith('http') ? driveUrl : `https://drive.google.com/file/d/${fileId}/view`,
       embedUrl: `https://drive.google.com/file/d/${fileId}/preview`,
       thumbnailUrl: thumbnailUrl.trim() || `https://drive.google.com/thumbnail?id=${fileId}&sz=w640`,
-      badgeEn: 'Drive Added',
-      badgeUr: 'ڈرائیو سے منسلک',
-      summaryEn: summaryEn.trim() || 'Video resource added and synchronized from Google Drive.',
-      summaryUr: summaryUr.trim() || 'گوگل ڈرائیو سے منسلک کی گئی تصدیقی ویڈیو۔',
-      keyPointsEn: ['Verified video resource from field Google Drive storage.'],
-      keyPointsUr: ['فیلڈ گوگل ڈرائیو سے تصدیق شدہ ویڈیو ریسورس۔'],
+      badgeEn: 'Verified',
+      badgeUr: 'تصدیق شدہ',
+      summaryEn: summaryEn.trim() || 'Video resource added to campaign library.',
+      summaryUr: summaryUr.trim() || 'مہم کی آگاہی لائبریری کے لیے شامل کردہ ویڈیو پیغام۔',
+      keyPointsEn: ['Verified video resource for campaign communication.'],
+      keyPointsUr: ['مہم کی آگاہی اور ابلاغ کے لیے تصدیق شدہ ویڈیو مواد۔'],
       fieldScenarioEn: 'Use during refusal conversion or community awareness sessions.',
       fieldScenarioUr: 'انکاری والدین اور کمیونٹی آگاہی سیشنز کے دوران استعمال کریں۔',
       isUserAdded: true,
@@ -192,19 +192,19 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
         titleUr: cleanTitle,
         speakerEn: 'Health Expert / Community Champion',
         speakerUr: 'طبی ماہر / کمیونٹی چیمپئن',
-        designationEn: 'Google Drive Video',
-        designationUr: 'گوگل ڈرائیو ویڈیو',
+        designationEn: 'Media Resource',
+        designationUr: 'میڈیا ریسورس',
         duration: 'Video Clip',
         driveFileId: fileId,
         driveUrl: urlPart.startsWith('http') ? urlPart : `https://drive.google.com/file/d/${fileId}/view`,
         embedUrl: `https://drive.google.com/file/d/${fileId}/preview`,
         thumbnailUrl: `https://drive.google.com/thumbnail?id=${fileId}&sz=w640`,
-        badgeEn: 'Drive Added',
-        badgeUr: 'ڈرائیو سے منسلک',
-        summaryEn: 'Video resource added and synchronized from Google Drive.',
-        summaryUr: 'گوگل ڈرائیو سے منسلک کی گئی تصدیقی ویڈیو۔',
-        keyPointsEn: ['Verified video resource from field Google Drive storage.'],
-        keyPointsUr: ['فیلڈ گوگل ڈرائیو سے تصدیق شدہ ویڈیو ریسورس۔'],
+        badgeEn: 'Verified',
+        badgeUr: 'تصدیق شدہ',
+        summaryEn: 'Video resource added to campaign library.',
+        summaryUr: 'مہم کی آگاہی لائبریری کے لیے شامل کردہ ویڈیو پیغام۔',
+        keyPointsEn: ['Verified video resource for campaign communication.'],
+        keyPointsUr: ['مہم کی آگاہی اور ابلاغ کے لیے تصدیق شدہ ویڈیو مواد۔'],
         fieldScenarioEn: 'Use during refusal conversion or community awareness sessions.',
         fieldScenarioUr: 'انکاری والدین اور کمیونٹی آگاہی سیشنز کے دوران استعمال کریں۔',
         isUserAdded: true,
@@ -216,7 +216,7 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
     }
 
     if (count === 0) {
-      setErrorMsg(isUrdu ? 'کوئی درست گوگل ڈرائیو لنک نہیں ملا۔' : 'No valid Google Drive links were found.');
+      setErrorMsg(isUrdu ? 'کوئی درست ویڈیو لنک نہیں ملا۔' : 'No valid video links were found.');
       return;
     }
 
@@ -241,19 +241,19 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
         <div className="p-4 sm:p-5 bg-gradient-to-r from-teal-900 via-slate-900 to-teal-950 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-300">
-              <HardDrive className="w-5 h-5" />
+              <Video className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">
-                <span>{isUrdu ? 'گوگل ڈرائیو سے ویڈیو شامل کریں' : 'Add Video from Google Drive'}</span>
+                <span>{isUrdu ? 'نئی ویڈیو شامل کریں' : 'Add Campaign Video'}</span>
                 <span className="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] font-mono border border-teal-400/30">
                   AI Ready
                 </span>
               </h3>
               <p className="text-xs text-slate-300 mt-0.5">
                 {isUrdu
-                  ? 'ڈرائیو لنک درج کریں، AI خودکار عنوان و تفصیل تیار کرے گا'
-                  : 'Paste Drive link — AI automatically writes titles, speakers, and medical summaries'}
+                  ? 'ویڈیو لنک درج کریں، AI خودکار عنوان و تفصیل تیار کرے گا'
+                  : 'Paste video link — AI automatically writes titles, speakers, and clinical summaries'}
               </p>
             </div>
           </div>
@@ -315,10 +315,10 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
         <div className="overflow-y-auto flex-1 p-4 sm:p-6 text-xs space-y-4">
           {mode === 'single' ? (
             <form onSubmit={handleSingleSubmit} id="add-single-video-form" className="space-y-4">
-              {/* Google Drive Link with AI Button */}
+              {/* Video Link with AI Button */}
               <div>
                 <label className="block font-bold text-slate-800 mb-1">
-                  {isUrdu ? 'گوگل ڈرائیو ویڈیو لنک یا فائل آئی ڈی *' : 'Google Drive Video Link or File ID *'}
+                  {isUrdu ? 'ویڈیو لنک یا فائل آئی ڈی *' : 'Video Link or File ID *'}
                 </label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
@@ -343,7 +343,7 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
                   </button>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  Supports Google Drive file links, preview links, or raw IDs.
+                  Supports video file links, preview links, or file IDs.
                 </p>
               </div>
 
@@ -445,7 +445,7 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
                     type="url"
                     value={thumbnailUrl}
                     onChange={(e) => setThumbnailUrl(e.target.value)}
-                    placeholder="Auto-generated from Google Drive"
+                    placeholder="Auto-generated from media link"
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-600 font-mono text-[11px]"
                   />
                 </div>
@@ -482,7 +482,7 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
           ) : (
             <form onSubmit={handleBatchSubmit} id="add-batch-video-form" className="space-y-4">
               <div className="p-3.5 rounded-2xl bg-teal-50 border border-teal-200 text-teal-900 text-xs space-y-1">
-                <p className="font-bold">Paste multiple Google Drive links or File IDs:</p>
+                <p className="font-bold">Paste multiple video links or File IDs:</p>
                 <p className="text-[11px] text-teal-800">
                   One per line. You can optionally include a title: <span className="font-mono font-bold">Title | https://drive.google.com/file/d/...</span>
                 </p>

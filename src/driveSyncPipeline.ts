@@ -6,6 +6,13 @@ import {
   DRIVE_LAST_FETCH_TIMESTAMP_KEY,
 } from './data/driveLiveConfig';
 
+export interface DriveSubfolderMeta {
+  name: string;
+  category?: string;
+  folderId?: string;
+  filesFound?: number;
+}
+
 export interface DriveSyncImportResult {
   success: boolean;
   discoveredCount: number;
@@ -15,6 +22,7 @@ export interface DriveSyncImportResult {
   resultSummary: string;
   importedItems: VideoItem[];
   allSyncedItems: VideoItem[];
+  subfolders?: DriveSubfolderMeta[];
   error?: string;
 }
 
@@ -258,7 +266,8 @@ export function normalizeDriveResource(
  */
 export function importAllDriveFiles(
   rawFiles: any[],
-  existingResources: VideoItem[]
+  existingResources: VideoItem[],
+  subfolders: DriveSubfolderMeta[] = []
 ): DriveSyncImportResult {
   console.log(`[DriveSync] Starting normalization for ${rawFiles.length} files...`);
 
@@ -295,6 +304,7 @@ export function importAllDriveFiles(
       resultSummary: `${discoveredCount} files discovered → 0 resources loaded → ${failedCount} failed`,
       importedItems: [],
       allSyncedItems: existingResources,
+      subfolders,
       error: errorMsg,
     };
   }
@@ -359,6 +369,7 @@ export function importAllDriveFiles(
     resultSummary,
     importedItems: acceptedItems,
     allSyncedItems,
+    subfolders,
   };
 }
 
@@ -443,7 +454,7 @@ export async function fetchDriveApiData(
  */
 export async function fetchAppsScriptData(
   config: DriveSyncConfig
-): Promise<{ rawFiles: any[]; status: number; message?: string }> {
+): Promise<{ rawFiles: any[]; status: number; message?: string; subfolders?: DriveSubfolderMeta[] }> {
   const url = (config.appsScriptUrl || '').trim();
   const folderId = (config.masterFolderId || MASTER_FOLDER_ID).trim();
 
@@ -458,61 +469,45 @@ export async function fetchAppsScriptData(
   let responseStatus = 0;
   let responseData: any = null;
 
-  // Direct browser fetch with cache-busting and no-store
+  // 1. Try server-side API proxy first (bypasses browser CORS, follows Google redirects)
   try {
-    const targetUrl = new URL(url);
-    targetUrl.searchParams.set('folderId', folderId);
-    targetUrl.searchParams.set('_t', Date.now().toString());
-    console.log('[DriveSync] Direct live fetch to Apps Script URL:', targetUrl.toString());
-
-    const directRes = await fetch(targetUrl.toString(), {
-      cache: 'no-store',
-      redirect: 'follow',
+    const proxyRes = await fetch('/api/drive/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scriptUrl: url, folderId, apiKey: config.apiKey }),
     });
-
-    responseStatus = directRes.status;
-    const text = await directRes.text();
-
-    if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
-      console.warn('[DriveSync] Direct fetch returned HTML (authorization required or invalid Web App access).');
-      // If we are in local dev with server proxy, try /api/drive/sync
-      if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-        const proxyRes = await fetch('/api/drive/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ scriptUrl: url, folderId, apiKey: config.apiKey }),
-        });
-        if (proxyRes.ok) {
-          responseData = await proxyRes.json();
-        }
-      }
-      if (!responseData) {
-        throw new Error(
-          'Google Apps Script returned an HTML page instead of JSON. Ensure your Apps Script Web App is deployed with "Who has access: Anyone".'
-        );
-      }
-    } else {
-      responseData = JSON.parse(text);
+    if (proxyRes.ok) {
+      responseData = await proxyRes.json();
+      responseStatus = proxyRes.status;
+      console.log('[DriveSync] Server-side proxy responded successfully.');
     }
-  } catch (directErr: any) {
-    console.warn('[DriveSync] Direct live fetch error:', directErr.message);
+  } catch (proxyErr: any) {
+    console.warn('[DriveSync] Server-side proxy attempt failed, falling back to direct fetch:', proxyErr?.message || proxyErr);
+  }
 
-    // Fallback: try backend proxy ONLY if running locally
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.port === '3000')) {
-      try {
-        const proxyRes = await fetch('/api/drive/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ scriptUrl: url, folderId, apiKey: config.apiKey }),
-        });
-        if (proxyRes.ok) {
-          responseData = await proxyRes.json();
-          responseStatus = proxyRes.status;
-        }
-      } catch {}
-    }
+  // 2. Direct browser fetch fallback if server proxy was not available
+  if (!responseData) {
+    try {
+      const targetUrl = new URL(url);
+      targetUrl.searchParams.set('folderId', folderId);
+      targetUrl.searchParams.set('_t', Date.now().toString());
+      console.log('[DriveSync] Direct fetch to Apps Script URL:', targetUrl.toString());
 
-    if (!responseData) {
+      const directRes = await fetch(targetUrl.toString(), {
+        cache: 'no-store',
+        redirect: 'follow',
+      });
+
+      responseStatus = directRes.status;
+      const text = await directRes.text();
+
+      if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+        throw new Error('Google Apps Script returned an HTML page instead of JSON.');
+      } else {
+        responseData = JSON.parse(text);
+      }
+    } catch (directErr: any) {
+      console.warn('[DriveSync] Direct fetch error:', directErr?.message || directErr);
       throw directErr;
     }
   }
@@ -531,7 +526,18 @@ export async function fetchAppsScriptData(
   }
 
   console.log(`[DriveSync] Live source of truth: extracted ${rawFiles.length} raw files from response.`);
-  return { rawFiles, status: responseStatus };
+
+  const subfolders: DriveSubfolderMeta[] =
+    responseData && Array.isArray(responseData.subfolderStats)
+      ? responseData.subfolderStats.map((s: any) => ({
+          name: s.name,
+          category: s.category,
+          folderId: s.folderId,
+          filesFound: s.filesFound,
+        }))
+      : [];
+
+  return { rawFiles, status: responseStatus, subfolders };
 }
 
 /**
@@ -543,7 +549,7 @@ export async function runFullDriveSync(
 ): Promise<DriveSyncImportResult> {
   const method = config.method || (config.appsScriptUrl ? 'apps_script' : (config.apiKey ? 'drive_api' : 'apps_script'));
 
-  let fetchResult: { rawFiles: any[]; status: number; message?: string };
+  let fetchResult: { rawFiles: any[]; status: number; message?: string; subfolders?: DriveSubfolderMeta[] };
 
   if (method === 'drive_api' || (!config.appsScriptUrl && config.apiKey)) {
     fetchResult = await fetchDriveApiData(config);
@@ -551,7 +557,7 @@ export async function runFullDriveSync(
     fetchResult = await fetchAppsScriptData(config);
   }
 
-  return importAllDriveFiles(fetchResult.rawFiles, existingResources);
+  return importAllDriveFiles(fetchResult.rawFiles, existingResources, fetchResult.subfolders || []);
 }
 
 /**
@@ -590,6 +596,7 @@ export async function fetchLiveDriveResources(
           new CustomEvent('polio_drive_synced', {
             detail: {
               items: result.allSyncedItems,
+              subfolders: result.subfolders || [],
               timestamp: new Date().toISOString(),
               summary: result.resultSummary,
             },

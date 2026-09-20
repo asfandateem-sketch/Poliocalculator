@@ -11,7 +11,7 @@ import {
 import { EditVideoModal } from './EditVideoModal';
 import { DriveSyncModal } from './DriveSyncModal';
 import { AddVideoModal } from './AddVideoModal';
-import { runFullDriveSync, fetchLiveDriveResources, slugify } from '../driveSyncPipeline';
+import { runFullDriveSync, fetchLiveDriveResources, slugify, DriveSubfolderMeta } from '../driveSyncPipeline';
 import {
   getEffectiveDriveSyncConfig,
   saveEffectiveDriveSyncConfig,
@@ -49,6 +49,12 @@ import {
   Lock,
   Unlock,
   Key,
+  Stethoscope,
+  ShieldCheck,
+  Users,
+  Landmark,
+  BookOpen,
+  FileCheck,
 } from 'lucide-react';
 
 const USER_STORAGE_KEY = 'polio_custom_user_videos_v2';
@@ -177,8 +183,164 @@ const BLOCKED_FOLDER_IDS = new Set([
   'polio_tools_kit',
   'polio_tool_kit',
   'communication_resources',
+  'documents_guides',
   'root',
 ]);
+
+export interface CategoryMeta {
+  titleEn: string;
+  titleUr: string;
+  shortTitleEn: string;
+  shortTitleUr: string;
+  descriptionEn: string;
+  descriptionUr: string;
+  icon: any;
+  accentColor: string;
+  badgeColor: string;
+}
+
+export const getCategoryMeta = (rawName: string): CategoryMeta => {
+  const lower = rawName.toLowerCase().trim();
+
+  if (lower.includes('health') || lower.includes('doctor') || lower.includes('hcp') || lower.includes('medical')) {
+    return {
+      titleEn: 'Health Care Professionals',
+      titleUr: 'ہیلتھ کیئر پروفیشنلز ویڈیوز',
+      shortTitleEn: 'Health Care Professionals',
+      shortTitleUr: 'ہیلتھ کیئر پروفیشنلز',
+      descriptionEn: 'Clinical endorsements, pediatricians & DHQ/THQ medical experts',
+      descriptionUr: 'طبی ماہرین، چائلڈ سپیشلسٹس اور ڈاکٹرز کے وضاحتی پیغامات',
+      icon: Stethoscope,
+      accentColor: 'from-teal-600 to-teal-800',
+      badgeColor: 'bg-teal-50 text-teal-800 border-teal-200',
+    };
+  }
+
+  if (lower.includes('religio') || lower.includes('scholar') || lower.includes('ulema') || lower.includes('mufti') || lower.includes('leader')) {
+    return {
+      titleEn: 'Religious Leaders',
+      titleUr: 'مذہبی رہنماؤں کے پیغامات',
+      shortTitleEn: 'Religious Leaders',
+      shortTitleUr: 'مذہبی رہنما',
+      descriptionEn: 'Islamic scholars, ulema council endorsements & Shariah fatwas',
+      descriptionUr: 'جید علمائے کرام اور مفتیانِ عظام کے فتاویٰ اور ویڈیو بیانات',
+      icon: ShieldCheck,
+      accentColor: 'from-amber-600 to-amber-800',
+      badgeColor: 'bg-amber-50 text-amber-800 border-amber-200',
+    };
+  }
+
+  if (lower.includes('community')) {
+    return {
+      titleEn: 'Community Influencers',
+      titleUr: 'کمیونٹی انفلوئنسرز',
+      shortTitleEn: 'Community Influencers',
+      shortTitleUr: 'کمیونٹی انفلوئنسرز',
+      descriptionEn: 'Local community elders, sports figures, teachers and social role models',
+      descriptionUr: 'مقامی معززین، اساتذہ، اسپورٹس شخصیات اور سماجی رہنماؤں کے پیغامات',
+      icon: Users,
+      accentColor: 'from-blue-600 to-indigo-700',
+      badgeColor: 'bg-blue-50 text-blue-800 border-blue-200',
+    };
+  }
+
+  if (lower.includes('political')) {
+    return {
+      titleEn: 'Political Influencers',
+      titleUr: 'سیاسی رہنما و عمائدین',
+      shortTitleEn: 'Political Influencers',
+      shortTitleUr: 'سیاسی رہنما',
+      descriptionEn: 'Elected representatives, tribal leaders and public figures',
+      descriptionUr: 'منتخب عوامی نمائندوں اور علاقائی عمائدین کے پیغامات',
+      icon: Landmark,
+      accentColor: 'from-purple-600 to-purple-800',
+      badgeColor: 'bg-purple-50 text-purple-800 border-purple-200',
+    };
+  }
+
+  if (lower.includes('operational') || lower.includes('manual') || lower.includes('sop')) {
+    return {
+      titleEn: 'Operational Documents',
+      titleUr: 'آپریشنل دستاویزات',
+      shortTitleEn: 'Operational Documents',
+      shortTitleUr: 'آپریشنل دستاویزات',
+      descriptionEn: 'Field manuals, operational SOPs, and campaign guides',
+      descriptionUr: 'فیلڈ مینوئلز، آپریشنل ایس او پیز اور مہماتی گائیڈز',
+      icon: FileCheck,
+      accentColor: 'from-cyan-600 to-sky-700',
+      badgeColor: 'bg-sky-50 text-sky-800 border-sky-200',
+    };
+  }
+
+  if (lower.includes('training')) {
+    return {
+      titleEn: 'Training Documents',
+      titleUr: 'تربیتی دستاویزات',
+      shortTitleEn: 'Training Documents',
+      shortTitleUr: 'تربیتی دستاویزات',
+      descriptionEn: 'Staff training guides, modules and capacity building files',
+      descriptionUr: 'عملے کی تربیت کے گائیڈز، ماڈیولز اور صلاحیت سازی کا مواد',
+      icon: BookOpen,
+      accentColor: 'from-indigo-600 to-indigo-800',
+      badgeColor: 'bg-indigo-50 text-indigo-800 border-indigo-200',
+    };
+  }
+
+  if (lower.includes('tor')) {
+    return {
+      titleEn: 'TORs & Guidelines',
+      titleUr: 'ٹی او آرز اور رہنما اصول',
+      shortTitleEn: 'TORs',
+      shortTitleUr: 'ٹی او آرز',
+      descriptionEn: 'Terms of Reference, role descriptions and official criteria',
+      descriptionUr: 'ٹرمز آف ریفرنس اور دائرہ کار کے رہنما اصول',
+      icon: FileText,
+      accentColor: 'from-emerald-600 to-teal-800',
+      badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    };
+  }
+
+  if (lower.includes('faq') || lower.includes('communication support')) {
+    return {
+      titleEn: 'FAQ & Communication Support',
+      titleUr: 'سوالات و مواصلاتی معاونت',
+      shortTitleEn: 'FAQ & Support',
+      shortTitleUr: 'سوالات و معاونت',
+      descriptionEn: 'Frequently asked questions, refusal resolution & field talking points',
+      descriptionUr: 'اکثر پوچھے گئے سوالات اور انکاری کیسز سے نمٹنے کے رہنما نکات',
+      icon: HelpCircle,
+      accentColor: 'from-violet-600 to-purple-800',
+      badgeColor: 'bg-violet-50 text-violet-800 border-violet-200',
+    };
+  }
+
+  if (lower.includes('other')) {
+    return {
+      titleEn: 'Other Videos',
+      titleUr: 'دیگر ویڈیوز',
+      shortTitleEn: 'Other Videos',
+      shortTitleUr: 'دیگر ویڈیوز',
+      descriptionEn: 'Miscellaneous communication materials and community videos',
+      descriptionUr: 'متفرق مواصلاتی ویڈیوز اور آگاہی پیغامات',
+      icon: Play,
+      accentColor: 'from-slate-700 to-slate-900',
+      badgeColor: 'bg-slate-100 text-slate-800 border-slate-200',
+    };
+  }
+
+  // Dynamic fallback for any newly created folder in Google Drive
+  return {
+    titleEn: rawName,
+    titleUr: rawName,
+    shortTitleEn: rawName,
+    shortTitleUr: rawName,
+    descriptionEn: `Google Drive: ${rawName}`,
+    descriptionUr: `گوگل ڈرائیو فولڈر: ${rawName}`,
+    icon: Folder,
+    accentColor: 'from-slate-700 to-slate-900',
+    badgeColor: 'bg-slate-100 text-slate-800 border-slate-200',
+  };
+};
 
 // Normalizes resources so that doctor videos go ONLY to Health Care Professionals and religious videos go ONLY to Religious leaders,
 // while preserving user moves to other configured Drive folders (e.g. Other videos, Community Influencers)
@@ -329,19 +491,9 @@ export const VideosSection: React.FC = () => {
   });
 
   // Live synced videos from Google Drive
-  // Empty initially so live request is the primary source of truth
-  const [driveSyncedVideos, setDriveSyncedVideos] = useState<VideoItem[]>(() => {
-    try {
-      const saved = localStorage.getItem(DRIVE_SYNC_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return sanitizeSyncedVideos(parsed);
-        }
-      }
-    } catch {}
-    return [];
-  });
+  // Empty initially so the live Apps Script API is the strict primary source of truth
+  const [driveSyncedVideos, setDriveSyncedVideos] = useState<VideoItem[]>([]);
+  const [discoveredSubfolders, setDiscoveredSubfolders] = useState<DriveSubfolderMeta[]>([]);
 
   // AUTOMATIC LIVE DRIVE SOURCE OF TRUTH:
   // On component mount and whenever configuration updates, fetch fresh resources directly from Apps Script
@@ -360,6 +512,9 @@ export const VideosSection: React.FC = () => {
         if (result.success && Array.isArray(result.allSyncedItems) && result.allSyncedItems.length > 0) {
           const sanitized = sanitizeSyncedVideos(result.allSyncedItems);
           setDriveSyncedVideos(sanitized);
+          if (Array.isArray(result.subfolders)) {
+            setDiscoveredSubfolders(result.subfolders);
+          }
           setIsLiveLoaded(true);
           setIsEmergencyFallback(false);
           setLastLiveSyncTime(new Date());
@@ -393,6 +548,9 @@ export const VideosSection: React.FC = () => {
       if (Array.isArray(items) && items.length > 0) {
         const sanitized = sanitizeSyncedVideos(items);
         setDriveSyncedVideos(sanitized);
+        if (Array.isArray(e?.detail?.subfolders)) {
+          setDiscoveredSubfolders(e.detail.subfolders);
+        }
         setIsLiveLoaded(true);
         setIsEmergencyFallback(false);
         setLastLiveSyncTime(new Date());
@@ -416,10 +574,13 @@ export const VideosSection: React.FC = () => {
         if (result.success && Array.isArray(result.allSyncedItems) && result.allSyncedItems.length > 0) {
           const sanitized = sanitizeSyncedVideos(result.allSyncedItems);
           setDriveSyncedVideos(sanitized);
+          if (Array.isArray(result.subfolders)) {
+            setDiscoveredSubfolders(result.subfolders);
+          }
           setIsLiveLoaded(true);
           setIsEmergencyFallback(false);
           setLastLiveSyncTime(new Date());
-          setSyncToast(isUrdu ? 'گوگل ڈرائیو سے لائیو مواد کامیابی سے لوڈ ہو گیا!' : 'Successfully loaded live resources from Google Drive!');
+          setSyncToast(isUrdu ? 'تازہ ترین مواد کامیابی سے لوڈ ہو گیا!' : 'Successfully loaded the latest resources!');
         } else {
           setLiveFetchError(result.error || 'Unable to load the latest communication resources.');
         }
@@ -529,59 +690,73 @@ export const VideosSection: React.FC = () => {
 
   // Dynamic categories strictly reflecting Google Drive folders (Health Care Professionals, Religious leaders, etc.)
   const categories = useMemo(() => {
-    const baseList = [...BASE_COMMUNICATION_FOLDERS];
-    const knownIds = new Set(baseList.map((b) => b.id.toLowerCase()));
-    // Mark removed / blocked folder IDs as known so they are never added
-    BLOCKED_FOLDER_IDS.forEach((id) => knownIds.add(id.toLowerCase()));
+    const list: FolderDefinition[] = [];
+    const added = new Set<string>();
 
-    if (driveSyncedVideos.length > 0) {
-      for (const vid of driveSyncedVideos) {
-        const catName = vid.category || vid.originalCategory || vid.folderName;
-        if (!catName) continue;
-        const catId = vid.folderId || slugify(catName);
-        const lowerId = catId.toLowerCase();
-        const lowerName = catName.toLowerCase();
+    const addCat = (rawName: string, folderIdOverride?: string) => {
+      if (!rawName) return;
+      const trimmed = rawName.trim();
+      const lower = trimmed.toLowerCase();
+      if (['root', 'polio tool kit', 'polio tools kit'].includes(lower)) return;
+      if (lower === 'communication resources' || lower === 'documents & guides') return;
 
-        // Strictly omit blocked folders (hcp, political influencers, etc.) and communication resources (which was split)
-        if (
-          knownIds.has(lowerId) ||
-          BLOCKED_FOLDER_IDS.has(lowerId) ||
-          BLOCKED_FOLDER_IDS.has(lowerName) ||
-          lowerName.includes('communication') ||
-          lowerName.includes('political') ||
-          lowerName.includes('community') ||
-          lowerName === 'hcp'
-        ) {
-          continue;
-        }
+      const meta = getCategoryMeta(trimmed);
+      const catId = folderIdOverride || slugify(meta.shortTitleEn);
+      const key = catId.toLowerCase();
 
-        knownIds.add(lowerId);
-        baseList.push({
+      if (!added.has(key)) {
+        added.add(key);
+        list.push({
           id: catId,
-          titleEn: catName,
-          titleUr: catName,
-          shortTitleEn: catName,
-          shortTitleUr: catName,
-          descriptionEn: `Google Drive folder: ${catName}`,
-          descriptionUr: `گوگل ڈرائیو فولڈر: ${catName}`,
-          icon: vid.fileType === 'document' ? FileText : vid.fileType === 'image' ? ImageIcon : Folder,
-          badgeEn: catName,
-          badgeUr: catName,
+          titleEn: meta.titleEn,
+          titleUr: meta.titleUr,
+          shortTitleEn: meta.shortTitleEn,
+          shortTitleUr: meta.shortTitleUr,
+          descriptionEn: meta.descriptionEn,
+          descriptionUr: meta.descriptionUr,
+          icon: meta.icon,
+          badgeEn: meta.shortTitleEn,
+          badgeUr: meta.shortTitleUr,
           driveFolderUrl: MASTER_FOLDER_URL,
-          accentColor: 'from-slate-700 to-slate-900',
-          badgeColor: 'bg-slate-100 text-slate-800 border-slate-200',
-          isCustom: true,
+          accentColor: meta.accentColor,
+          badgeColor: meta.badgeColor,
         });
       }
+    };
+
+    // 1. Standard primary categories
+    addCat('Health Care Professionals', 'healthcare_professionals_videos');
+    addCat('Religious Leaders', 'religious_leaders_videos');
+
+    // 2. Discover categories from resources returned by Google Drive
+    for (const item of driveSyncedVideos) {
+      const folder = item.folderName || item.category || item.originalCategory;
+      if (folder) {
+        addCat(folder);
+      }
     }
-    return baseList;
-  }, [driveSyncedVideos]);
+
+    // 3. Discover categories from subfolders metadata returned by Apps Script
+    for (const sub of discoveredSubfolders) {
+      if (sub.name) {
+        addCat(sub.name);
+      }
+    }
+
+    return list;
+  }, [driveSyncedVideos, discoveredSubfolders]);
 
   // Combined resource list (DRIVE-ONLY: strictly resources from Google Drive + custom user additions)
   const allVideos = useMemo(() => {
+    // While live request is pending, or if live request has not loaded and emergency fallback was not explicitly selected, return empty.
+    // This strictly ensures NO static resources are displayed while live request is pending or before explicit fallback selection.
+    if (isLiveFetching || (!isLiveLoaded && !isEmergencyFallback)) {
+      return [];
+    }
+
     const map = new Map<string, VideoItem>();
 
-    // 1. Synced videos and resources from user's Google Drive (the single source of truth)
+    // 1. Synced videos and resources from user's Google Drive (the live source of truth)
     for (const vid of driveSyncedVideos) {
       map.set(vid.id, vid);
     }
@@ -591,15 +766,15 @@ export const VideosSection: React.FC = () => {
       map.set(vid.id, vid);
     }
 
-    // 3. Guaranteed baseline fallback: if map is somehow empty, populate from CORE_VIDEO_ITEMS
-    if (map.size === 0) {
+    // 3. Fallback resources ONLY if user explicitly clicked "View Offline Fallback Resources"
+    if (isEmergencyFallback && map.size === 0) {
       for (const vid of CORE_VIDEO_ITEMS) {
         map.set(vid.id, vid);
       }
     }
 
     return Array.from(map.values());
-  }, [driveSyncedVideos, userVideos]);
+  }, [driveSyncedVideos, userVideos, isLiveFetching, isLiveLoaded, isEmergencyFallback]);
 
   // Persist handlers
   const saveUserVideos = (vids: VideoItem[]) => {
@@ -675,8 +850,8 @@ export const VideosSection: React.FC = () => {
 
       triggerHaptic('success');
       const toastText = isUrdu
-        ? `گوگل ڈرائیو سنک: ${syncResult.resultSummary}`
-        : `Google Drive Sync: ${syncResult.resultSummary}`;
+        ? `مواد اپ ڈیٹ ہو گیا: ${syncResult.resultSummary}`
+        : `Resources Updated: ${syncResult.resultSummary}`;
       setSyncToast(toastText);
       setTimeout(() => setSyncToast(null), 5000);
 
@@ -689,7 +864,7 @@ export const VideosSection: React.FC = () => {
     } catch (err: any) {
       console.error('[DriveSync] Synchronization pipeline error:', err);
       triggerHaptic('error');
-      const errMsg = err.message || 'Sync failed. Please check Drive folder setup or Apps Script URL.';
+      const errMsg = err.message || 'Sync failed. Please check your connection and retry.';
       setSyncToast(errMsg);
       setTimeout(() => setSyncToast(null), 6000);
       return { success: false, count: 0, error: errMsg };
@@ -790,7 +965,14 @@ export const VideosSection: React.FC = () => {
         let matches =
           v.folderId === activeFolderId ||
           cat === activeLower ||
-          slugify(cat) === activeLower;
+          slugify(cat) === activeLower ||
+          (activeLower.includes('operation') && (cat.includes('operation') || v.folderId.includes('operation'))) ||
+          (activeLower.includes('other') && (cat.includes('other') || v.folderId.includes('other'))) ||
+          (activeLower.includes('communit') && (cat.includes('communit') || v.folderId.includes('communit'))) ||
+          (activeLower.includes('politi') && (cat.includes('politi') || v.folderId.includes('politi'))) ||
+          (activeLower.includes('train') && (cat.includes('train') || v.folderId.includes('train'))) ||
+          (activeLower.includes('tor') && (cat.includes('tor') || v.folderId.includes('tor'))) ||
+          (activeLower.includes('faq') && (cat.includes('faq') || cat.includes('support') || v.folderId.includes('faq')));
 
         if (!matches) return false;
       }
@@ -858,7 +1040,20 @@ export const VideosSection: React.FC = () => {
 
       const cat = (v.category || v.originalCategory || v.folderName || '').toLowerCase();
       const target = fId.toLowerCase();
-      if (v.folderId === fId || cat === target || slugify(cat) === target) return true;
+      if (
+        v.folderId === fId ||
+        cat === target ||
+        slugify(cat) === target ||
+        (target.includes('operation') && (cat.includes('operation') || v.folderId.includes('operation'))) ||
+        (target.includes('other') && (cat.includes('other') || v.folderId.includes('other'))) ||
+        (target.includes('communit') && (cat.includes('communit') || v.folderId.includes('communit'))) ||
+        (target.includes('politi') && (cat.includes('politi') || v.folderId.includes('politi'))) ||
+        (target.includes('train') && (cat.includes('train') || v.folderId.includes('train'))) ||
+        (target.includes('tor') && (cat.includes('tor') || v.folderId.includes('tor'))) ||
+        (target.includes('faq') && (cat.includes('faq') || cat.includes('support') || v.folderId.includes('faq')))
+      ) {
+        return true;
+      }
       return false;
     }).length;
   };
@@ -866,6 +1061,11 @@ export const VideosSection: React.FC = () => {
   const totalVideosCount = useMemo(() => allVideos.filter((v) => v.fileType === 'video').length, [allVideos]);
   const totalDocsCount = useMemo(() => allVideos.filter((v) => v.fileType === 'document').length, [allVideos]);
   const totalImagesCount = useMemo(() => allVideos.filter((v) => v.fileType === 'image').length, [allVideos]);
+
+  // Only display categories that actually contain resources (removes extra empty/unused category cards)
+  const visibleCategories = useMemo(() => {
+    return categories.filter((folder) => getFolderCount(folder.id) > 0);
+  }, [categories, allVideos, fileTypeFilter]);
 
   return (
     <section id="communication-videos" className="w-full space-y-5">
@@ -901,30 +1101,20 @@ export const VideosSection: React.FC = () => {
                   <span>{isUrdu ? 'وسائل' : 'Resources'}</span>
                 </span>
                 
-                {/* Live Drive Source Status Badge */}
+                {/* Live Status Badge */}
                 {isLiveFetching || isSyncing ? (
                   <span className="px-2.5 py-0.5 text-[11px] font-bold text-teal-800 bg-teal-50 border border-teal-300 rounded-full flex items-center gap-1.5 animate-pulse">
                     <RefreshCw className="w-3 h-3 text-teal-600 animate-spin" />
-                    <span>{isUrdu ? 'گوگل ڈرائیو لائیو چیکنگ...' : 'Checking Live Drive...'}</span>
-                  </span>
-                ) : syncConfig.appsScriptUrl || syncConfig.apiKey ? (
-                  <span
-                    className="px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 rounded-full flex items-center gap-1.5"
-                    title={`Google Drive is the live source of truth${lastLiveSyncTime ? ` (Last checked: ${lastLiveSyncTime.toLocaleTimeString()})` : ''}`}
-                  >
-                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span>{isUrdu ? 'ڈرائیو لائیو سورس' : 'Live Drive Source'}</span>
+                    <span>{isUrdu ? 'تازہ ترین مواد چیک ہو رہا ہے...' : 'Checking updates...'}</span>
                   </span>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => setIsSyncModalOpen(true)}
-                    className="px-2.5 py-0.5 text-[11px] font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-full flex items-center gap-1.5 transition cursor-pointer"
-                    title="Click to connect Google Apps Script Web App or Google Drive API Key"
+                  <span
+                    className="px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 rounded-full flex items-center gap-1.5"
+                    title={lastLiveSyncTime ? `Last updated: ${lastLiveSyncTime.toLocaleTimeString()}` : 'Live repository'}
                   >
-                    <Settings2 className="w-3 h-3 text-slate-500" />
-                    <span>{isUrdu ? 'ڈرائیو سورس سیٹ کریں' : 'Set Drive Source'}</span>
-                  </button>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>{isUrdu ? 'مستند مواد' : 'Live Repository'}</span>
+                  </span>
                 )}
 
                 {isAdmin && (
@@ -936,46 +1126,46 @@ export const VideosSection: React.FC = () => {
               </div>
               <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
                 {isUrdu
-                  ? 'گوگل ڈرائیو فولڈرز (HCP، مذہبی اسکالرز، دیگر ویڈیوز) سے مستند مواد لائیو اپ ڈیٹ ہوتا ہے۔ ڈرائیو میں تبدیلی سائٹ پر خود بخود نظر آئے گی۔'
-                  : 'Google Drive is your live source of truth. Any video added, renamed, or updated in your Drive folders automatically updates here.'}
+                  ? 'فرنٹ لائن ورکرز، نگران عملہ اور کمیونٹی چیمپئنز کے لیے مستند و تصدیق شدہ ملٹی میڈیا مواد۔'
+                  : 'Verified multimedia communication repository for frontline healthcare teams, supervisors, and community mobilizers.'}
               </p>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-            {/* Universal Live Refresh Button: Available for mobile, incognito, and all users */}
+            {/* Universal Live Refresh Button */}
             <button
               type="button"
               onClick={handleQuickSync}
               disabled={isSyncing || isLiveFetching}
               className="saas-btn-primary px-3.5 py-2 text-xs flex items-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap bg-teal-700 hover:bg-teal-800 text-white font-extrabold min-h-[38px]"
-              title="Query Google Drive live now for newly added, deleted, or renamed videos"
+              title="Refresh resources list"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSyncing || isLiveFetching ? 'animate-spin' : ''}`} />
               <span>
                 {isSyncing || isLiveFetching
-                  ? (isUrdu ? 'لائیو چیک ہو رہا ہے...' : 'Checking Drive...')
-                  : (isUrdu ? 'لائیو ریفریش' : 'Live Refresh')}
+                  ? (isUrdu ? 'تازہ کاری جاری...' : 'Updating...')
+                  : (isUrdu ? 'تازہ کریں' : 'Refresh')}
               </span>
-            </button>
-
-            {/* Sync / Connection Settings Button */}
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                setIsSyncModalOpen(true);
-              }}
-              className="saas-btn-secondary px-3 py-2 text-xs flex items-center gap-1.5 border border-slate-300 shadow-2xs cursor-pointer whitespace-nowrap min-h-[38px]"
-              title="Google Drive Connection Settings & Web App URL"
-            >
-              <Settings2 className="w-4 h-4 text-teal-700" />
-              <span>{isUrdu ? 'ڈرائیو سورس' : 'Drive Source'}</span>
             </button>
 
             {isAdmin ? (
               <>
+                {/* Admin: Sync / Connection Settings Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setIsSyncModalOpen(true);
+                  }}
+                  className="saas-btn-secondary px-3 py-2 text-xs flex items-center gap-1.5 border border-slate-300 shadow-2xs cursor-pointer whitespace-nowrap min-h-[38px]"
+                  title="Connection Settings"
+                >
+                  <Settings2 className="w-4 h-4 text-teal-700" />
+                  <span>{isUrdu ? 'ترتیبات' : 'Settings'}</span>
+                </button>
+
                 {/* Admin: + Add Video Button */}
                 <button
                   type="button"
@@ -984,7 +1174,7 @@ export const VideosSection: React.FC = () => {
                     setIsAddVideoModalOpen(true);
                   }}
                   className="saas-btn-primary px-3.5 py-2 text-xs flex items-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold min-h-[38px]"
-                  title="Add more videos from Google Drive with AI auto-fill"
+                  title="Add more resources with AI auto-fill"
                 >
                   <Plus className="w-4 h-4 text-white" />
                   <span>{isUrdu ? 'ویڈیو شامل کریں' : '+ Add Video'}</span>
@@ -1017,122 +1207,94 @@ export const VideosSection: React.FC = () => {
                 </button>
               </>
             )}
-
-            {/* Open Main Drive Folder */}
-            <a
-              href={MASTER_FOLDER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="saas-btn-secondary px-3 py-2 text-xs flex items-center gap-1.5 border border-slate-300 shadow-2xs cursor-pointer whitespace-nowrap min-h-[38px]"
-              title="Open Main Communication Resources Folder in Google Drive"
-            >
-              <HardDrive className="w-4 h-4 text-teal-700" />
-              <span>{isUrdu ? 'مین ڈرائیو' : 'Drive Folder'}</span>
-              <ExternalLink className="w-3 h-3 text-slate-400" />
-            </a>
           </div>
         </div>
+      </div>
 
-        {/* Live Drive Source Banner: Explains live source of truth */}
-        <div className="mt-4 pt-3 border-t border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-slate-600 bg-slate-50/70 p-2.5 rounded-xl">
-          <div className="flex items-center gap-2 min-w-0 flex-wrap">
-            <span className="font-semibold text-teal-900 flex-shrink-0 flex items-center gap-1">
-              <Folder className="w-3.5 h-3.5 text-teal-700" />
-              {isUrdu ? 'گوگل ڈرائیو سورس:' : 'Drive Source:'}
-            </span>
-            <span className="font-mono text-slate-700 truncate text-[11px]">
-              ID: {syncConfig.masterFolderId || MASTER_FOLDER_ID}
-            </span>
-            {lastLiveSyncTime ? (
-              <span className="text-[11px] text-emerald-700 font-medium">
-                • {isUrdu ? 'لائیو تصدیق شدہ:' : 'Live verified:'} {lastLiveSyncTime.toLocaleTimeString()}
-              </span>
-            ) : isLiveFetching ? (
-              <span className="text-[11px] text-teal-700 font-medium animate-pulse">
-                • {isUrdu ? 'چیک ہو رہا ہے...' : 'Checking live contents...'}
-              </span>
-            ) : null}
+      {/* 1. If currently fetching live: show Loading state and DO NOT display static resources */}
+      {isLiveFetching ? (
+        <div className="saas-card p-12 sm:p-16 text-center space-y-4 bg-white/95 border border-teal-200/80 shadow-sm my-2">
+          <div className="w-14 h-14 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center mx-auto border border-teal-200 shadow-sm">
+            <RefreshCw className="w-7 h-7 text-teal-700 animate-spin" />
           </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setIsSyncModalOpen(true)}
-              className="text-[11px] font-semibold text-teal-700 hover:text-teal-900 flex items-center gap-1 cursor-pointer"
-            >
-              <FolderSync className="w-3 h-3" />
-              <span>{isUrdu ? 'ڈرائیو کنکشن تفصیلات' : 'Drive Setup'}</span>
-            </button>
-            <a
-              href={MASTER_FOLDER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[11px] font-semibold text-teal-700 hover:text-teal-900 flex items-center gap-1 flex-shrink-0 cursor-pointer"
-            >
-              <span>{isUrdu ? 'گوگل ڈرائیو میں کھولیں' : 'Open in Drive'}</span>
-              <ArrowUpRight className="w-3 h-3" />
-            </a>
+          <div className="space-y-1.5 max-w-md mx-auto">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">
+              {isUrdu ? 'مواصلاتی مواد لوڈ ہو رہا ہے...' : 'Loading communication resources…'}
+            </h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              {isUrdu
+                ? 'سرور سے براہ راست تازہ ترین میڈیا مواد حاصل کیا جا رہا ہے...'
+                : 'Retrieving the latest campaign communication resources…'}
+            </p>
           </div>
         </div>
-
-        {/* Emergency Fallback Banner */}
-        {isEmergencyFallback && (
-          <div className="mt-2.5 p-3 rounded-xl bg-amber-50 border border-amber-300 text-xs text-amber-950 flex items-start justify-between gap-3">
-            <div className="flex items-start gap-2.5">
-              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold">
-                  {isUrdu ? 'آف لائن فال بیک ڈیٹا فعال ہے' : 'Offline Fallback Resources Active'}
-                </p>
-                <p className="text-[11px] text-amber-800 mt-0.5">
-                  {isUrdu
-                    ? 'یہ ڈیٹا صرف آف لائن یا فال بیک کی صورت میں دکھایا جا رہا ہے۔ لائیو گوگل ڈرائیو سے جڑنے کے لیے ری ٹرائی کریں۔'
-                    : 'Displaying offline fallback data because the live Google Drive request was unavailable. Click retry to connect live.'}
-                </p>
-              </div>
-            </div>
+      ) : liveFetchError && !isEmergencyFallback && driveSyncedVideos.length === 0 ? (
+        /* 2. If live fetch failed and user hasn't explicitly chosen offline fallback: show Error state */
+        <div className="saas-card p-8 sm:p-12 text-center space-y-4 bg-white/95 border border-rose-200 shadow-sm my-2">
+          <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200 shadow-sm">
+            <AlertCircle className="w-7 h-7 text-rose-600" />
+          </div>
+          <div className="space-y-1.5 max-w-md mx-auto">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">
+              {isUrdu ? 'تازہ ترین مواصلاتی مواد لوڈ کرنے میں ناکامی ہوئی' : 'Unable to load the latest communication resources.'}
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              {liveFetchError}
+            </p>
+          </div>
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               onClick={handleRetryLiveFetch}
-              className="px-3 py-1.5 text-xs font-bold bg-amber-700 hover:bg-amber-800 text-white rounded-lg transition cursor-pointer flex items-center gap-1.5 flex-shrink-0"
+              className="saas-btn-primary px-5 py-2.5 text-xs font-extrabold flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white shadow-md cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>{isUrdu ? 'لائیو کنیکٹ کریں' : 'Connect Live'}</span>
+              <RefreshCw className="w-4 h-4" />
+              <span>{isUrdu ? 'دوبارہ کوشش کریں' : 'Retry'}</span>
             </button>
-          </div>
-        )}
-
-        {/* Live fetch notice banner if any configuration issue arises */}
-        {liveFetchError && !isEmergencyFallback && (
-          <div className="mt-2.5 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2.5">
-            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="font-bold">
-                {isUrdu ? 'گوگل ڈرائیو لائیو کنکشن نوٹ:' : 'Google Drive live connection notice:'}
-              </p>
-              <p className="mt-0.5 text-amber-800">
-                {liveFetchError}
-              </p>
-              <p className="mt-1 text-[11px] text-amber-700">
-                {isUrdu
-                  ? 'اگر آپ نے Apps Script استعمال کیا ہے تو تصدیق کریں کہ Web App میں "Who has access" کو "Anyone" پر سیٹ کیا گیا ہے۔'
-                  : 'If using Google Apps Script, ensure Web App deployment has "Who has access: Anyone". If using Drive API, ensure API key has Google Drive API v3 enabled.'}
-              </p>
-            </div>
             <button
               type="button"
-              onClick={() => setIsSyncModalOpen(true)}
-              className="px-2.5 py-1 text-[11px] font-bold bg-amber-200/80 hover:bg-amber-300 text-amber-950 rounded-lg transition cursor-pointer"
+              onClick={handleLoadEmergencyFallback}
+              className="saas-btn-secondary px-4 py-2.5 text-xs font-semibold flex items-center gap-2 border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer"
             >
-              {isUrdu ? 'درست کریں' : 'Configure'}
+              <Folder className="w-4 h-4 text-slate-500" />
+              <span>{isUrdu ? 'آف لائن فال بیک مواد دیکھیں' : 'View Offline Fallback Resources'}</span>
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        /* 3. Resources loaded (either live or offline fallback) */
+        <>
+          {isEmergencyFallback && (
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-xs text-amber-950 flex items-start justify-between gap-3 shadow-xs my-2">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-sm text-amber-950">
+                    {isUrdu
+                      ? 'آف لائن فال بیک مواد — ممکن ہے کہ بالکل تازہ ترین مواد نہ ہو۔'
+                      : 'Offline fallback resources — may not reflect the latest updates.'}
+                  </p>
+                  <p className="text-[11px] text-amber-800 mt-0.5">
+                    {isUrdu
+                      ? 'یہ مواد آف لائن موڈ میں دکھایا جا رہا ہے۔ تازہ ترین فائلیں حاصل کرنے کے لیے ری ٹرائی کریں۔'
+                      : 'Currently displaying offline cached data. Connect to internet and retry to fetch live resources.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleRetryLiveFetch}
+                className="px-3.5 py-1.5 text-xs font-bold bg-amber-700 hover:bg-amber-800 text-white rounded-xl transition cursor-pointer flex items-center gap-1.5 flex-shrink-0 shadow-xs"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>{isUrdu ? 'لائیو کنیکٹ کریں' : 'Retry'}</span>
+              </button>
+            </div>
+          )}
 
-      {/* Folder Category Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        {categories.map((folder) => {
+          {/* Folder Category Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        {visibleCategories.map((folder) => {
           const Icon = folder.icon || Folder;
           const count = getFolderCount(folder.id);
           const isActive = activeFolderId === folder.id;
@@ -1164,7 +1326,7 @@ export const VideosSection: React.FC = () => {
                   <Icon className="w-4 h-4" />
                 </div>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200">
-                  {count} {isUrdu ? 'ویڈیوز' : 'vids'}
+                  {count} {isUrdu ? 'فائلیں' : 'items'}
                 </span>
               </div>
 
@@ -1181,13 +1343,9 @@ export const VideosSection: React.FC = () => {
                 <span className={isActive ? 'text-teal-700' : 'text-slate-500'}>
                   {isActive ? (isUrdu ? 'منتخب شدہ' : 'Selected') : (isUrdu ? 'دیکھیں' : 'View')}
                 </span>
-                {folder.driveFolderId ? (
-                  <span className="font-mono text-[9px] text-slate-400 truncate max-w-[90px]">
-                    {folder.driveFolderId.slice(0, 8)}...
-                  </span>
-                ) : (
-                  <span className="text-[9px] text-teal-600 font-mono">Drive Sync</span>
-                )}
+                <span className="text-[10px] text-slate-400 font-medium">
+                  {count} {count === 1 ? (isUrdu ? 'آئٹم' : 'item') : (isUrdu ? 'آئٹمز' : 'items')}
+                </span>
               </div>
             </button>
           );
@@ -1214,8 +1372,8 @@ export const VideosSection: React.FC = () => {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              <HardDrive className="w-3.5 h-3.5" />
-              <span>{isUrdu ? 'ڈرائیو کا تمام مواد' : 'All Drive Files'}</span>
+              <Folder className="w-3.5 h-3.5" />
+              <span>{isUrdu ? 'تمام وسائل' : 'All Resources'}</span>
               <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
                 fileTypeFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
               }`}>
@@ -1298,7 +1456,7 @@ export const VideosSection: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isUrdu ? 'ڈرائیو مواد تلاش کریں...' : 'Search Drive files...'}
+              placeholder={isUrdu ? 'مواد تلاش کریں...' : 'Search resources...'}
               className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition"
             />
             {searchQuery && (
@@ -1328,7 +1486,7 @@ export const VideosSection: React.FC = () => {
             }`}
           >
             <Filter className="w-3 h-3" />
-            <span>{isUrdu ? 'تمام فولڈرز' : 'All Folders'}</span>
+            <span>{isUrdu ? 'تمام کیٹیگریز' : 'All Categories'}</span>
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
               activeFolderId === 'all' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-800'
             }`}>
@@ -1336,7 +1494,7 @@ export const VideosSection: React.FC = () => {
             </span>
           </button>
 
-          {categories.map((folder) => {
+          {visibleCategories.map((folder) => {
             const isSelected = activeFolderId === folder.id;
             const count = getFolderCount(folder.id);
             return (
@@ -1377,8 +1535,8 @@ export const VideosSection: React.FC = () => {
             </h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
               {isUrdu
-                ? 'گوگل ڈرائیو اور Apps Script سے براہ راست تازہ ترین ویڈیوز حاصل کی جا رہی ہیں...'
-                : 'Fetching live resources directly from Google Drive Apps Script Web App…'}
+                ? 'سرور سے براہ راست تازہ ترین میڈیا مواد حاصل کیا جا رہا ہے...'
+                : 'Fetching live resources directly…'}
             </p>
           </div>
         </div>
@@ -1393,8 +1551,8 @@ export const VideosSection: React.FC = () => {
             </h3>
             <p className="text-xs text-slate-600">
               {isUrdu
-                ? 'گوگل ڈرائیو لائیو سروس سے رابطہ نہیں ہو سکا۔ براہ کرم اپنا انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔'
-                : 'Could not connect to the live Google Drive Apps Script endpoint. Please check your connection and retry.'}
+                ? 'لائیو سروس سے رابطہ نہیں ہو سکا۔ براہ کرم اپنا انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔'
+                : 'Could not connect to the live resources service. Please check your connection and retry.'}
             </p>
             {liveFetchError && (
               <p className="text-[11px] font-mono text-red-700 bg-red-50 p-2 rounded-lg break-words border border-red-200">
@@ -1416,7 +1574,7 @@ export const VideosSection: React.FC = () => {
               onClick={handleLoadEmergencyFallback}
               className="saas-btn-secondary px-4 py-2.5 text-xs font-semibold flex items-center gap-2 border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer"
             >
-              <HardDrive className="w-4 h-4 text-slate-500" />
+              <Folder className="w-4 h-4 text-slate-500" />
               <span>{isUrdu ? 'آف لائن فال بیک دیکھیں' : 'View Offline Fallback Resources'}</span>
             </button>
           </div>
@@ -1431,8 +1589,8 @@ export const VideosSection: React.FC = () => {
           </h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
             {isUrdu
-              ? 'تلاش کی شرائط تبدیل کریں یا گوگل ڈرائیو سے نئی ویڈیوز سنک کریں۔'
-              : 'Try adjusting your search query or sync new videos from your Google Drive folder.'}
+              ? 'تلاش کی شرائط تبدیل کریں یا فلٹرز صاف کریں۔'
+              : 'Try adjusting your search query or clear filters.'}
           </p>
           <div className="pt-2 flex items-center justify-center gap-2">
             <button
@@ -1452,7 +1610,7 @@ export const VideosSection: React.FC = () => {
                 className="px-3.5 py-1.5 text-xs font-extrabold text-white bg-teal-700 hover:bg-teal-800 rounded-xl transition cursor-pointer flex items-center gap-1.5"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>{isUrdu ? 'گوگل ڈرائیو سنک' : 'Sync Drive'}</span>
+                <span>{isUrdu ? 'تازہ کریں' : 'Refresh'}</span>
               </button>
             )}
           </div>
@@ -1513,7 +1671,7 @@ export const VideosSection: React.FC = () => {
                         <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between z-10">
                           <span className="px-2.5 py-0.5 rounded-full bg-black/75 text-white text-[10px] font-semibold backdrop-blur-md border border-white/15 flex items-center gap-1">
                             <Folder className="w-3 h-3 text-teal-300" />
-                            <span>{folderMeta ? (isUrdu ? folderMeta.shortTitleUr : folderMeta.shortTitleEn) : (vid.category || vid.originalCategory || vid.folderName || 'Drive')}</span>
+                            <span>{folderMeta ? (isUrdu ? folderMeta.shortTitleUr : folderMeta.shortTitleEn) : (vid.category || vid.originalCategory || vid.folderName || (isUrdu ? 'میڈیا' : 'Media'))}</span>
                           </span>
                           <span className="px-2.5 py-0.5 rounded-full bg-black/75 text-teal-200 text-[10px] font-mono font-bold flex items-center gap-1 backdrop-blur-md border border-white/15">
                             <Clock className="w-3 h-3 text-teal-300" />
@@ -1540,9 +1698,9 @@ export const VideosSection: React.FC = () => {
                               {isUrdu ? vid.designationUr : vid.designationEn}
                             </span>
                             {vid.isDriveSynced && (
-                              <span className="text-[9px] text-emerald-700 font-mono font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
-                                <FolderSync className="w-2.5 h-2.5" />
-                                <span>Drive</span>
+                              <span className="text-[9px] text-emerald-700 font-medium bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80 flex items-center gap-1">
+                                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                                <span>{isUrdu ? 'تصدیق شدہ' : 'Verified'}</span>
                               </span>
                             )}
                           </div>
@@ -1561,7 +1719,7 @@ export const VideosSection: React.FC = () => {
                           </p>
                         </div>
 
-                        {/* Action Buttons: Watch, Download, Drive, Edit, Copy, Delete */}
+                        {/* Action Buttons: Watch, Download, Open, Edit, Copy, Delete */}
                         <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {/* View/Watch Resource Button */}
@@ -1591,15 +1749,15 @@ export const VideosSection: React.FC = () => {
                               <span>{isUrdu ? 'ڈاؤنلوڈ' : 'Download'}</span>
                             </button>
 
-                            {/* Open in Google Drive */}
+                            {/* Open in new tab */}
                             <a
                               href={vid.driveUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="py-1.5 px-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1 min-h-[34px]"
-                              title="Open on Google Drive"
+                              title={isUrdu ? 'فائل کھولیں' : 'Open in new tab'}
                             >
-                              <span>{isUrdu ? 'ڈرائیو' : 'Drive'}</span>
+                              <span>{isUrdu ? 'کھولیں' : 'Open'}</span>
                               <ExternalLink className="w-3 h-3 text-slate-500" />
                             </a>
                           </div>
@@ -1625,7 +1783,7 @@ export const VideosSection: React.FC = () => {
                               type="button"
                               onClick={() => handleCopyLink(vid)}
                               className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
-                              title={isCopied ? 'Copied!' : 'Copy Drive Link'}
+                              title={isCopied ? 'Copied!' : 'Copy Link'}
                             >
                               {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                             </button>
@@ -1719,7 +1877,7 @@ export const VideosSection: React.FC = () => {
                         <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-10">
                           <span className="px-2 py-0.5 rounded-full bg-black/75 text-white text-[10px] font-semibold backdrop-blur-md border border-white/15 flex items-center gap-1">
                             <Folder className="w-3 h-3 text-sky-300" />
-                            <span>{folderMeta ? (isUrdu ? folderMeta.shortTitleUr : folderMeta.shortTitleEn) : (doc.category || 'Drive')}</span>
+                            <span>{folderMeta ? (isUrdu ? folderMeta.shortTitleUr : folderMeta.shortTitleEn) : (doc.category || (isUrdu ? 'دستاویز' : 'Document'))}</span>
                           </span>
                           {doc.fileSize && (
                             <span className="px-2 py-0.5 rounded-full bg-black/75 text-sky-200 text-[10px] font-mono font-bold backdrop-blur-md border border-white/15">
@@ -1737,9 +1895,9 @@ export const VideosSection: React.FC = () => {
                               {isUrdu ? doc.designationUr : doc.designationEn}
                             </span>
                             {doc.isDriveSynced && (
-                              <span className="text-[9px] text-emerald-700 font-mono font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
-                                <FolderSync className="w-2.5 h-2.5" />
-                                <span>Drive</span>
+                              <span className="text-[9px] text-emerald-700 font-medium bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/80 flex items-center gap-1">
+                                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                                <span>{isUrdu ? 'تصدیق شدہ' : 'Verified'}</span>
                               </span>
                             )}
                           </div>
@@ -1788,14 +1946,15 @@ export const VideosSection: React.FC = () => {
                               <span>{isUrdu ? 'ڈاؤنلوڈ' : 'Download'}</span>
                             </button>
 
-                            {/* Drive Link */}
+                            {/* Open file in new tab */}
                             <a
                               href={doc.driveUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="py-1.5 px-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1 min-h-[32px]"
+                              title={isUrdu ? 'فائل کھولیں' : 'Open in new tab'}
                             >
-                              <span>{isUrdu ? 'ڈرائیو' : 'Drive'}</span>
+                              <span>{isUrdu ? 'کھولیں' : 'Open'}</span>
                               <ExternalLink className="w-3 h-3 text-slate-500" />
                             </a>
                           </div>
@@ -1832,6 +1991,8 @@ export const VideosSection: React.FC = () => {
             </div>
           )}
         </div>
+      )}
+        </>
       )}
 
       {/* 6. Video Player Modal with Google Drive Preview Embed */}
@@ -1928,7 +2089,7 @@ export const VideosSection: React.FC = () => {
                       rel="noopener noreferrer"
                       className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer border border-slate-200 min-h-[34px]"
                     >
-                      <span>{isUrdu ? 'ڈرائیو میں کھولیں' : 'Open in Drive'}</span>
+                      <span>{isUrdu ? 'نئی ونڈو میں کھولیں' : 'Open in New Tab'}</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
@@ -2067,7 +2228,7 @@ export const VideosSection: React.FC = () => {
                     {isUrdu ? 'ایڈمن رسائی لاگ ان' : 'Admin Control Access'}
                   </h3>
                   <p className="text-[11px] text-slate-500">
-                    {isUrdu ? 'ڈرائیو سنک اور ایڈمن اختیارات' : 'Unlock Drive Sync & library controls'}
+                    {isUrdu ? 'انتظامی و مینیجمنٹ اختیارات' : 'Unlock library management controls'}
                   </p>
                 </div>
               </div>
