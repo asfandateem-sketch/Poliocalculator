@@ -9,7 +9,73 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
-app.use(express.json({ limit: '10mb' }));
+// -------------------------------------------------------------
+// Security Hardening: Anti-DDoS, Anti-SSRF, and HTTP Headers
+// -------------------------------------------------------------
+
+// Security HTTP headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  // Protect against clickjacking while allowing iframe previews in development
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  next();
+});
+
+// Constrain request payload size to 2MB to prevent memory exhaustion attacks
+app.use(express.json({ limit: '2mb' }));
+
+// In-memory rate limiting to prevent brute force & DoS
+interface RateLimitEntry {
+  count: number;
+  resetAt: number;
+}
+const ipApiLimits = new Map<string, RateLimitEntry>();
+const ipSyncLimits = new Map<string, RateLimitEntry>();
+
+// Garbage collect expired rate limit records periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, item] of ipApiLimits.entries()) {
+    if (item.resetAt <= now) ipApiLimits.delete(ip);
+  }
+  for (const [ip, item] of ipSyncLimits.entries()) {
+    if (item.resetAt <= now) ipSyncLimits.delete(ip);
+  }
+}, 5 * 60 * 1000);
+
+function createRateLimiter(limitMap: Map<string, RateLimitEntry>, maxHits: number, windowMs: number) {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const rawIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.socket.remoteAddress || 'ip';
+    const now = Date.now();
+    let entry = limitMap.get(rawIp);
+    if (!entry || entry.resetAt <= now) {
+      entry = { count: 1, resetAt: now + windowMs };
+      limitMap.set(rawIp, entry);
+    } else {
+      entry.count++;
+    }
+
+    if (entry.count > maxHits) {
+      const waitSeconds = Math.ceil((entry.resetAt - now) / 1000);
+      res.setHeader('Retry-After', waitSeconds.toString());
+      return res.status(429).json({
+        error: 'Too many requests. Please slow down and try again later.',
+        diagnostic: 'RATE_LIMIT_EXCEEDED',
+        retryAfterSeconds: waitSeconds,
+      });
+    }
+    next();
+  };
+}
+
+const apiRateLimit = createRateLimiter(ipApiLimits, 120, 60 * 1000); // 120 req/min for general API
+const syncRateLimit = createRateLimiter(ipSyncLimits, 20, 60 * 1000); // 20 req/min for sync & test
+
+// Apply general rate limit to all /api/ endpoints
+app.use('/api/', apiRateLimit);
 
 // Lazy initialize Google Gen AI
 let aiClient: GoogleGenAI | null = null;
@@ -76,14 +142,14 @@ function heuristicCleanFilename(filename: string, folderName?: string) {
     designationUr: folderName ? `ماہر شعبہ ${folderName}` : 'ماہر صحت عامہ و حفاظتی ٹیکہ جات',
     summaryEn,
     summaryUr,
-    badgeEn: folderName ? `${folderName} Verified` : 'Drive Verified',
-    badgeUr: folderName ? `${folderName} تصدیق شدہ` : 'ڈرائیو سے تصدیق شدہ',
+    badgeEn: folderName ? `${folderName}` : 'Verified',
+    badgeUr: folderName ? `${folderName}` : 'تصدیق شدہ',
     keyPointsEn: [
-      'Official field communication video addressing community concerns directly from Drive.',
+      'Official field communication video addressing community concerns directly from repository.',
       'Recommended for refusal conversion, caregiver reassurance, and frontline team reference.',
     ],
     keyPointsUr: [
-      'گوگل ڈرائیو سے منسلک مستند فیلڈ کمیونیکیشن ویڈیو برائے عوامی آگاہی۔',
+      'مستند فیلڈ کمیونیکیشن ویڈیو برائے عوامی آگاہی و تحفظات کا ازالہ۔',
       'انکاری والدین کی رہنمائی اور فیلڈ ٹیموں کی معاونت کے لیے انتہائی مفید۔',
     ],
     fieldScenarioEn: 'Use during refusal conversion or community mobilization sessions.',
@@ -145,14 +211,14 @@ Return ONLY a valid JSON object matching this schema (no markdown, no code block
         speakerUr: parsed.speakerUr || 'طبی ماہر',
         designationEn: parsed.designationEn || (folderName ? `${folderName} Contributor` : 'Polio Field Specialist'),
         designationUr: parsed.designationUr || 'پولیو فیلڈ اسپیشلسٹ',
-        summaryEn: parsed.summaryEn || `Video resource from Google Drive folder: ${folderName || 'Communication'}.`,
-        summaryUr: parsed.summaryUr || 'گوگل ڈرائیو فولڈر سے حاصل کردہ مستند ویڈیو پیغام۔',
+        summaryEn: parsed.summaryEn || `Video resource from repository category: ${folderName || 'Communication'}.`,
+        summaryUr: parsed.summaryUr || 'مستند ویڈیو پیغام برائے پولیو آگاہی و فیلڈ مہم۔',
         keyPointsEn: Array.isArray(parsed.keyPointsEn) && parsed.keyPointsEn.length > 0 ? parsed.keyPointsEn : ['Verified field resource.'],
         keyPointsUr: Array.isArray(parsed.keyPointsUr) && parsed.keyPointsUr.length > 0 ? parsed.keyPointsUr : ['تصدیق شدہ فیلڈ ویڈیو پیغام۔'],
         fieldScenarioEn: parsed.fieldScenarioEn || 'Use during refusal conversion or community mobilization sessions.',
         fieldScenarioUr: parsed.fieldScenarioUr || 'انکاری والدین اور کمیونٹی آگاہی سیشنز کے دوران استعمال کریں۔',
-        badgeEn: folderName ? `${folderName}` : 'Drive Synced',
-        badgeUr: folderName ? `${folderName}` : 'ڈرائیو سنک',
+        badgeEn: folderName ? `${folderName}` : 'Verified',
+        badgeUr: folderName ? `${folderName}` : 'تصدیق شدہ',
       };
     }
   } catch (err) {
@@ -208,6 +274,44 @@ function slugifyCategoryName(name: string): string {
     .replace(/^_+|_+$/g, '') || 'general_resources';
 }
 
+// -------------------------------------------------------------
+// Anti-SSRF & Input Validation Helpers
+// -------------------------------------------------------------
+
+function validateAndSanitizeAppsScriptUrl(rawUrl: unknown): { valid: boolean; cleanUrl?: string; error?: string } {
+  if (!rawUrl || typeof rawUrl !== 'string') {
+    return { valid: false, error: 'Google Apps Script Web App URL must be provided as a string.' };
+  }
+  try {
+    const parsed = new URL(rawUrl.trim());
+    if (parsed.protocol !== 'https:') {
+      return { valid: false, error: 'Security rejection: Only secure HTTPS endpoints are permitted.' };
+    }
+    const host = parsed.hostname.toLowerCase();
+    // Strictly restrict to Google Apps Script execution hostnames
+    if (host !== 'script.google.com' && host !== 'script.googleusercontent.com') {
+      return {
+        valid: false,
+        error: 'Security rejection (SSRF protection): Only official script.google.com URLs are permitted.',
+      };
+    }
+    return { valid: true, cleanUrl: parsed.toString() };
+  } catch {
+    return { valid: false, error: 'Malformed URL format.' };
+  }
+}
+
+function validateFolderId(folderId: unknown): string {
+  if (!folderId || typeof folderId !== 'string') {
+    return POLIO_TOOL_KIT_ROOT_ID;
+  }
+  const clean = folderId.trim();
+  if (!clean || !/^[a-zA-Z0-9_-]{10,120}$/.test(clean)) {
+    return POLIO_TOOL_KIT_ROOT_ID;
+  }
+  return clean;
+}
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({
@@ -241,15 +345,24 @@ app.post('/api/drive/ai-enhance', async (req, res) => {
  * Diagnostic Test Connection endpoint
  * Validates connectivity without altering saved data or counting as a sync
  */
-app.post('/api/drive/test-connection', async (req, res) => {
+app.post('/api/drive/test-connection', syncRateLimit, async (req, res) => {
   const startTime = Date.now();
   try {
     const { scriptUrl, folderId, apiKey } = req.body;
-    const targetFolderId = (folderId && String(folderId).trim()) || POLIO_TOOL_KIT_ROOT_ID;
+    const targetFolderId = validateFolderId(folderId);
 
     // Test Method 1: Apps Script Web App
-    if (scriptUrl && typeof scriptUrl === 'string' && scriptUrl.startsWith('http')) {
-      const targetUrl = new URL(scriptUrl.trim());
+    if (scriptUrl) {
+      const urlCheck = validateAndSanitizeAppsScriptUrl(scriptUrl);
+      if (!urlCheck.valid || !urlCheck.cleanUrl) {
+        return res.status(400).json({
+          success: false,
+          diagnostic: 'SSRF_VALIDATION_REJECTED',
+          message: urlCheck.error || 'Invalid Google Apps Script URL.',
+        });
+      }
+
+      const targetUrl = new URL(urlCheck.cleanUrl);
       targetUrl.searchParams.set('folderId', targetFolderId);
 
       const response = await fetch(targetUrl.toString(), {
@@ -366,10 +479,10 @@ app.post('/api/drive/test-connection', async (req, res) => {
 /**
  * Fetch and synchronize items strictly from Google Drive Polio Tool Kit root folder
  */
-app.post('/api/drive/sync', async (req, res) => {
+app.post('/api/drive/sync', syncRateLimit, async (req, res) => {
   try {
     const { scriptUrl, folderId, apiKey } = req.body;
-    const targetFolderId = (folderId && String(folderId).trim()) || POLIO_TOOL_KIT_ROOT_ID;
+    const targetFolderId = validateFolderId(folderId);
 
     let rawFiles: Array<{
       id: string;
@@ -406,9 +519,17 @@ app.post('/api/drive/sync', async (req, res) => {
     let discoveredCategoriesList: Array<{ name: string; count?: number }> = [];
 
     // Method 1: Google Apps Script Web App (Root locked to Polio Tool Kit)
-    if (scriptUrl && typeof scriptUrl === 'string' && scriptUrl.startsWith('http')) {
+    if (scriptUrl) {
+      const urlCheck = validateAndSanitizeAppsScriptUrl(scriptUrl);
+      if (!urlCheck.valid || !urlCheck.cleanUrl) {
+        return res.status(400).json({
+          error: `Security Validation Failed: ${urlCheck.error || 'Invalid Google Apps Script Web App URL.'}`,
+          diagnostic: 'SSRF_VALIDATION_REJECTED',
+        });
+      }
+
       console.log(`[DriveSync] Syncing strictly from Polio Tool Kit (${targetFolderId}) via Apps Script`);
-      const targetUrl = new URL(scriptUrl.trim());
+      const targetUrl = new URL(urlCheck.cleanUrl);
       targetUrl.searchParams.set('folderId', targetFolderId);
 
       const response = await fetch(targetUrl.toString(), {

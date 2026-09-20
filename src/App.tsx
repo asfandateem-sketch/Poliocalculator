@@ -34,6 +34,7 @@ import { HomeLatestUpdates } from './components/HomeLatestUpdates';
 import { DocumentsSection } from './components/DocumentsSection';
 import { FieldResourcesSection } from './components/FieldResourcesSection';
 import { FaqSection } from './components/FaqSection';
+import { MobileBottomNav } from './components/MobileBottomNav';
 
 function AppContent() {
   const { language, toggleLanguage, isUrdu, t } = useLanguage();
@@ -256,7 +257,7 @@ function AppContent() {
 
   return (
     <div
-      className={`min-h-screen saas-bg text-slate-900 flex flex-col justify-between px-3 sm:px-6 lg:px-8 py-3 sm:py-5 overflow-x-clip selection:bg-teal-200 selection:text-teal-950 relative ${
+      className={`min-h-screen saas-bg text-slate-900 flex flex-col justify-between px-3 sm:px-6 lg:px-8 pt-3 pb-24 sm:py-5 overflow-x-clip selection:bg-teal-200 selection:text-teal-950 relative ${
         isUrdu ? 'font-arabic' : ''
       }`}
       dir={isUrdu ? 'rtl' : 'ltr'}
@@ -614,18 +615,24 @@ function AppContent() {
         </AnimatePresence>
       </div>
 
-      {/* Floating Back to Top Button */}
+      {/* Floating Back to Top Button (offset on mobile to clear MobileBottomNav) */}
       {showBackToTop && (
         <button
           id="back-to-top-btn"
           type="button"
           onClick={scrollToTop}
           aria-label={isUrdu ? 'اوپر جائیں' : 'Back to top'}
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 p-2.5 sm:p-3 rounded-xl bg-slate-900/90 hover:bg-slate-900 text-white shadow-xl backdrop-blur-xs border border-slate-700 cursor-pointer flex items-center justify-center transition active:scale-95"
+          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-30 p-2.5 sm:p-3 rounded-xl bg-slate-900/90 hover:bg-slate-900 text-white shadow-xl backdrop-blur-xs border border-slate-700 cursor-pointer flex items-center justify-center transition active:scale-95"
         >
           <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       )}
+
+      {/* Persistent Mobile Bottom Navigation Bar */}
+      <MobileBottomNav
+        activeCategory={activePlatformCategory}
+        onSelectCategory={handleSelectCategory}
+      />
 
       {/* Attribution & Standards Modal */}
       <AttributionModal

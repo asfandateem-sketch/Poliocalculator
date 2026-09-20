@@ -51,7 +51,7 @@ export const PlatformHubNavigation: React.FC<PlatformHubNavigationProps> = ({
       shortLabelEn: 'Resources',
       shortLabelUr: 'وسائل',
       icon: FileVideo,
-      badge: 'Drive',
+      badge: 'Media',
     },
     {
       key: 'documents',

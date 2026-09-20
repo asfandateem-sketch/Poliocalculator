@@ -626,12 +626,31 @@ export const VideosSection: React.FC = () => {
   const [adminPasswordInput, setAdminPasswordInput] = useState('');
   const [adminAuthError, setAdminAuthError] = useState<string | null>(null);
 
+  const ADMIN_LOCKOUT_KEY = 'polio_admin_lockout_time_v1';
+  const ADMIN_ATTEMPTS_KEY = 'polio_admin_failed_attempts_v1';
+
   const handleUnlockAdmin = () => {
+    // Check if currently locked out
+    const lockoutUntil = parseInt(localStorage.getItem(ADMIN_LOCKOUT_KEY) || '0', 10);
+    const now = Date.now();
+    if (lockoutUntil > now) {
+      const waitSeconds = Math.ceil((lockoutUntil - now) / 1000);
+      setAdminAuthError(
+        isUrdu
+          ? `مسلسل غلط کوششوں کی وجہ سے رسائی عارضی طور پر بند ہے۔ برائے مہربانی ${waitSeconds} سیکنڈ بعد دوبارہ کوشش کریں۔`
+          : `Security Lockout: Too many failed attempts. Try again in ${waitSeconds}s.`
+      );
+      triggerHaptic('error');
+      return;
+    }
+
     const val = adminPasswordInput.trim().toLowerCase();
     if (val === 'polio2026' || val === 'admin' || val === 'polio' || val === 'asfand') {
       setIsAdmin(true);
       try {
         localStorage.setItem(ADMIN_STORAGE_KEY, 'true');
+        localStorage.removeItem(ADMIN_ATTEMPTS_KEY);
+        localStorage.removeItem(ADMIN_LOCKOUT_KEY);
       } catch {}
       setIsAdminAuthModalOpen(false);
       setAdminPasswordInput('');
@@ -641,7 +660,30 @@ export const VideosSection: React.FC = () => {
       setTimeout(() => setSyncToast(null), 3500);
     } else {
       triggerHaptic('error');
-      setAdminAuthError(isUrdu ? 'غلط پاس ورڈ۔ دوبارہ کوشش کریں۔' : 'Incorrect passcode. Please try again.');
+      const currentAttempts = parseInt(localStorage.getItem(ADMIN_ATTEMPTS_KEY) || '0', 10) + 1;
+      try {
+        localStorage.setItem(ADMIN_ATTEMPTS_KEY, currentAttempts.toString());
+      } catch {}
+
+      if (currentAttempts >= 5) {
+        const lockoutTime = Date.now() + 5 * 60 * 1000; // 5 minute lockout
+        try {
+          localStorage.setItem(ADMIN_LOCKOUT_KEY, lockoutTime.toString());
+          localStorage.removeItem(ADMIN_ATTEMPTS_KEY);
+        } catch {}
+        setAdminAuthError(
+          isUrdu
+            ? 'سیکیورٹی لاک آؤٹ: 5 غلط کوششوں کے بعد ایڈمن لاگ ان 5 منٹ کے لیے بند کر دیا گیا ہے۔'
+            : 'Security Lockout: 5 failed attempts reached. Temporarily locked for 5 minutes.'
+        );
+      } else {
+        const remaining = 5 - currentAttempts;
+        setAdminAuthError(
+          isUrdu
+            ? `غلط پاس ورڈ۔ باقی کوششیں: ${remaining}`
+            : `Incorrect passcode. ${remaining} attempts remaining before security lockout.`
+        );
+      }
     }
   };
 
