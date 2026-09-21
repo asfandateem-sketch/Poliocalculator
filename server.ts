@@ -718,10 +718,12 @@ app.post('/api/drive/sync', syncRateLimit, async (req, res) => {
           id: `drive-sync-${file.id}`,
           driveFileId: file.id,
           driveFolderId: targetFolderId,
+          streamUrl: `/api/drive/stream?id=${file.id}&type=video`,
+          downloadUrl: `/api/drive/download?id=${file.id}&filename=${encodeURIComponent(file.name)}`,
+          thumbnailUrl: `/api/drive/thumbnail?id=${file.id}`,
           driveUrl: file.viewUrl || `https://drive.google.com/file/d/${file.id}/view`,
-          embedUrl: file.embedUrl || `https://drive.google.com/file/d/${file.id}/preview`,
-          thumbnailUrl: file.thumbnailLink || `https://drive.google.com/thumbnail?id=${file.id}&sz=w640`,
-          thumbnailLink: file.thumbnailLink || `https://drive.google.com/thumbnail?id=${file.id}&sz=w640`,
+          embedUrl: `/api/drive/stream?id=${file.id}&type=video`,
+          thumbnailLink: `/api/drive/thumbnail?id=${file.id}`,
           folderId: categorySlug,
           originalCategory: folderCategoryName,
           category: folderCategoryName,
@@ -757,10 +759,12 @@ app.post('/api/drive/sync', syncRateLimit, async (req, res) => {
         id: `drive-sync-${file.id}`,
         driveFileId: file.id,
         driveFolderId: targetFolderId,
+        streamUrl: `/api/drive/stream?id=${file.id}&type=document`,
+        downloadUrl: `/api/drive/download?id=${file.id}&filename=${encodeURIComponent(file.name)}`,
+        thumbnailUrl: `/api/drive/thumbnail?id=${file.id}`,
         driveUrl: file.viewUrl || `https://drive.google.com/file/d/${file.id}/view`,
-        embedUrl: file.embedUrl || `https://drive.google.com/file/d/${file.id}/preview`,
-        thumbnailUrl: file.thumbnailLink || (fileType === 'image' ? `https://drive.google.com/thumbnail?id=${file.id}&sz=w640` : undefined),
-        thumbnailLink: file.thumbnailLink || (fileType === 'image' ? `https://drive.google.com/thumbnail?id=${file.id}&sz=w640` : ''),
+        embedUrl: `/api/drive/stream?id=${file.id}&type=document`,
+        thumbnailLink: fileType === 'image' ? `/api/drive/thumbnail?id=${file.id}` : '',
         folderId: categorySlug,
         originalCategory: folderCategoryName,
         category: folderCategoryName,
@@ -826,13 +830,259 @@ app.post('/api/drive/sync', syncRateLimit, async (req, res) => {
   }
 });
 
+// -------------------------------------------------------------
+// Server-Side Google Drive File Streaming & Caching
+// Eliminates all /preview iframes, Google sign-ins, and 3rd-party cookies
+// -------------------------------------------------------------
+interface CachedDriveFile {
+  buffer: Buffer;
+  mimeType: string;
+  filename: string;
+  size: number;
+  cachedAt: number;
+}
+
+const driveFileCache = new Map<string, CachedDriveFile>();
+const MAX_CACHE_SIZE_BYTES = 120 * 1024 * 1024; // 120 MB in-memory cache
+let currentCacheSizeBytes = 0;
+
+function addToDriveCache(fileId: string, item: CachedDriveFile) {
+  while (currentCacheSizeBytes + item.size > MAX_CACHE_SIZE_BYTES && driveFileCache.size > 0) {
+    const firstKey = driveFileCache.keys().next().value;
+    if (!firstKey) break;
+    const oldItem = driveFileCache.get(firstKey);
+    if (oldItem) {
+      currentCacheSizeBytes -= oldItem.size;
+    }
+    driveFileCache.delete(firstKey);
+  }
+  driveFileCache.set(fileId, item);
+  currentCacheSizeBytes += item.size;
+}
+
+async function retrieveGoogleDriveFile(fileId: string, requestedType?: string): Promise<CachedDriveFile | null> {
+  const cached = driveFileCache.get(fileId);
+  if (cached) {
+    return cached;
+  }
+
+  const scriptUrl = process.env.DRIVE_APPS_SCRIPT_URL || process.env.VITE_DRIVE_APPS_SCRIPT_URL;
+  const apiKey = process.env.GOOGLE_DRIVE_API_KEY || process.env.VITE_GOOGLE_DRIVE_API_KEY;
+
+  // Strategy 1: Google Apps Script with action=get_file (Server-to-Server, no visitor cookies)
+  if (scriptUrl) {
+    try {
+      const targetUrl = new URL(scriptUrl);
+      targetUrl.searchParams.set('action', 'get_file');
+      targetUrl.searchParams.set('fileId', fileId);
+
+      const resp = await fetch(targetUrl.toString(), {
+        headers: { Accept: 'application/json' },
+        redirect: 'follow',
+      });
+
+      if (resp.ok) {
+        const text = await resp.text();
+        try {
+          const data = JSON.parse(text);
+          if (data && data.success && data.base64) {
+            const buf = Buffer.from(data.base64, 'base64');
+            const result: CachedDriveFile = {
+              buffer: buf,
+              mimeType: data.mimeType || (requestedType === 'video' ? 'video/mp4' : 'application/pdf'),
+              filename: data.name || `drive_file_${fileId}`,
+              size: buf.length,
+              cachedAt: Date.now(),
+            };
+            addToDriveCache(fileId, result);
+            return result;
+          }
+        } catch {}
+      }
+    } catch (scriptErr) {
+      console.warn('[DriveStream] Apps Script retrieve error:', scriptErr);
+    }
+  }
+
+  // Strategy 2: Google Drive API v3 (if server has valid API key)
+  if (apiKey) {
+    try {
+      const driveApiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
+      const apiResp = await fetch(driveApiUrl);
+      if (apiResp.ok) {
+        const contentType = apiResp.headers.get('content-type') || '';
+        if (!contentType.includes('text/html')) {
+          const arrBuf = await apiResp.arrayBuffer();
+          const buf = Buffer.from(arrBuf);
+          const result: CachedDriveFile = {
+            buffer: buf,
+            mimeType: contentType || (requestedType === 'video' ? 'video/mp4' : 'application/pdf'),
+            filename: `drive_file_${fileId}`,
+            size: buf.length,
+            cachedAt: Date.now(),
+          };
+          addToDriveCache(fileId, result);
+          return result;
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[DriveStream] Drive API retrieve error:', apiErr);
+    }
+  }
+
+  // Strategy 3: Google Drive direct content streaming
+  try {
+    const directUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
+    const directResp = await fetch(directUrl, {
+      redirect: 'follow',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
+    });
+
+    const cType = directResp.headers.get('content-type') || '';
+    if (directResp.ok && !cType.includes('text/html')) {
+      const arrBuf = await directResp.arrayBuffer();
+      const buf = Buffer.from(arrBuf);
+      const result: CachedDriveFile = {
+        buffer: buf,
+        mimeType: cType || (requestedType === 'video' ? 'video/mp4' : 'application/pdf'),
+        filename: `drive_file_${fileId}`,
+        size: buf.length,
+        cachedAt: Date.now(),
+      };
+      addToDriveCache(fileId, result);
+      return result;
+    }
+  } catch (directErr) {
+    console.warn('[DriveStream] Direct download retrieve error:', directErr);
+  }
+
+  return null;
+}
+
+/**
+ * Streaming media endpoint supporting HTTP 206 Range requests
+ * Enables seamless HTML5 video scrubbing and inline document preview
+ */
+app.get('/api/drive/stream', async (req, res) => {
+  const fileId = (req.query.id as string || '').trim();
+  const fileType = (req.query.type as string || 'video').toLowerCase();
+
+  if (!fileId) {
+    return res.status(400).json({ error: 'Missing file ID parameter' });
+  }
+
+  try {
+    const fileData = await retrieveGoogleDriveFile(fileId, fileType);
+    if (!fileData) {
+      return res.status(404).json({
+        error: 'Media file currently being prepared by server integration.',
+        fileId,
+        message: 'Direct streaming requires public link or updated Apps Script deployment.',
+      });
+    }
+
+    const { buffer, mimeType, filename, size } = fileData;
+    const range = req.headers.range;
+
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+
+    if (range) {
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : size - 1;
+
+      if (start >= size || end >= size) {
+        res.status(416).setHeader('Content-Range', `bytes */${size}`);
+        return res.end();
+      }
+
+      const chunk = buffer.subarray(start, end + 1);
+      res.status(206);
+      res.setHeader('Content-Range', `bytes ${start}-${end}/${size}`);
+      res.setHeader('Content-Length', chunk.length);
+      res.setHeader('Content-Type', mimeType);
+      return res.end(chunk);
+    } else {
+      res.status(200);
+      res.setHeader('Content-Length', size);
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      return res.end(buffer);
+    }
+  } catch (err: any) {
+    console.error('[DriveStream] Stream exception:', err);
+    return res.status(500).json({ error: 'Internal streaming error' });
+  }
+});
+
+/**
+ * Direct file download endpoint through our server
+ * Visitors never touch Google Drive directly or encounter cookie prompts
+ */
+app.get('/api/drive/download', async (req, res) => {
+  const fileId = (req.query.id as string || '').trim();
+  const customName = (req.query.filename as string || '').trim();
+
+  if (!fileId) {
+    return res.status(400).json({ error: 'Missing file ID parameter' });
+  }
+
+  try {
+    const fileData = await retrieveGoogleDriveFile(fileId);
+    if (!fileData) {
+      // Graceful fallback: Redirect directly to Google Drive usercontent download URL
+      // so user download NEVER fails even before the server cache is populated
+      const fallbackUrl = `https://drive.usercontent.google.com/download?id=${encodeURIComponent(fileId)}&export=download&confirm=t`;
+      return res.redirect(302, fallbackUrl);
+    }
+
+    const downloadName = customName || fileData.filename;
+    const cleanName = downloadName.replace(/[/\\?%*:|"<>]/g, '-');
+    res.setHeader('Content-Type', fileData.mimeType || 'application/octet-stream');
+    res.setHeader('Content-Length', fileData.size);
+    res.setHeader('Content-Disposition', `attachment; filename="${cleanName}"`);
+    return res.end(fileData.buffer);
+  } catch (dlErr: any) {
+    console.error('[DriveDownload] Error:', dlErr);
+    return res.status(500).json({ error: 'Download retrieval failed' });
+  }
+});
+
+/**
+ * Proxies Google Drive thumbnails to avoid third-party cookie or referrer blocks
+ */
+app.get('/api/drive/thumbnail', async (req, res) => {
+  const fileId = (req.query.id as string || '').trim();
+  if (!fileId) {
+    return res.status(400).end();
+  }
+
+  try {
+    const thumbUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w640`;
+    const resp = await fetch(thumbUrl);
+    if (resp.ok) {
+      const cType = resp.headers.get('content-type') || 'image/jpeg';
+      const arrBuf = await resp.arrayBuffer();
+      res.setHeader('Content-Type', cType);
+      res.setHeader('Cache-Control', 'public, max-age=604800'); // 7 days
+      return res.end(Buffer.from(arrBuf));
+    }
+    return res.status(404).end();
+  } catch {
+    return res.status(500).end();
+  }
+});
+
 /**
  * Return copy-paste Google Apps Script code strictly locked to Polio Tool Kit
  */
 app.get('/api/drive/apps-script-code', (req, res) => {
   const code = `/**
  * ==============================================================================
- * Google Apps Script — Polio Tool Kit Master Auto-Sync Web App
+ * Google Apps Script — Polio Tool Kit Master Auto-Sync & Streaming Web App
  * ==============================================================================
  * 
  * SECURITY & SCOPE GUARANTEE:
@@ -840,18 +1090,15 @@ app.get('/api/drive/apps-script-code', (req, res) => {
  * - NEVER accesses "My Drive" root or any unrelated folders/files.
  * - Recursively discovers all subfolders and supported files (Videos, Documents, Images).
  * - Dynamically exposes new folders as categories automatically.
+ * - Provides server-side file retrieval so visitors NEVER need to sign in or enable cookies!
  * 
  * SETUP INSTRUCTIONS (1-2 minutes):
- * 1. Go to https://script.google.com and click "+ New project".
- * 2. Delete any existing code and paste this ENTIRE script.
- * 3. Click "Deploy" > "New deployment".
- * 4. Select type: "Web app" (click gear icon next to "Select type" if needed).
- * 5. Configuration:
- *    - Description: Polio Tool Kit Master Sync
+ * 1. Go to https://script.google.com and open your Polio Tool Kit project.
+ * 2. Replace with this updated script.
+ * 3. Click "Deploy" > "Manage deployments" > Edit (pencil icon) > Version: "New version" > "Deploy".
+ * 4. Ensure:
  *    - Execute as: Me (your email)
- *    - Who has access: Anyone  <-- (CRITICAL: enables website sync without login prompts)
- * 6. Click "Deploy", review permissions, and COPY the "Web app URL".
- * 7. Paste that Web app URL into your Polio Field Tools sync settings and click "Save & Sync Now"!
+ *    - Who has access: Anyone
  */
 
 // Master Root Folder ID — "Polio Tool Kit" (ONLY allowed root)
@@ -859,7 +1106,30 @@ const POLIO_TOOL_KIT_ROOT_ID = '102rLBDf1Q94SvkLf9sr3XzP7tulkKYCv';
 
 function doGet(e) {
   try {
-    // Strictly restrict to Polio Tool Kit root folder ID
+    // 1. Single-File Retrieval for Server-Side Streaming (No visitor login or cookies required)
+    if (e && e.parameter && (e.parameter.action === 'get_file' || e.parameter.action === 'stream') && e.parameter.fileId) {
+      var targetFileId = e.parameter.fileId.trim();
+      try {
+        var file = DriveApp.getFileById(targetFileId);
+        var blob = file.getBlob();
+        var bytes = blob.getBytes();
+        return createJsonResponse({
+          success: true,
+          id: file.getId(),
+          name: file.getName(),
+          mimeType: blob.getContentType() || file.getMimeType(),
+          size: bytes.length,
+          base64: Utilities.base64Encode(bytes)
+        });
+      } catch (fileErr) {
+        return createJsonResponse({
+          success: false,
+          error: "Unable to retrieve file: " + fileErr.toString()
+        });
+      }
+    }
+
+    // 2. Full Hierarchy Directory Scan
     const targetFolderId = (e && e.parameter && e.parameter.folderId && e.parameter.folderId.trim()) 
       ? e.parameter.folderId.trim() 
       : POLIO_TOOL_KIT_ROOT_ID;

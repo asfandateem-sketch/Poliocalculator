@@ -11,6 +11,7 @@ import {
 import { EditVideoModal } from './EditVideoModal';
 import { DriveSyncModal } from './DriveSyncModal';
 import { AddVideoModal } from './AddVideoModal';
+import { CustomVideoPlayer } from './CustomVideoPlayer';
 import { runFullDriveSync, fetchLiveDriveResources, slugify, DriveSubfolderMeta } from '../driveSyncPipeline';
 import {
   getEffectiveDriveSyncConfig,
@@ -446,7 +447,7 @@ export const sanitizeSyncedVideos = (items: VideoItem[]): VideoItem[] => {
 };
 
 export const VideosSection: React.FC = () => {
-  const { isUrdu } = useLanguage();
+  const { isUrdu, language } = useLanguage();
 
   // Navigation & filter state
   const [activeFolderId, setActiveFolderId] = useState<FolderId | 'all'>('all');
@@ -703,9 +704,9 @@ export const VideosSection: React.FC = () => {
     triggerHaptic('medium');
 
     const fileId = item.driveFileId || extractDriveId(item.driveUrl || '') || extractDriveId(item.viewUrl || '');
-    // Google Drive direct download URL format
+    // Direct download proxy through server to avoid Google sign-in walls and cookie blocks
     const directDownloadUrl = item.downloadUrl ||
-      (fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : item.driveUrl || item.viewUrl);
+      (fileId ? `/api/drive/download?id=${fileId}&filename=${encodeURIComponent(item.originalFilename || item.titleEn || item.name || 'polio_resource')}` : item.driveUrl || item.viewUrl);
 
     if (!directDownloadUrl) return;
 
@@ -2037,179 +2038,24 @@ export const VideosSection: React.FC = () => {
         </>
       )}
 
-      {/* 6. Video Player Modal with Google Drive Preview Embed */}
+      {/* 6. Custom Video Player Modal (No Google Sign-in / No Cookie Blocks) */}
       {activeVideo && (
         <div
+          id="custom-video-player-modal"
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in"
+          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fade-in"
           onClick={() => setActiveVideo(null)}
         >
           <div
-            className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-white/20"
+            className="bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[94vh] p-3 sm:p-5"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="p-3.5 sm:p-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
-              <div className="flex items-center gap-2.5 min-w-0 pr-3">
-                <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-pulse" />
-                <h3 className="text-xs sm:text-sm font-bold truncate">
-                  {isUrdu ? activeVideo.titleUr : activeVideo.titleEn}
-                </h3>
-              </div>
-              <div className="flex items-center gap-1.5">
-                {isAdmin && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('light');
-                      setEditingVideo(activeVideo);
-                    }}
-                    className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer transition flex items-center gap-1 text-xs"
-                    title="Edit title and description"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                    <span className="hidden sm:inline">{isUrdu ? 'ترمیم' : 'Edit'}</span>
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setActiveVideo(null)}
-                  aria-label="Close"
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer transition"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Modal Body with Embed Player */}
-            <div className="overflow-y-auto flex-1 p-0">
-              {/* Google Drive Player Container */}
-              <div className="relative bg-black aspect-video max-h-80 sm:max-h-96 w-full flex items-center justify-center overflow-hidden">
-                <iframe
-                  src={activeVideo.embedUrl}
-                  title={activeVideo.titleEn}
-                  className="w-full h-full border-0"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                />
-              </div>
-
-              {/* Video Deep Dive Information */}
-              <div className="p-4 sm:p-6 space-y-4 text-xs">
-                {/* Speaker Card */}
-                <div className="p-3 bg-teal-50/70 border border-teal-200/80 rounded-2xl flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-11 h-11 rounded-xl overflow-hidden border border-teal-300/80 flex-shrink-0 relative shadow-2xs">
-                      <VideoThumbnail video={activeVideo} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[11px] font-bold text-teal-900 truncate">
-                        {isUrdu ? activeVideo.speakerUr : activeVideo.speakerEn}
-                      </div>
-                      <div className="text-[11px] text-slate-600 line-clamp-1">
-                        {isUrdu ? activeVideo.designationUr : activeVideo.designationEn}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleDownload(activeVideo)}
-                      className="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs min-h-[34px]"
-                      title={isUrdu ? 'براہ راست ڈاؤنلوڈ کریں' : 'Download file directly'}
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>{isUrdu ? 'ڈاؤنلوڈ' : 'Download'}</span>
-                    </button>
-                    <a
-                      href={activeVideo.driveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer border border-slate-200 min-h-[34px]"
-                    >
-                      <span>{isUrdu ? 'نئی ونڈو میں کھولیں' : 'Open in New Tab'}</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </div>
-
-                {/* Summary */}
-                <div className="space-y-1">
-                  <h4 className="font-bold text-slate-800">
-                    {isUrdu ? 'ویڈیو خلاصہ و مقصد:' : 'Video Overview:'}
-                  </h4>
-                  <p className="text-slate-600 leading-relaxed">
-                    {isUrdu ? activeVideo.summaryUr : activeVideo.summaryEn}
-                  </p>
-                </div>
-
-                {/* Key Points */}
-                {activeVideo.keyPointsEn && activeVideo.keyPointsEn.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-teal-700" />
-                      <span>{isUrdu ? 'اہم طبی و تربیتی نکات:' : 'Key Clinical & Persuasion Points:'}</span>
-                    </h4>
-                    <ul className="space-y-1.5 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                      {(isUrdu ? activeVideo.keyPointsUr : activeVideo.keyPointsEn).map((pt, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-slate-700 leading-relaxed">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-teal-600 flex-shrink-0 mt-0.5" />
-                          <span>{pt}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Field Scenario */}
-                {activeVideo.fieldScenarioEn && (
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl space-y-1">
-                    <div className="font-bold text-amber-900 text-[11px] flex items-center gap-1">
-                      <HelpCircle className="w-3.5 h-3.5 text-amber-700" />
-                      <span>{isUrdu ? 'فیلڈ میں استعمال کا موقع:' : 'Recommended Field Scenario:'}</span>
-                    </div>
-                    <p className="text-[11px] text-amber-800 leading-relaxed">
-                      {isUrdu ? activeVideo.fieldScenarioUr : activeVideo.fieldScenarioEn}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-3.5 sm:p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2 text-xs flex-wrap">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleDownload(activeVideo)}
-                  className="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs min-h-[34px]"
-                  title={isUrdu ? 'ڈاؤنلوڈ کریں' : 'Download file directly'}
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>{isUrdu ? 'ڈاؤنلوڈ کریں' : 'Download'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleCopyLink(activeVideo)}
-                  className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold flex items-center gap-1.5 transition cursor-pointer min-h-[34px]"
-                >
-                  {copiedVideoId === activeVideo.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedVideoId === activeVideo.id ? (isUrdu ? 'کاپی ہو گیا' : 'Copied') : (isUrdu ? 'لنک کاپی کریں' : 'Copy Link')}</span>
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setActiveVideo(null)}
-                className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold cursor-pointer min-h-[34px]"
-              >
-                {isUrdu ? 'بند کریں' : 'Close'}
-              </button>
-            </div>
+            <CustomVideoPlayer
+              video={activeVideo}
+              language={language}
+              onClose={() => setActiveVideo(null)}
+            />
           </div>
         </div>
       )}

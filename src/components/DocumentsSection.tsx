@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { MASTER_FOLDER_URL } from '../data/coreVideos';
+import { CustomDocumentViewer } from './CustomDocumentViewer';
 
 interface DocumentItem {
   id: string;
@@ -154,7 +155,7 @@ interface DocumentsSectionProps {
 }
 
 export const DocumentsSection: React.FC<DocumentsSectionProps> = ({ targetDocId }) => {
-  const { isUrdu } = useLanguage();
+  const { isUrdu, language } = useLanguage();
   const [selectedDoc, setSelectedDoc] = useState<DocumentItem | null>(null);
   const [activeDriveDoc, setActiveDriveDoc] = useState<any | null>(null);
 
@@ -254,8 +255,8 @@ export const DocumentsSection: React.FC<DocumentsSectionProps> = ({ targetDocId 
 
   const handleDownloadDoc = (doc: any) => {
     triggerHaptic('medium');
-    const fileId = doc.driveFileId;
-    const downloadUrl = doc.downloadUrl || (fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : doc.driveUrl);
+    const fileId = doc.driveFileId || doc.id?.replace(/^drive-sync-/, '');
+    const downloadUrl = doc.downloadUrl || (fileId ? `/api/drive/download?id=${fileId}&filename=${encodeURIComponent(doc.titleEn || doc.name || 'document.pdf')}` : doc.driveUrl);
     if (!downloadUrl) return;
 
     const rawTitle = (doc.titleEn || doc.name || 'polio_document').trim();
@@ -594,84 +595,19 @@ Generated from Polio Field Companion Toolkit
         </div>
       )}
 
-      {/* Drive Document Preview Modal */}
+      {/* Custom Server Document Viewer Modal (No Google Sign-in / No Cookies) */}
       {activeDriveDoc && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4"
+          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4"
         >
-          <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
-            <div className="p-3.5 bg-slate-900 text-white flex items-center justify-between">
-              <div className="min-w-0 pr-3">
-                <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider">
-                  {activeDriveDoc.category || 'Google Drive File'}
-                </span>
-                <h3 className="text-sm font-bold truncate text-white">
-                  {isUrdu ? activeDriveDoc.titleUr : activeDriveDoc.titleEn}
-                </h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleDownloadDoc(activeDriveDoc)}
-                  className="px-2.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center gap-1 transition cursor-pointer shadow-xs min-h-[32px]"
-                  title={isUrdu ? 'ڈاؤنلوڈ کریں' : 'Download file directly'}
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>{isUrdu ? 'ڈاؤنلوڈ' : 'Download'}</span>
-                </button>
-                <a
-                  href={activeDriveDoc.driveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-2.5 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold flex items-center gap-1 transition min-h-[32px]"
-                >
-                  <span>{isUrdu ? 'گوگل ڈرائیو' : 'Open in Drive'}</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-                <button
-                  type="button"
-                  onClick={() => setActiveDriveDoc(null)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="flex-1 w-full bg-slate-100 relative">
-              <iframe
-                src={activeDriveDoc.embedUrl || `https://drive.google.com/file/d/${activeDriveDoc.driveFileId}/preview`}
-                title={activeDriveDoc.titleEn}
-                className="w-full h-full border-0"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-              />
-            </div>
-
-            <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs flex-wrap gap-2">
-              <span className="text-slate-500 font-mono text-[11px]">
-                ID: {activeDriveDoc.driveFileId}
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleDownloadDoc(activeDriveDoc)}
-                  className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold cursor-pointer flex items-center gap-1.5 min-h-[34px]"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>{isUrdu ? 'ڈاؤنلوڈ کریں' : 'Download File'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveDriveDoc(null)}
-                  className="px-4 py-1.5 rounded-xl bg-slate-900 text-white font-semibold cursor-pointer min-h-[34px]"
-                >
-                  {isUrdu ? 'بند کریں' : 'Close'}
-                </button>
-              </div>
-            </div>
+          <div className="bg-slate-900 border border-slate-800 w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90vh] p-3 sm:p-4">
+            <CustomDocumentViewer
+              document={activeDriveDoc}
+              language={language}
+              onClose={() => setActiveDriveDoc(null)}
+            />
           </div>
         </div>
       )}
