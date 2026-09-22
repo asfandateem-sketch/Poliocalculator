@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Sparkles,
   SlidersHorizontal,
+  ArrowLeft,
 } from 'lucide-react';
 import type { VideoItem } from '../types';
 
@@ -64,6 +65,16 @@ export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
   const [playbackError, setPlaybackError] = useState(false);
   const [speedMenuOpen, setSpeedMenuOpen] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
+
+  // Player mode: 'drive_embed' (plays actual video footage via Google Drive player) vs 'html5_stream' (server-side stream)
+  const [playerMode, setPlayerMode] = useState<'drive_embed' | 'html5_stream'>('drive_embed');
+
+  const driveEmbedUrl =
+    video.embedUrl ||
+    (fileId ? `https://drive.google.com/file/d/${fileId}/preview` : '');
+  const driveOpenUrl =
+    video.driveUrl ||
+    (fileId ? `https://drive.google.com/file/d/${fileId}/view` : '');
 
   // Format seconds to mm:ss
   const formatTime = (secs: number) => {
@@ -246,89 +257,158 @@ export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
 
   return (
     <div id={`custom-video-player-${video.id}`} className="space-y-4">
-      {/* Security & Direct Stream Banner */}
-      <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-emerald-950/40 border border-emerald-800/40 text-xs text-emerald-300">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>
-            {isUr
-              ? 'سرور کے ذریعے محفوظ براہ راست ویڈیو اسٹریم — گوگل سائن ان یا کوکیز کی ضرورت نہیں'
-              : 'Direct Server Video Stream — Google Sign-in & Third-Party Cookies Bypassed'}
-          </span>
+      {/* Control & Mode Selector Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
+        <div className="flex items-center gap-2 flex-wrap">
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={isUr ? 'ویڈیوز پر واپس جائیں' : 'Back to videos'}
+              title={isUr ? 'ویڈیوز کی فہرست پر واپس جائیں' : 'Back to video list'}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold transition cursor-pointer active:scale-95 touch-manipulation"
+            >
+              <ArrowLeft className={`w-3.5 h-3.5 ${isUr ? 'rotate-180' : ''}`} />
+              <span>{isUr ? 'واپس' : 'Back'}</span>
+            </button>
+          )}
+
+          {/* Mode Switcher: Google Drive HD Player (Actual Video) vs HTML5 Direct Stream */}
+          <div className="inline-flex items-center rounded-lg bg-slate-900 border border-slate-700/80 p-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                setPlayerMode('drive_embed');
+                setPlaybackError(false);
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                playerMode === 'drive_embed'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Play className="w-3 h-3 fill-current" />
+              <span>{isUr ? 'گوگل ڈرائیو ایچ ڈی پلیئر (اصل ویڈیو)' : 'Google Drive Player (Actual Video)'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPlayerMode('html5_stream')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                playerMode === 'html5_stream'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Sparkles className="w-3 h-3 text-cyan-400" />
+              <span>{isUr ? 'براہ راست سرور اسٹریم' : 'Server Stream (HTML5)'}</span>
+            </button>
+          </div>
         </div>
-        {downloadSrc && (
-          <a
-            href={downloadSrc}
-            download
-            className="flex items-center gap-1.5 font-medium text-emerald-300 hover:text-emerald-100 transition-colors ml-2"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>{isUr ? 'ڈاؤن لوڈ' : 'Download'}</span>
-          </a>
-        )}
+
+        <div className="flex items-center gap-2">
+          {downloadSrc && (
+            <a
+              href={downloadSrc}
+              download
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-700/50 text-emerald-300 font-medium transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>{isUr ? 'ڈاؤن لوڈ' : 'Download'}</span>
+            </a>
+          )}
+          {driveOpenUrl && (
+            <a
+              href={driveOpenUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-700/50 text-xs transition-colors"
+              title={isUr ? 'گوگل ڈرائیو میں کھولیں' : 'Open in Google Drive'}
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>{isUr ? 'ڈرائیو' : 'Drive'}</span>
+            </a>
+          )}
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={isUr ? 'بند کریں' : 'Close player'}
+              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+            >
+              <span className="font-bold text-sm leading-none">&times;</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Video Screen Container */}
-      <div
-        ref={containerRef}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={() => isPlaying && setShowControls(false)}
-        className="relative aspect-video w-full bg-[#080d16] rounded-2xl overflow-hidden shadow-2xl border border-slate-800 select-none group"
-      >
-        {/* HTML5 Native Video Element */}
-        <video
-          ref={videoRef}
-          src={streamSrc}
-          poster={video.thumbnailUrl}
-          playsInline
-          preload="metadata"
-          onClick={togglePlay}
-          className="w-full h-full object-contain cursor-pointer"
-        />
+      {playerMode === 'drive_embed' ? (
+        <div className="relative aspect-video w-full bg-[#080d16] rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
+          <iframe
+            src={driveEmbedUrl}
+            className="w-full h-full border-0 rounded-2xl bg-black"
+            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+            allowFullScreen
+            title={isUr ? (video.titleUr || video.titleEn) : (video.titleEn || video.titleUr)}
+          />
+        </div>
+      ) : (
+        <div
+          ref={containerRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => isPlaying && setShowControls(false)}
+          className="relative aspect-video w-full bg-[#080d16] rounded-2xl overflow-hidden shadow-2xl border border-slate-800 select-none group"
+        >
+          {/* HTML5 Native Video Element */}
+          <video
+            ref={videoRef}
+            src={streamSrc}
+            poster={video.thumbnailUrl}
+            playsInline
+            preload="metadata"
+            onClick={togglePlay}
+            className="w-full h-full object-contain cursor-pointer"
+          />
 
-        {/* Playback Fallback Card if Video Decode Fails */}
-        {playbackError && (
-          <div className="absolute inset-0 bg-[#0b1120]/95 flex flex-col items-center justify-center p-6 text-center z-20">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-3">
-              <AlertCircle className="w-7 h-7" />
-            </div>
-            <h4 className="text-base font-semibold text-slate-100 mb-1">
-              {isUr ? 'براہ راست ڈاؤن لوڈ یا پلے بیک' : 'Direct Stream Ready'}
-            </h4>
-            <p className="text-xs text-slate-400 max-w-md mb-4 leading-relaxed">
-              {isUr
-                ? 'یہ ویڈیو گوگل ڈرائیو کے اندر پروسیسنگ مرحلے میں ہے یا فارمیٹ کو کنورٹ کیا جا رہا ہے۔ آپ اسے بغیر کسی رکاوٹ کے ڈاؤن لوڈ کر کے چلا سکتے ہیں۔'
-                : 'Google Drive preview embeds have been removed. You can download the video directly via our secure server proxy without any Google authentication.'}
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              {downloadSrc && (
-                <a
-                  href={downloadSrc}
-                  download
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-950/40 transition-all"
+          {/* Playback Fallback Card if Video Decode Fails or Server Cache is Inactive */}
+          {playbackError && (
+            <div className="absolute inset-0 bg-[#0b1120]/95 flex flex-col items-center justify-center p-6 text-center z-20">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-3">
+                <AlertCircle className="w-7 h-7" />
+              </div>
+              <h4 className="text-base font-semibold text-slate-100 mb-1">
+                {isUr ? 'سرور کیش فعال نہیں ہے' : 'Server Cache Not Active'}
+              </h4>
+              <p className="text-xs text-slate-400 max-w-md mb-4 leading-relaxed">
+                {isUr
+                  ? 'اصل ویڈیو مواد دیکھنے کے لیے گوگل ڈرائیو ایچ ڈی پلیئر پر جائیں، یا فائل کو براہ راست ڈاؤن لوڈ کریں۔'
+                  : 'This video file is not yet cached on the server. Switch to the Google Drive HD Player to watch the real video footage immediately, or download it directly.'}
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPlayerMode('drive_embed');
+                    setPlaybackError(false);
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-950/40 transition-all cursor-pointer active:scale-95"
                 >
-                  <Download className="w-4 h-4" />
-                  <span>{isUr ? 'براہ راست ڈاؤن لوڈ کریں' : 'Download File Directly'}</span>
-                </a>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  setPlaybackError(false);
-                  setIsLoading(true);
-                  if (videoRef.current) {
-                    videoRef.current.load();
-                    videoRef.current.play().catch(() => setPlaybackError(true));
-                  }
-                }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all"
-              >
-                <RotateCw className="w-4 h-4" />
-                <span>{isUr ? 'دوبارہ کوشش کریں' : 'Retry Stream'}</span>
-              </button>
+                  <Play className="w-4 h-4 fill-current" />
+                  <span>{isUr ? 'گوگل ڈرائیو پلیئر میں اصل ویڈیو چلائیں' : 'Watch Actual Video via Drive Player'}</span>
+                </button>
+                {downloadSrc && (
+                  <a
+                    href={downloadSrc}
+                    download
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>{isUr ? 'براہ راست ڈاؤن لوڈ کریں' : 'Download File Directly'}</span>
+                  </a>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Loading Spinner */}
         {isLoading && !playbackError && (
@@ -494,6 +574,7 @@ export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
           </div>
         </div>
       </div>
+      )}
 
       {/* Speaker & Takeaways Details */}
       <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">

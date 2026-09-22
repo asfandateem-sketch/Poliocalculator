@@ -76,14 +76,20 @@ export function extractDriveId(input: string): string | null {
 }
 
 export function resolveThumbnailUrl(video: VideoItem): string | null {
-  if (video.thumbnailUrl && video.thumbnailUrl.trim()) {
+  if (video.thumbnailUrl && video.thumbnailUrl.trim() && !video.thumbnailUrl.includes('drive.google.com/thumbnail')) {
     return video.thumbnailUrl.trim();
+  }
+  const fileId =
+    video.driveFileId ||
+    video.id?.replace(/^drive-sync-/, '') ||
+    video.embedUrl?.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1] ||
+    video.driveUrl?.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+
+  if (fileId) {
+    return `/api/drive/thumbnail?id=${fileId}`;
   }
   if (video.thumbnailLink && video.thumbnailLink.trim()) {
     return video.thumbnailLink.trim();
-  }
-  if (video.driveFileId) {
-    return `https://drive.google.com/thumbnail?id=${video.driveFileId}&sz=w640`;
   }
   return null;
 }

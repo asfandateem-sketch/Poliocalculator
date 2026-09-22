@@ -8,6 +8,7 @@ import {
   ArrowUp,
   Share2,
   Check,
+  ArrowLeft,
 } from 'lucide-react';
 import { CALCULATOR_ITEMS, type PlatformCategoryKey } from './platformNavigation';
 import { BrandLogo } from './components/BrandLogo';
@@ -39,6 +40,7 @@ import { MobileBottomNav } from './components/MobileBottomNav';
 function AppContent() {
   const { language, toggleLanguage, isUrdu, t } = useLanguage();
   const [activePlatformCategory, setActivePlatformCategory] = useState<PlatformCategoryKey>('calculators');
+  const [historyStack, setHistoryStack] = useState<PlatformCategoryKey[]>([]);
   const [activeSection, setActiveSection] = useState<string>('calc-1');
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
   const [isAttributionOpen, setIsAttributionOpen] = useState<boolean>(false);
@@ -53,7 +55,7 @@ function AppContent() {
   const isProgrammaticScrollRef = useRef(false);
   const scrollEndTimerRef = useRef<number | null>(null);
 
-  // Hash-based initial route handling
+  // Hash-based initial route handling and browser popstate back/forward support
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.replace('#', '');
@@ -68,7 +70,7 @@ function AppContent() {
         } else {
           setActivePlatformCategory(hash === 'field-resources' ? 'field_resources' : (hash as PlatformCategoryKey));
         }
-      } else if (hash.startsWith('calc-') || hash === 'calculators') {
+      } else if (hash.startsWith('calc-') || hash === 'calculators' || !hash) {
         setActivePlatformCategory('calculators');
         if (hash.startsWith('calc-')) {
           setTimeout(() => {
@@ -81,7 +83,11 @@ function AppContent() {
 
     handleHash();
     window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    window.addEventListener('popstate', handleHash);
+    return () => {
+      window.removeEventListener('hashchange', handleHash);
+      window.removeEventListener('popstate', handleHash);
+    };
   }, []);
 
   // Register lightweight service worker for reliable offline caching in remote areas
@@ -177,12 +183,96 @@ function AppContent() {
     toggleLanguage();
   }, [toggleLanguage]);
 
-  const handleSelectCategory = (cat: PlatformCategoryKey) => {
+  const handleSelectCategory = useCallback((cat: PlatformCategoryKey, pushToHistory = true) => {
+    triggerHaptic('light');
+    if (pushToHistory && cat !== activePlatformCategory) {
+      setHistoryStack((prev) => [...prev, activePlatformCategory]);
+      try {
+        window.history.pushState({ category: cat }, '', `#${cat === 'field_resources' ? 'field-resources' : cat}`);
+      } catch {
+        // ignore state error in restricted iframe environments
+      }
+    }
+    setTargetTrainingId(undefined);
+    setTargetDocId(undefined);
+    setTargetScriptId(undefined);
+    setTargetUpdateId(undefined);
     setActivePlatformCategory(cat);
     const hash = cat === 'field_resources' ? 'field-resources' : cat;
-    window.location.hash = hash;
+    if (!pushToHistory) {
+      window.location.hash = hash;
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, [activePlatformCategory]);
+
+  const handleGoBack = useCallback(() => {
+    triggerHaptic('medium');
+    // 1. If currently inside an update article detail view
+    if (targetUpdateId) {
+      setTargetUpdateId(undefined);
+      window.location.hash = 'updates';
+      return;
+    }
+
+    // 2. If inside document or training detail view
+    if (targetDocId) {
+      setTargetDocId(undefined);
+      return;
+    }
+    if (targetTrainingId) {
+      setTargetTrainingId(undefined);
+      return;
+    }
+    if (targetScriptId) {
+      setTargetScriptId(undefined);
+      return;
+    }
+
+    // 3. If there is a recorded history stack of categories
+    if (historyStack.length > 0) {
+      const prevCat = historyStack[historyStack.length - 1];
+      setHistoryStack((prev) => prev.slice(0, -1));
+      setActivePlatformCategory(prevCat);
+      const hash = prevCat === 'field_resources' ? 'field-resources' : prevCat;
+      try {
+        window.history.replaceState({ category: prevCat }, '', `#${hash}`);
+      } catch {
+        window.location.hash = hash;
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // 4. If currently on any section other than calculators, return to calculators
+    if (activePlatformCategory !== 'calculators') {
+      setActivePlatformCategory('calculators');
+      window.location.hash = 'calculators';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // 5. If already on calculators, scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [targetUpdateId, targetDocId, targetTrainingId, targetScriptId, historyStack, activePlatformCategory]);
+
+  const canGoBack =
+    activePlatformCategory !== 'calculators' ||
+    Boolean(targetUpdateId) ||
+    Boolean(targetDocId) ||
+    Boolean(targetTrainingId) ||
+    Boolean(targetScriptId) ||
+    historyStack.length > 0;
+
+  // Keyboard Escape listener to go back
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && canGoBack) {
+        handleGoBack();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleGoBack, canGoBack]);
 
   const highlightElement = (id: string) => {
     const el = document.getElementById(id);
@@ -271,9 +361,24 @@ function AppContent() {
       </div>
 
       <div className="max-w-5xl w-full mx-auto flex flex-col flex-1 min-h-0 relative z-0">
-        {/* Header - Compact Clean Liquid Glass Header */}
-        <header className="saas-header p-3 sm:p-4 mb-2.5 sm:mb-3 flex items-center justify-between flex-shrink-0 gap-2 sm:gap-3 liquid-shimmer">
-          <BrandLogo size="md" isUrdu={isUrdu} />
+        {/* Header - Sticky Compact Clean Liquid Glass Header with Back Option */}
+        <header className="saas-header sticky top-1 sm:top-2 z-30 p-2.5 sm:p-4 mb-2.5 sm:mb-3 flex items-center justify-between flex-shrink-0 gap-2 sm:gap-3 liquid-shimmer backdrop-blur-xl">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+            {canGoBack && (
+              <button
+                id="header-back-btn"
+                type="button"
+                onClick={handleGoBack}
+                aria-label={isUrdu ? 'پچھلے صفحے پر واپس جائیں' : 'Go back to previous screen'}
+                title={isUrdu ? 'پچھلے صفحے پر واپس جائیں' : 'Back to previous screen'}
+                className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-teal-900 bg-teal-50/95 hover:bg-teal-100 border border-teal-200/90 rounded-xl transition duration-150 active:scale-95 cursor-pointer touch-manipulation shrink-0 shadow-2xs"
+              >
+                <ArrowLeft className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-teal-800 ${isUrdu ? 'rotate-180' : ''}`} />
+                <span className="font-extrabold">{isUrdu ? 'واپس' : 'Back'}</span>
+              </button>
+            )}
+            <BrandLogo size="md" isUrdu={isUrdu} />
+          </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             {/* Share Button */}
@@ -348,6 +453,8 @@ function AppContent() {
           <Breadcrumbs
             activeTab={activePlatformCategory}
             onTabChange={handleSelectCategory}
+            onGoBack={handleGoBack}
+            canGoBack={canGoBack}
           />
         </div>
 
@@ -359,7 +466,7 @@ function AppContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              transition={{ type: 'spring', stiffness: 480, damping: 34, mass: 0.6 }}
               className="w-full min-w-0"
             >
               {/* Sticky Horizontal Calculator Quick Selector */}
@@ -511,7 +618,7 @@ function AppContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              transition={{ type: 'spring', stiffness: 480, damping: 34, mass: 0.6 }}
               className="w-full min-w-0 pb-8"
             >
               <TrainingSection targetModuleId={targetTrainingId} />
@@ -524,7 +631,7 @@ function AppContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              transition={{ type: 'spring', stiffness: 480, damping: 34, mass: 0.6 }}
               className="w-full min-w-0 pb-8"
             >
               <CommunicationSection
@@ -540,7 +647,7 @@ function AppContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              transition={{ type: 'spring', stiffness: 480, damping: 34, mass: 0.6 }}
               className="w-full min-w-0 pb-8"
             >
               <VideosSection />
@@ -553,7 +660,7 @@ function AppContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              transition={{ type: 'spring', stiffness: 480, damping: 34, mass: 0.6 }}
               className="w-full min-w-0 pb-8"
             >
               <DocumentsSection targetDocId={targetDocId} />
@@ -566,7 +673,7 @@ function AppContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              transition={{ type: 'spring', stiffness: 480, damping: 34, mass: 0.6 }}
               className="w-full min-w-0 pb-8"
             >
               <UpdatesSection
@@ -593,7 +700,7 @@ function AppContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              transition={{ type: 'spring', stiffness: 480, damping: 34, mass: 0.6 }}
               className="w-full min-w-0 pb-8"
             >
               <FieldResourcesSection />
@@ -606,7 +713,7 @@ function AppContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
+              transition={{ type: 'spring', stiffness: 480, damping: 34, mass: 0.6 }}
               className="w-full min-w-0 pb-8"
             >
               <FaqSection />
@@ -615,6 +722,21 @@ function AppContent() {
         </AnimatePresence>
       </div>
 
+      {/* Floating Quick Back Button on Mobile (opposite to Back to Top) */}
+      {canGoBack && (
+        <button
+          id="floating-mobile-back-btn"
+          type="button"
+          onClick={handleGoBack}
+          aria-label={isUrdu ? 'پچھلے صفحے پر واپس جائیں' : 'Go back'}
+          title={isUrdu ? 'واپس جائیں' : 'Go back'}
+          className="sm:hidden fixed bottom-20 start-3 z-30 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/95 hover:bg-slate-900 text-white font-bold text-xs shadow-xl backdrop-blur-md border border-slate-700/80 cursor-pointer transition active:scale-95 touch-manipulation"
+        >
+          <ArrowLeft className={`w-3.5 h-3.5 ${isUrdu ? 'rotate-180' : ''}`} />
+          <span>{isUrdu ? 'واپس' : 'Back'}</span>
+        </button>
+      )}
+
       {/* Floating Back to Top Button (offset on mobile to clear MobileBottomNav) */}
       {showBackToTop && (
         <button
@@ -622,7 +744,7 @@ function AppContent() {
           type="button"
           onClick={scrollToTop}
           aria-label={isUrdu ? 'اوپر جائیں' : 'Back to top'}
-          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-30 p-2.5 sm:p-3 rounded-xl bg-slate-900/90 hover:bg-slate-900 text-white shadow-xl backdrop-blur-xs border border-slate-700 cursor-pointer flex items-center justify-center transition active:scale-95"
+          className="fixed bottom-20 end-3 sm:bottom-6 sm:end-6 z-30 p-2.5 sm:p-3 rounded-xl bg-slate-900/90 hover:bg-slate-900 text-white shadow-xl backdrop-blur-xs border border-slate-700 cursor-pointer flex items-center justify-center transition active:scale-95 touch-manipulation"
         >
           <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>

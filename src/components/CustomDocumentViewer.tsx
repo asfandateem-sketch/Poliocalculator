@@ -14,6 +14,7 @@ import {
   BookOpen,
   X,
   ExternalLink,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface CustomDocumentViewerProps {
@@ -114,6 +115,18 @@ export const CustomDocumentViewer: React.FC<CustomDocumentViewerProps> = ({
       {/* Control Header & Tabs Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-3 rounded-2xl">
         <div className="flex items-center gap-2.5 min-w-0">
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={isUr ? 'واپس جائیں' : 'Back to documents'}
+              title={isUr ? 'دستاویزات کی فہرست پر واپس جائیں' : 'Back to documents list'}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-xs border border-slate-700 transition cursor-pointer active:scale-95 shrink-0 touch-manipulation"
+            >
+              <ArrowLeft className={`w-3.5 h-3.5 ${isUr ? 'rotate-180' : ''}`} />
+              <span>{isUr ? 'واپس' : 'Back'}</span>
+            </button>
+          )}
           <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
             <FileText className="w-5 h-5" />
           </div>

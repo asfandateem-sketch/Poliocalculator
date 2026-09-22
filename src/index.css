@@ -7,6 +7,10 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
 }
 
 :root {
@@ -22,14 +26,28 @@ body {
   background-color: #f8fafc;
   color: #0f172a;
   overflow-x: clip;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Urdu / Arabic Typography Enhancements with Noto Nastaliq Urdu Priority */
+/* Instant tap response with zero 300ms mobile browser delay */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"],
+[role="tab"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Urdu / Arabic Typography Enhancements with Noto Nastaliq Urdu Priority and Crisp Naskh Fallbacks */
 .font-nastaliq,
 .font-urdu,
 .font-arabic,
 [dir="rtl"] {
-  font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Tahoma, sans-serif;
+  font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', 'Noto Sans Arabic', Tahoma, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: 0 !important;
   word-spacing: normal !important;
 }
