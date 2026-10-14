@@ -150,8 +150,8 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
               </span>
             </div>
             
-            <div className="min-w-0 flex items-center gap-1.5 truncate">
-              <span className="text-[11px] font-semibold text-slate-500 hidden sm:inline uppercase tracking-wider font-mono">
+            <div className="min-w-0 flex items-center gap-1.5 flex-1">
+              <span className="text-[11px] font-semibold text-slate-500 hidden sm:inline uppercase tracking-wider font-mono flex-shrink-0">
                 {isUrdu ? 'موجودہ ٹول:' : 'Active Tool:'}
               </span>
               <AnimatePresence mode="wait" initial={false}>
@@ -161,7 +161,7 @@ export const TopCalculatorNavigation: React.FC<TopCalculatorNavigationProps> = R
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -3 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  className="text-xs font-bold text-slate-900 truncate inline-block"
+                  className={`text-xs font-bold text-slate-900 leading-snug line-clamp-1 break-words ${isUrdu ? 'font-arabic text-[12px]' : ''}`}
                 >
                   {currentCalcName}
                 </motion.span>

@@ -95,7 +95,7 @@ export const Under5Calculator: React.FC<Props> = React.memo(() => {
               <span className="w-7 h-7 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/80 font-mono font-bold text-xs flex items-center justify-center flex-shrink-0">
                 09
               </span>
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-snug truncate sm:whitespace-normal">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-snug break-words">
                 {strings.title}
               </h2>
             </div>

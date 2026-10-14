@@ -1199,6 +1199,20 @@ export const VideosSection: React.FC = () => {
               </span>
             </button>
 
+            {/* Direct Add Video Button for Google Drive videos */}
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setIsAddVideoModalOpen(true);
+              }}
+              className="saas-btn-primary px-3 py-2 text-xs flex items-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold min-h-[38px] rounded-xl"
+              title={isUrdu ? 'گوگل ڈرائیو ویڈیو شامل کریں' : 'Add Google Drive video'}
+            >
+              <Plus className="w-3.5 h-3.5 text-white" />
+              <span>{isUrdu ? 'ویڈیو شامل کریں' : '+ Add Video'}</span>
+            </button>
+
             {isAdmin ? (
               <>
                 {/* Admin: Sync / Connection Settings Button */}
@@ -1215,20 +1229,6 @@ export const VideosSection: React.FC = () => {
                   <span>{isUrdu ? 'ترتیبات' : 'Settings'}</span>
                 </button>
 
-                {/* Admin: + Add Video Button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setIsAddVideoModalOpen(true);
-                  }}
-                  className="saas-btn-primary px-3.5 py-2 text-xs flex items-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold min-h-[38px]"
-                  title="Add more resources with AI auto-fill"
-                >
-                  <Plus className="w-4 h-4 text-white" />
-                  <span>{isUrdu ? 'ویڈیو شامل کریں' : '+ Add Video'}</span>
-                </button>
-
                 {/* Admin: Exit Admin Mode Button */}
                 <button
                   type="button"
@@ -1240,21 +1240,18 @@ export const VideosSection: React.FC = () => {
                 </button>
               </>
             ) : (
-              <>
-                {/* Regular User View: Discreet admin lock button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setIsAdminAuthModalOpen(true);
-                  }}
-                  className="p-2 rounded-xl text-slate-400 hover:text-teal-700 hover:bg-slate-100 transition cursor-pointer min-h-[38px]"
-                  title={isUrdu ? 'ایڈمن رسائی' : 'Admin Login'}
-                  aria-label="Admin Login"
-                >
-                  <Lock className="w-4 h-4" />
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setIsAdminAuthModalOpen(true);
+                }}
+                className="p-2 rounded-xl text-slate-400 hover:text-teal-700 hover:bg-slate-100 transition cursor-pointer min-h-[38px]"
+                title={isUrdu ? 'ایڈمن رسائی' : 'Admin Login'}
+                aria-label="Admin Login"
+              >
+                <Lock className="w-4 h-4" />
+              </button>
             )}
           </div>
         </div>

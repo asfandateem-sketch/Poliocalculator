@@ -54,12 +54,14 @@
     <link rel="alternate" hreflang="ur" href="https://poliofieldtools.org/?lang=ur" />
     <link rel="alternate" hreflang="x-default" href="https://poliofieldtools.org/" />
 
-    <!-- Preconnect to Google Fonts -->
+    <!-- Performance & Font Preconnects -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Noto+Nastaliq+Urdu:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Structured Data (JSON-LD): WebApplication & MedicalWebPage -->
+    <!-- Structured Data (JSON-LD): WebApplication, MedicalGuideline & AEO Speakable Specification -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -69,12 +71,16 @@
           "@id": "https://poliofieldtools.org/#webapp",
           "name": "Polio Field Tools",
           "alternateName": "پولیو فیلڈ ٹولز",
-          "description": "Practical tools and resources for polio campaign workers: 9 field calculators, official EOC updates, training SOPs, refusal conversion communication scripts, and provincial operational guidelines across Pakistan.",
+          "description": "Practical tools and resources for polio campaign workers: 9 field calculators, verified campaign updates, training SOPs, refusal conversion communication scripts, and provincial operational guidelines across Pakistan.",
           "url": "https://poliofieldtools.org/",
           "applicationCategory": "HealthApplication",
           "operatingSystem": "All",
           "browserRequirements": "Requires JavaScript",
           "inLanguage": ["en", "ur"],
+          "speakable": {
+            "@type": "SpeakableSpecification",
+            "cssSelector": ["h1", "h2", "#calculators p", "#faq .question-text", "#faq .answer-text"]
+          },
           "spatialCoverage": {
             "@type": "Place",
             "name": "Pakistan",
@@ -175,6 +181,18 @@
           ]
         },
         {
+          "@type": "MedicalGuideline",
+          "@id": "https://poliofieldtools.org/#guideline",
+          "name": "Pakistan National Emergency Action Plan for Polio Eradication (NEAP)",
+          "guidelineSubject": {
+            "@type": "MedicalCondition",
+            "name": "Poliomyelitis (Infantile Paralysis)"
+          },
+          "guidelineDate": "2026-01-01",
+          "evidenceLevel": "National Immunization SOPs & WHO SAGE Guidelines",
+          "url": "https://poliofieldtools.org/#training"
+        },
+        {
           "@type": "BreadcrumbList",
           "@id": "https://poliofieldtools.org/#breadcrumbs",
           "itemListElement": [
@@ -193,14 +211,20 @@
             {
               "@type": "ListItem",
               "position": 3,
-              "name": "Official Updates",
-              "item": "https://poliofieldtools.org/#updates"
+              "name": "Communication Resources",
+              "item": "https://poliofieldtools.org/#videos"
             },
             {
               "@type": "ListItem",
               "position": 4,
-              "name": "Training SOPs",
-              "item": "https://poliofieldtools.org/#training"
+              "name": "Documents & Guides",
+              "item": "https://poliofieldtools.org/#documents"
+            },
+            {
+              "@type": "ListItem",
+              "position": 5,
+              "name": "FAQs & Guidance",
+              "item": "https://poliofieldtools.org/#faq"
             }
           ]
         }

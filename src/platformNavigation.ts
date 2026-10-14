@@ -105,8 +105,8 @@ export const PLATFORM_CATEGORIES: PlatformCategory[] = [
   },
   {
     key: 'faq',
-    labelEn: 'FAQ & Standards',
-    labelUr: 'سوالات و اصول',
+    labelEn: 'FAQs & Guidance',
+    labelUr: 'سوالات و رہنمائی',
     shortLabelEn: 'FAQs',
     shortLabelUr: 'اکثر پوچھے گئے سوالات',
     icon: AlertCircle,

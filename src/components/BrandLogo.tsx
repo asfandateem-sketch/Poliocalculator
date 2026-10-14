@@ -65,16 +65,16 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       {showText && (
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm sm:text-base md:text-lg font-extrabold text-slate-900 tracking-tight leading-snug truncate">
+            <span className={`text-sm sm:text-base md:text-lg font-extrabold text-slate-900 tracking-tight leading-snug break-words ${isUrdu ? 'font-arabic' : ''}`}>
               {isUrdu ? 'پولیو فیلڈ ٹولز' : 'Polio Field Tools'}
             </span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold text-teal-900 bg-teal-500/10 border border-teal-500/20 rounded-full backdrop-blur-md shadow-xs">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold text-teal-900 bg-teal-500/10 border border-teal-500/20 rounded-full backdrop-blur-md shadow-xs flex-shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               {isUrdu ? '2026 ایڈیشن' : '2026 Edition'}
             </span>
           </div>
           {tagline && (
-            <p className="text-xs text-slate-500 font-normal mt-0.5 leading-normal truncate">
+            <p className={`text-xs text-slate-500 font-normal mt-0.5 leading-relaxed break-words ${isUrdu ? 'font-arabic text-[12px]' : ''}`}>
               {isUrdu
                 ? 'پولیو مہم ورکرز کے لیے عملی اوزار اور رہنمائی'
                 : 'Practical tools and resources for polio campaign workers'}

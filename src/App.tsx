@@ -16,7 +16,6 @@ import { GlobalSearchBar } from './components/GlobalSearchBar';
 import type { SearchableItem } from './searchData';
 import { PlatformHubNavigation } from './components/PlatformHubNavigation';
 import { Breadcrumbs } from './components/Breadcrumbs';
-import { AttributionModal } from './components/AttributionModal';
 import { TopCalculatorNavigation } from './components/TopCalculatorNavigation';
 import { ChildAgeCalculator } from './components/ChildAgeCalculator';
 import { VaccineDemandCalculator } from './components/VaccineDemandCalculator';
@@ -31,7 +30,6 @@ import { TrainingSection } from './components/TrainingSection';
 import { CommunicationSection } from './components/CommunicationSection';
 import { VideosSection } from './components/VideosSection';
 import { UpdatesSection } from './components/UpdatesSection';
-import { HomeLatestUpdates } from './components/HomeLatestUpdates';
 import { DocumentsSection } from './components/DocumentsSection';
 import { FieldResourcesSection } from './components/FieldResourcesSection';
 import { FaqSection } from './components/FaqSection';
@@ -43,7 +41,6 @@ function AppContent() {
   const [historyStack, setHistoryStack] = useState<PlatformCategoryKey[]>([]);
   const [activeSection, setActiveSection] = useState<string>('calc-1');
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
-  const [isAttributionOpen, setIsAttributionOpen] = useState<boolean>(false);
   const [isShared, setIsShared] = useState<boolean>(false);
 
   // Targets passed when navigating from Global Search Bar
@@ -352,6 +349,14 @@ function AppContent() {
       }`}
       dir={isUrdu ? 'rtl' : 'ltr'}
     >
+      {/* Skip to Main Content Link for Accessibility */}
+      <a
+        href="#main-calculators-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2.5 focus:bg-teal-900 focus:text-white focus:rounded-xl focus:shadow-2xl focus:ring-2 focus:ring-teal-400 font-bold text-xs"
+      >
+        {isUrdu ? 'براہ راست بنیادی مواد پر جائیں' : 'Skip to main content'}
+      </a>
+
       {/* Liquid Glass Ambient Fluid Light Refraction Layer */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-sky-200/45 blur-3xl" />
@@ -421,21 +426,6 @@ function AppContent() {
                 اردو
               </span>
             </button>
-
-            {/* Attribution / Info Button (i) */}
-            <button
-              id="info-modal-btn"
-              type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                setIsAttributionOpen(true);
-              }}
-              aria-label={isUrdu ? 'معلومات اور اصول' : 'App Information and Guidelines'}
-              title={isUrdu ? 'معلومات دیکھیں' : 'View Attribution & Standards'}
-              className="w-8 h-8 rounded-lg bg-teal-50/80 backdrop-blur-md hover:bg-teal-100/90 text-teal-800 border border-teal-200/80 flex items-center justify-center cursor-pointer transition shadow-xs"
-            >
-              <Info className="w-4 h-4 text-teal-700" />
-            </button>
           </div>
         </header>
 
@@ -475,23 +465,8 @@ function AppContent() {
                 onSelect={scrollToCalculator}
               />
 
-              {/* Homepage Compact Latest Updates Feed */}
-              <HomeLatestUpdates
-                onNavigateToUpdates={(id) => {
-                  setActivePlatformCategory('updates');
-                  if (id) {
-                    setTargetUpdateId(id);
-                    window.location.hash = `updates/${id}`;
-                  } else {
-                    setTargetUpdateId(undefined);
-                    window.location.hash = 'updates';
-                  }
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              />
-
               {/* All 9 Calculators Aligned in Clean Full-Width Container */}
-              <main className="w-full min-w-0 space-y-6 sm:space-y-7 pb-8">
+              <main id="main-calculators-content" className="w-full min-w-0 space-y-6 sm:space-y-7 pb-8" role="main">
                 <motion.section
                   id="calc-1"
                   animate={{
@@ -756,12 +731,6 @@ function AppContent() {
         onSelectCategory={handleSelectCategory}
       />
 
-      {/* Attribution & Standards Modal */}
-      <AttributionModal
-        isOpen={isAttributionOpen}
-        onClose={() => setIsAttributionOpen(false)}
-      />
-
       {/* Footer - Professional Clean Minimal Footer with Transparency Disclaimer */}
       <footer className="saas-header py-3.5 px-4 mt-4 mb-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 max-w-5xl w-full mx-auto flex-shrink-0">
         <div className="flex flex-col sm:flex-row items-center gap-1.5 text-center sm:text-left">
@@ -778,17 +747,7 @@ function AppContent() {
             }}
             className="text-teal-800 hover:text-teal-900 font-semibold cursor-pointer"
           >
-            {isUrdu ? 'سوالات و جوابات' : 'FAQ & SOPs'}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('light');
-              setIsAttributionOpen(true);
-            }}
-            className="text-slate-600 hover:text-slate-900 cursor-pointer"
-          >
-            {isUrdu ? 'معلومات' : 'Disclaimer'}
+            {isUrdu ? 'سوالات و رہنمائی' : 'FAQs & Field SOPs'}
           </button>
         </div>
       </footer>

@@ -123,13 +123,13 @@ export const PlatformHubNavigation: React.FC<PlatformHubNavigationProps> = ({
                 />
               )}
 
-              <div className="relative z-10 flex items-center gap-1.5 min-w-0">
+              <div className="relative z-10 flex items-center gap-1.5 min-w-0 flex-1">
                 <Icon
                   className={`w-4 h-4 flex-shrink-0 transition-colors duration-150 ${
                     isActive ? 'text-teal-200' : 'text-slate-500 group-hover:text-slate-700'
                   }`}
                 />
-                <span className="truncate text-left font-semibold">
+                <span className={`font-semibold text-xs leading-snug whitespace-normal break-words ${isUrdu ? 'text-right font-arabic text-[12.5px]' : 'text-left'}`}>
                   {isUrdu ? item.labelUr : item.labelEn}
                 </span>
               </div>

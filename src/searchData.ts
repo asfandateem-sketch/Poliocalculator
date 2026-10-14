@@ -421,7 +421,7 @@ export const SEARCHABLE_ITEMS: SearchableItem[] = [
     id: 'faq-fixed-rule',
     category: 'faq',
     type: 'faq',
-    typeLabelEn: 'FAQ & Standards',
+    typeLabelEn: 'FAQs & Guidance',
     typeLabelUr: 'سوال و جواب',
     titleEn: 'Fixed bOPV Rule: 1 Vial = 20 Doses (2 Drops/Child)',
     titleUr: 'لازمی اصول: 1 وائل = 20 خوراکیں اور 2 قطرے فی بچہ',

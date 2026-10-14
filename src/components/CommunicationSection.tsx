@@ -239,7 +239,7 @@ export const CommunicationSection: React.FC<CommunicationSectionProps> = ({
                   </span>
                 </div>
 
-                <h3 className="text-sm font-bold text-slate-900 bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-3">
+                <h3 className={`text-sm font-bold text-slate-900 bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-3 break-words leading-snug ${isUrdu ? 'font-arabic' : ''}`}>
                   {isUrdu ? script.mythOrHesitationUr : script.mythOrHesitationEn}
                 </h3>
 

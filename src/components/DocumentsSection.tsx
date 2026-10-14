@@ -518,7 +518,7 @@ Generated from Polio Field Companion Toolkit
                 <span className="text-[11px] font-mono text-teal-200 font-bold uppercase tracking-wider">
                   {selectedDoc.code} • {isUrdu ? selectedDoc.categoryUr : selectedDoc.categoryEn}
                 </span>
-                <h3 className="text-sm sm:text-base font-bold truncate">
+                <h3 className={`text-sm sm:text-base font-bold break-words leading-snug ${isUrdu ? 'font-arabic' : ''}`}>
                   {isUrdu ? selectedDoc.titleUr : selectedDoc.titleEn}
                 </h3>
               </div>

@@ -272,7 +272,7 @@ export const TrainingSection: React.FC<TrainingSectionProps> = ({ targetModuleId
                 type="button"
                 onClick={() => toggleExpand(module.id)}
                 aria-expanded={isExpanded}
-                className="w-full text-left p-4 sm:p-5 flex items-start justify-between gap-3 cursor-pointer hover:bg-slate-50/50"
+                className={`w-full text-start p-4 sm:p-5 flex items-start justify-between gap-3 cursor-pointer hover:bg-slate-50/50 ${isUrdu ? 'font-arabic' : ''}`}
               >
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -288,11 +288,11 @@ export const TrainingSection: React.FC<TrainingSectionProps> = ({ targetModuleId
                     </span>
                   </div>
 
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug break-words">
                     {isUrdu ? module.titleUr : module.titleEn}
                   </h3>
 
-                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
+                  <p className={`text-xs text-slate-600 leading-relaxed ${isUrdu ? 'font-arabic leading-normal line-clamp-3' : 'line-clamp-2'}`}>
                     {isUrdu ? module.summaryUr : module.summaryEn}
                   </p>
                 </div>

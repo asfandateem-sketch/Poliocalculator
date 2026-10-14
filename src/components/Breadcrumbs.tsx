@@ -26,7 +26,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
     training: { en: 'Training SOPs', ur: 'تربیتی ایس او پیز' },
     communication: { en: 'Dialogue Scripts', ur: 'انکار و ابلاغ کے سکرپٹس' },
     field_resources: { en: 'Field Guidelines', ur: 'فیلڈ رہنمائی' },
-    faq: { en: 'FAQ & Standards', ur: 'سوالات و اصول' },
+    faq: { en: 'FAQs & Guidance', ur: 'سوالات و رہنمائی' },
   };
 
   const currentLabel = tabLabels[activeTab] || tabLabels.calculators;

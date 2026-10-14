@@ -116,9 +116,9 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
               {/* Label */}
               <span
-                className={`text-[10px] tracking-tight mt-1 leading-none font-bold truncate max-w-[64px] ${
+                className={`text-[10px] tracking-tight mt-1 leading-snug font-bold text-center px-0.5 break-normal ${
                   isActive ? 'text-teal-900 font-extrabold' : 'text-slate-600'
-                }`}
+                } ${isUrdu ? 'font-arabic text-[11px]' : ''}`}
               >
                 {isUrdu ? tab.labelUr : tab.labelEn}
               </span>

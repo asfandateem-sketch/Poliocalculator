@@ -4,7 +4,7 @@
   <!-- Homepage & Core Hub -->
   <url>
     <loc>https://poliofieldtools.org/</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://poliofieldtools.org/?lang=en" />
@@ -15,31 +15,31 @@
   <!-- Official Updates Section -->
   <url>
     <loc>https://poliofieldtools.org/#updates</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#/updates/eoc-kp-september-2026-subnational-polio-campaign</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#/updates/national-polio-campaign-115-high-risk-districts</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#/updates/kp-polio-peshawar-campaign-inauguration-transit-points</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#/updates/national-advisory-sehat-muhafiz-1166-helpline</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -47,7 +47,7 @@
   <!-- Calculators Section -->
   <url>
     <loc>https://poliofieldtools.org/#calculators</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
@@ -55,55 +55,55 @@
   <!-- Individual Calculator Anchors for High-Intent Queries -->
   <url>
     <loc>https://poliofieldtools.org/#calc-1</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#calc-2</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#calc-3</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#calc-4</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#calc-5</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#calc-6</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#calc-7</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#calc-8</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://poliofieldtools.org/#calc-9</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -111,7 +111,7 @@
   <!-- Training Modules Section -->
   <url>
     <loc>https://poliofieldtools.org/#training</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -119,7 +119,7 @@
   <!-- Communication & SBC Section -->
   <url>
     <loc>https://poliofieldtools.org/#communication</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -127,7 +127,7 @@
   <!-- Videos Section -->
   <url>
     <loc>https://poliofieldtools.org/#videos</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -135,7 +135,7 @@
   <!-- Documents & Guides Section -->
   <url>
     <loc>https://poliofieldtools.org/#documents</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -143,8 +143,16 @@
   <!-- Field Resources Section -->
   <url>
     <loc>https://poliofieldtools.org/#field-resources</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+
+  <!-- FAQs & Guidance Section -->
+  <url>
+    <loc>https://poliofieldtools.org/#faq</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
 </urlset>

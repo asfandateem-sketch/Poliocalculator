@@ -419,6 +419,37 @@ export function getUpdateById(id: string): PolioUpdate | undefined {
   return all.find((item) => item.id === id || item.slug === id);
 }
 
+export function getUserManualUpdates(): PolioUpdate[] {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_UPDATES_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {
+    console.error('Error reading manual updates from localStorage', e);
+  }
+  return [];
+}
+
+export function addUserManualUpdate(update: PolioUpdate): void {
+  const current = getUserManualUpdates();
+  const updated = [update, ...current.filter((u) => u.id !== update.id && u.slug !== update.slug)];
+  saveUserUpdates(updated);
+}
+
+export function deleteUserManualUpdate(id: string): void {
+  const current = getUserManualUpdates();
+  const updated = current.filter((u) => u.id !== id && u.slug !== id);
+  saveUserUpdates(updated);
+}
+
+export function updateUserManualUpdate(update: PolioUpdate): void {
+  const current = getUserManualUpdates();
+  const updated = current.map((u) => (u.id === update.id ? update : u));
+  saveUserUpdates(updated);
+}
+
 export function filterUpdates(
   category = 'all',
   searchQuery = ''
@@ -445,3 +476,4 @@ export function filterUpdates(
 
   return filtered;
 }
+

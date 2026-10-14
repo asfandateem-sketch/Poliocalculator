@@ -42,10 +42,13 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const isUrdu = language === 'ur';
   const t = translations[language];
 
-  // Set document dir & lang attribute
+  // Set document dir, lang & title attributes dynamically for bilingual SEO & accessibility
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = isUrdu ? 'rtl' : 'ltr';
+    document.title = isUrdu
+      ? 'پولیو فیلڈ ٹولز — پاکستان مہماتی کیلکولیٹرز و ای او سی رہنمائی'
+      : 'Polio Field Tools — Official Pakistan Campaign Calculators & Guidance';
   }, [language, isUrdu]);
 
   return (
