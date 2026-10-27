@@ -710,13 +710,19 @@ export const VideosSection: React.FC = () => {
     triggerHaptic('medium');
 
     const fileId = item.driveFileId || extractDriveId(item.driveUrl || '') || extractDriveId(item.viewUrl || '');
-    // Direct download proxy through server to avoid Google sign-in walls and cookie blocks
+    const isDoc = item.fileType === 'document' || /\.(pdf|docx?|pptx?|xlsx?)$/i.test(item.originalFilename || item.name || '');
+    const typeParam = isDoc ? 'document' : 'video';
+    
+    // Direct download proxy through server or official Google Drive export
     const directDownloadUrl = item.downloadUrl ||
-      (fileId ? `/api/drive/download?id=${fileId}&filename=${encodeURIComponent(item.originalFilename || item.titleEn || item.name || 'polio_resource')}` : item.driveUrl || item.viewUrl);
+      (fileId ? `/api/drive/download?id=${fileId}&type=${typeParam}&filename=${encodeURIComponent(item.originalFilename || item.titleEn || item.name || 'polio_resource')}` : item.driveUrl || item.viewUrl);
 
     if (!directDownloadUrl) return;
 
-    const ext = item.fileType === 'video' ? '.mp4' : item.fileType === 'image' ? '.jpg' : '.pdf';
+    let ext = isDoc ? '.pdf' : item.fileType === 'image' ? '.jpg' : '.mp4';
+    if ((item.originalFilename || '').endsWith('.docx')) {
+      ext = '.docx';
+    }
     const rawTitle = (item.titleEn || item.name || 'polio_resource').trim();
     const cleanTitle = rawTitle.replace(/[/\\?%*:|"<>]/g, '-');
     const filename = cleanTitle.includes('.') ? cleanTitle : `${cleanTitle}${ext}`;

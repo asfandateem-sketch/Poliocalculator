@@ -93,6 +93,36 @@ export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
   const [copiedNotification, setCopiedNotification] = useState(false);
   const [fallbackToast, setFallbackToast] = useState<string | null>(null);
 
+  const [retryKey, setRetryKey] = useState(0);
+
+  // Reset video state cleanly when active video changes
+  useEffect(() => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    setBufferedEnd(0);
+    setPlaybackError(false);
+    setIsLoading(true);
+    setFallbackToast(null);
+    setSpeedMenuOpen(false);
+    setRetryKey(0);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+  }, [video.id, fileId]);
+
+  // Clean retry without full page reload
+  const handleRetry = useCallback(() => {
+    setPlaybackError(false);
+    setIsLoading(true);
+    setFallbackToast(null);
+    setRetryKey((k) => k + 1);
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, []);
+
   // Format seconds to mm:ss
   const formatTime = (secs: number) => {
     if (isNaN(secs) || secs < 0) return '00:00';
@@ -299,41 +329,69 @@ export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
           </div>
         </div>
 
-        {/* Player Switcher (Drive Embed vs Direct HTML5) */}
-        {driveEmbedSrc && (
-          <div className="flex items-center gap-1 bg-slate-900 p-0.5 rounded-lg border border-slate-800 text-[11px]">
-            <button
-              type="button"
-              onClick={() => {
-                setPlayerMode('drive_embed');
-                setPlaybackError(false);
-              }}
-              className={`px-2.5 py-1 rounded-md font-bold transition cursor-pointer flex items-center gap-1 ${
-                playerMode === 'drive_embed'
-                  ? 'bg-teal-700 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+        {/* Player Controls & Switcher */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {/* Reload / Retry Action */}
+          <button
+            type="button"
+            onClick={handleRetry}
+            aria-label={isUr ? 'ویڈیو پلیئر ری لوڈ کریں' : 'Reload player'}
+            title={isUr ? 'ویڈیو پلیئر ری لوڈ کریں' : 'Reload player without reloading page'}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 font-bold transition cursor-pointer active:scale-95 text-[11px]"
+          >
+            <RefreshCw className="w-3 h-3 text-teal-400" />
+            <span>{isUr ? 'ری لوڈ' : 'Reload'}</span>
+          </button>
+
+          {/* Direct Download in Header */}
+          {downloadSrc && (
+            <a
+              href={downloadSrc}
+              download
+              title={isUr ? 'ویڈیو ڈاؤنلوڈ کریں' : 'Download video file'}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-700 hover:bg-emerald-600 text-white font-bold transition cursor-pointer active:scale-95 text-[11px] shadow-xs"
             >
-              <Tv className="w-3 h-3" />
-              <span>{isUr ? 'ڈرائیو ان-ایپ پلیئر' : 'Drive In-App Player'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setPlayerMode('html5');
-                setPlaybackError(false);
-              }}
-              className={`px-2.5 py-1 rounded-md font-bold transition cursor-pointer flex items-center gap-1 ${
-                playerMode === 'html5'
-                  ? 'bg-teal-700 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Film className="w-3 h-3" />
-              <span>{isUr ? 'ایچ ٹی ایم ایل 5' : 'HTML5 Player'}</span>
-            </button>
-          </div>
-        )}
+              <Download className="w-3 h-3" />
+              <span>{isUr ? 'ڈاؤنلوڈ' : 'Download'}</span>
+            </a>
+          )}
+
+          {/* Player Switcher (Drive Embed vs Direct HTML5) */}
+          {driveEmbedSrc && (
+            <div className="flex items-center gap-1 bg-slate-900 p-0.5 rounded-lg border border-slate-800 text-[11px]">
+              <button
+                type="button"
+                onClick={() => {
+                  setPlayerMode('drive_embed');
+                  setPlaybackError(false);
+                }}
+                className={`px-2.5 py-1 rounded-md font-bold transition cursor-pointer flex items-center gap-1 ${
+                  playerMode === 'drive_embed'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Tv className="w-3 h-3" />
+                <span>{isUr ? 'ڈرائیو ان-ایپ' : 'Drive In-App'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPlayerMode('html5');
+                  setPlaybackError(false);
+                }}
+                className={`px-2.5 py-1 rounded-md font-bold transition cursor-pointer flex items-center gap-1 ${
+                  playerMode === 'html5'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Film className="w-3 h-3" />
+                <span>{isUr ? 'ایچ ٹی ایم ایل 5' : 'HTML5'}</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {fallbackToast && (
@@ -360,10 +418,11 @@ export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
         {playerMode === 'drive_embed' && driveEmbedSrc ? (
           <div className="relative w-full h-full">
             <iframe
+              key={`drive-embed-${fileId}-${retryKey}`}
               src={driveEmbedSrc}
               title={video.titleEn || video.titleUr || 'Google Drive Video'}
               className="w-full h-full border-0 rounded-2xl bg-black"
-              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               loading="lazy"
             />
@@ -372,6 +431,7 @@ export const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
           /* MODE 2: HTML5 Video Element with Full Custom Controls */
           <>
             <video
+              key={`html5-video-${fileId}-${retryKey}`}
               ref={videoRef}
               src={streamSrc}
               poster={video.thumbnailUrl}

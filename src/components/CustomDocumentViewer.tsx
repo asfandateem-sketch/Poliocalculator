@@ -66,7 +66,7 @@ export const CustomDocumentViewer: React.FC<CustomDocumentViewerProps> = ({
 
   const docName = doc.name || doc.titleEn || (doc.code ? `${doc.code} - Operational Form` : 'Polio Document');
   const streamSrc = doc.streamUrl || (fileId ? `/api/drive/stream?id=${fileId}&type=document` : '');
-  const downloadSrc = doc.downloadUrl || (fileId ? `/api/drive/download?id=${fileId}&filename=${encodeURIComponent(docName)}` : '');
+  const downloadSrc = doc.downloadUrl || (fileId ? `/api/drive/download?id=${fileId}&type=document&filename=${encodeURIComponent(docName)}` : '');
 
   const [activeTab, setActiveTab] = useState<'stream' | 'sop'>('stream');
   const [zoomLevel, setZoomLevel] = useState<number>(100);

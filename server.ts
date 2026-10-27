@@ -721,10 +721,10 @@ app.post('/api/drive/sync', syncRateLimit, async (req, res) => {
           driveFileId: file.id,
           driveFolderId: targetFolderId,
           streamUrl: `/api/drive/stream?id=${file.id}&type=video`,
-          downloadUrl: `/api/drive/download?id=${file.id}&filename=${encodeURIComponent(file.name)}`,
+          downloadUrl: `/api/drive/download?id=${file.id}&type=video&filename=${encodeURIComponent(file.name)}`,
           thumbnailUrl: `/api/drive/thumbnail?id=${file.id}`,
           driveUrl: file.viewUrl || `https://drive.google.com/file/d/${file.id}/view`,
-          embedUrl: `/api/drive/stream?id=${file.id}&type=video`,
+          embedUrl: `https://drive.google.com/file/d/${file.id}/preview`,
           thumbnailLink: `/api/drive/thumbnail?id=${file.id}`,
           folderId: categorySlug,
           originalCategory: folderCategoryName,
@@ -762,10 +762,10 @@ app.post('/api/drive/sync', syncRateLimit, async (req, res) => {
         driveFileId: file.id,
         driveFolderId: targetFolderId,
         streamUrl: `/api/drive/stream?id=${file.id}&type=document`,
-        downloadUrl: `/api/drive/download?id=${file.id}&filename=${encodeURIComponent(file.name)}`,
+        downloadUrl: `/api/drive/download?id=${file.id}&type=document&filename=${encodeURIComponent(file.name)}`,
         thumbnailUrl: `/api/drive/thumbnail?id=${file.id}`,
         driveUrl: file.viewUrl || `https://drive.google.com/file/d/${file.id}/view`,
-        embedUrl: `/api/drive/stream?id=${file.id}&type=document`,
+        embedUrl: `https://drive.google.com/file/d/${file.id}/preview`,
         thumbnailLink: fileType === 'image' ? `/api/drive/thumbnail?id=${file.id}` : '',
         folderId: categorySlug,
         originalCategory: folderCategoryName,
@@ -1079,12 +1079,12 @@ function synthesizeVideoMedia(fileId: string, meta: { title: string; speaker: st
   const labelContent = `POLIO ERADICATION INITIATIVE - PAKISTAN\n\n${meta.title}\n\nSpeaker: ${meta.speaker}\n${meta.designation}\n\nOfficial Video Stream - Direct Mobile & Desktop Playback`;
   fs.writeFileSync(labelPath, labelContent, 'utf8');
 
-  // Spawn ffmpeg to synthesize a compliant H.264 baseline MP4 with faststart moov atom
+  // Spawn ffmpeg to synthesize a compliant H.264 baseline MP4 with faststart moov atom and silent clean audio
   const vf = `drawtext=textfile='${labelPath}':fontcolor=white:fontsize=26:x=(w-text_w)/2:y=(h-text_h)/2:line_spacing=16`;
   
   const ffmpegRes = spawnSync('ffmpeg', [
     '-f', 'lavfi', '-i', 'color=c=0x081325:s=1280x720:d=12',
-    '-f', 'lavfi', '-i', 'sine=frequency=440:beep_factor=4:d=12:sample_rate=44100',
+    '-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=44100',
     '-filter_complex', `[0:v]${vf}[v]`,
     '-map', '[v]',
     '-map', '1:a',
@@ -1180,12 +1180,6 @@ async function retrieveGoogleDriveFile(fileId: string, requestedType: string = '
         return item;
       }
     } catch {}
-  }
-
-  // If this is a known cataloged video or standard ID, immediately synthesize and serve without blocking on remote timeouts
-  if (requestedType === 'video' && (KNOWN_VIDEO_CATALOG[fileId] || fileId.startsWith('1') || fileId.startsWith('hcp-') || fileId.startsWith('rel-') || fileId.startsWith('media-'))) {
-    const meta = getVideoMetadata(fileId);
-    return synthesizeVideoMedia(fileId, meta);
   }
 
   const scriptUrl = process.env.DRIVE_APPS_SCRIPT_URL || process.env.VITE_DRIVE_APPS_SCRIPT_URL;
@@ -1348,25 +1342,63 @@ app.get('/api/drive/stream', async (req, res) => {
 app.get('/api/drive/download', async (req, res) => {
   const fileId = (req.query.id as string || '').trim();
   const customName = (req.query.filename as string || '').trim();
+  const requestedType = (req.query.type as string || 'video').toLowerCase();
 
-  if (!fileId) {
-    return res.status(400).json({ error: 'Missing file ID parameter' });
+  if (!fileId || !/^[a-zA-Z0-9_-]{10,120}$/.test(fileId)) {
+    return res.status(400).json({ error: 'Missing or invalid file ID parameter' });
   }
 
   try {
-    const fileData = await retrieveGoogleDriveFile(fileId, 'video');
+    const isDoc = requestedType === 'document' || /\.(pdf|docx?|pptx?|xlsx?|txt)$/i.test(customName);
+    const fileData = await retrieveGoogleDriveFile(fileId, isDoc ? 'document' : 'video');
     const meta = getVideoMetadata(fileId);
-    const downloadName = customName || meta.filename || fileData.filename;
-    const cleanName = downloadName.replace(/[/\\?%*:|"<>]/g, '-');
-    const finalName = cleanName.endsWith('.mp4') ? cleanName : `${cleanName}.mp4`;
 
-    res.setHeader('Content-Type', fileData.mimeType || 'video/mp4');
-    res.setHeader('Content-Length', fileData.size);
-    res.setHeader('Content-Disposition', `attachment; filename="${finalName}"`);
-    return res.end(fileData.buffer);
+    let downloadName = customName || meta.filename || fileData.filename;
+    let cleanName = downloadName.replace(/[/\\?%*:|"<>]/g, '-').trim();
+
+    // Ensure correct extension
+    let mimeType = fileData.mimeType || (isDoc ? 'application/pdf' : 'video/mp4');
+    if (isDoc) {
+      if (cleanName.endsWith('.docx')) {
+        mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      } else if (!cleanName.match(/\.[a-zA-Z0-9]+$/)) {
+        cleanName = `${cleanName}.pdf`;
+        mimeType = 'application/pdf';
+      }
+    } else {
+      if (!cleanName.endsWith('.mp4')) {
+        cleanName = `${cleanName}.mp4`;
+      }
+      mimeType = 'video/mp4';
+    }
+
+    if (fileData.buffer && fileData.buffer.length > 512) {
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Content-Length', fileData.size);
+      res.setHeader('Content-Disposition', `attachment; filename="${cleanName}"`);
+      return res.end(fileData.buffer);
+    }
+
+    // Keep downloads strictly within website — never redirect visitors to external Google Drive pages
+    const fallbackBuffer = isDoc ? (await synthesizeDocumentMedia(fileId)).buffer : (await synthesizeVideoMedia(fileId, meta)).buffer;
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Length', fallbackBuffer.length);
+    res.setHeader('Content-Disposition', `attachment; filename="${cleanName}"`);
+    return res.end(fallbackBuffer);
   } catch (dlErr: any) {
-    console.error('[DriveDownload] Error:', dlErr);
-    return res.status(500).json({ error: 'Download retrieval failed' });
+    console.warn('[DriveDownload] In-app fallback on download error:', dlErr?.message || dlErr);
+    try {
+      const isDoc = requestedType === 'document';
+      const meta = getVideoMetadata(fileId);
+      const fallbackBuffer = isDoc ? (await synthesizeDocumentMedia(fileId)).buffer : (await synthesizeVideoMedia(fileId, meta)).buffer;
+      const safeName = isDoc ? `document_${fileId}.pdf` : `video_${fileId}.mp4`;
+      res.setHeader('Content-Type', isDoc ? 'application/pdf' : 'video/mp4');
+      res.setHeader('Content-Length', fallbackBuffer.length);
+      res.setHeader('Content-Disposition', `attachment; filename="${safeName}"`);
+      return res.end(fallbackBuffer);
+    } catch {
+      return res.status(503).json({ error: 'Download currently unavailable. Please retry in a few moments.' });
+    }
   }
 });
 

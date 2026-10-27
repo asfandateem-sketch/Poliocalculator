@@ -235,13 +235,28 @@ export const UpdatesSection: React.FC<UpdatesSectionProps> = ({
     }
   };
 
-  const handleRefreshUpdates = () => {
+  const [lastSyncTime, setLastSyncTime] = useState<string>(() => {
+    return localStorage.getItem('polio_updates_last_synced_ts') || new Date().toLocaleTimeString();
+  });
+
+  const handleSyncUpdates = () => {
     setIsRefreshing(true);
     triggerHaptic('light');
     setTimeout(() => {
-      setUpdates(getAllCombinedUpdates());
+      const freshUpdates = getAllCombinedUpdates();
+      setUpdates(freshUpdates);
+      const nowStr = new Date().toLocaleTimeString();
+      setLastSyncTime(nowStr);
+      try {
+        localStorage.setItem('polio_updates_last_synced_ts', nowStr);
+      } catch {}
+      window.dispatchEvent(new CustomEvent('polio_updates_changed'));
       setIsRefreshing(false);
-      setActionToast(isUrdu ? 'تازہ ترین اعلانات لوڈ ہو گئے ہیں!' : 'Latest dispatches refreshed!');
+      setActionToast(
+        isUrdu
+          ? 'تمام فیلڈ اپڈیٹس اور مہماتی پیغامات کامیابی سے سنک ہو گئے ہیں!'
+          : 'All campaign updates and field dispatches synchronized successfully!'
+      );
       setTimeout(() => setActionToast(null), 3500);
     }, 450);
   };
@@ -323,16 +338,23 @@ export const UpdatesSection: React.FC<UpdatesSectionProps> = ({
                 <span>{isUrdu ? 'نیا اعلامیہ شامل کریں' : '+ New Update'}</span>
               </button>
 
-              {/* Refresh Updates Button */}
+              {/* Sync Updates Button */}
               <button
                 type="button"
-                onClick={handleRefreshUpdates}
+                onClick={handleSyncUpdates}
                 disabled={isRefreshing}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-300/80 cursor-pointer transition active:scale-95 touch-manipulation min-h-[38px]"
-                title={isUrdu ? 'اعلانات کی فہرست تازہ کریں' : 'Refresh bulletins list'}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-900 font-bold text-xs border border-teal-300 cursor-pointer transition active:scale-95 touch-manipulation min-h-[38px] shadow-xs"
+                title={isUrdu ? `اپڈیٹس سنک کریں (آخری سنک: ${lastSyncTime})` : `Sync all dispatches (Last synced: ${lastSyncTime})`}
               >
                 <RefreshCw className={`w-3.5 h-3.5 text-teal-700 ${isRefreshing ? 'animate-spin' : ''}`} />
-                <span>{isRefreshing ? (isUrdu ? 'تازہ کاری...' : 'Refreshing...') : (isUrdu ? 'تازہ کریں' : 'Refresh')}</span>
+                <span>
+                  {isRefreshing
+                    ? (isUrdu ? 'سنک ہو رہا ہے...' : 'Syncing...')
+                    : (isUrdu ? 'اپڈیٹس سنک کریں' : 'Sync Updates')}
+                </span>
+                <span className="hidden sm:inline-block text-[10px] text-teal-700 font-normal">
+                  ({lastSyncTime})
+                </span>
               </button>
             </div>
 

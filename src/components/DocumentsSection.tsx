@@ -256,12 +256,14 @@ export const DocumentsSection: React.FC<DocumentsSectionProps> = ({ targetDocId 
   const handleDownloadDoc = (doc: any) => {
     triggerHaptic('medium');
     const fileId = doc.driveFileId || doc.id?.replace(/^drive-sync-/, '');
-    const downloadUrl = doc.downloadUrl || (fileId ? `/api/drive/download?id=${fileId}&filename=${encodeURIComponent(doc.titleEn || doc.name || 'document.pdf')}` : doc.driveUrl);
+    const isDocx = (doc.originalFilename || doc.name || '').endsWith('.docx');
+    const defaultExt = isDocx ? '.docx' : '.pdf';
+    const downloadUrl = doc.downloadUrl || (fileId ? `/api/drive/download?id=${fileId}&type=document&filename=${encodeURIComponent(doc.originalFilename || doc.titleEn || doc.name || `document${defaultExt}`)}` : doc.driveUrl);
     if (!downloadUrl) return;
 
     const rawTitle = (doc.titleEn || doc.name || 'polio_document').trim();
     const cleanTitle = rawTitle.replace(/[/\\?%*:|"<>]/g, '-');
-    const filename = cleanTitle.includes('.') ? cleanTitle : `${cleanTitle}.pdf`;
+    const filename = cleanTitle.includes('.') ? cleanTitle : `${cleanTitle}${defaultExt}`;
 
     const link = document.createElement('a');
     link.href = downloadUrl;

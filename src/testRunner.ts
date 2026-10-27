@@ -22,7 +22,7 @@ import {
   calculateTeamRequirements,
   calculateMissedChildrenCoverage,
   calculateCombinedMissedChildren,
-} from './calculatorEngine.js';
+} from './calculatorEngine';
 
 export interface TestCaseResult {
   category: string;
