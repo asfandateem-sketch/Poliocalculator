@@ -116,3 +116,38 @@ export function getInitialDriveResources(): VideoItem[] {
   return CORE_VIDEO_ITEMS;
 }
 
+/**
+ * Verified Cloud Service Endpoint for cross-origin static GitHub Pages video streaming.
+ * Routes to the live Google Cloud Run service supporting HTTP 206 Range video playback.
+ */
+export const CLOUD_BACKEND_URL = 'https://ais-pre-s64z26kvyzkttp2ma5sayi-484408350629.asia-east1.run.app';
+
+export function getApiBaseUrl(): string {
+  if (typeof window === 'undefined') return '';
+  // When running on GitHub Pages (static hosting with no internal /api routing), route to cloud backend
+  if (window.location.hostname.includes('github.io')) {
+    return CLOUD_BACKEND_URL;
+  }
+  // When running directly on the deployed server or local dev with backend, use relative routes
+  return '';
+}
+
+export function getStreamUrl(fileId: string, fileType = 'video'): string {
+  if (!fileId) return '';
+  const base = getApiBaseUrl();
+  return `${base}/api/drive/stream?id=${encodeURIComponent(fileId)}&type=${encodeURIComponent(fileType)}`;
+}
+
+export function getDownloadUrl(fileId: string, filename = '', fileType = 'video'): string {
+  if (!fileId) return '';
+  const base = getApiBaseUrl();
+  return `${base}/api/drive/download?id=${encodeURIComponent(fileId)}&type=${encodeURIComponent(fileType)}&filename=${encodeURIComponent(filename)}`;
+}
+
+export function getThumbnailProxyUrl(fileId: string): string {
+  if (!fileId) return '';
+  const base = getApiBaseUrl();
+  return `${base}/api/drive/thumbnail?id=${encodeURIComponent(fileId)}`;
+}
+
+

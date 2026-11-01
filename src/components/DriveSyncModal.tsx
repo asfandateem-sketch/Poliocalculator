@@ -3,6 +3,7 @@ import { DriveSyncConfig } from '../types';
 import { MASTER_FOLDER_ID, MASTER_FOLDER_NAME } from '../data/coreVideos';
 import {
   X,
+  ArrowLeft,
   HardDrive,
   RefreshCw,
   Copy,
@@ -56,6 +57,20 @@ export const DriveSyncModal: React.FC<DriveSyncModalProps> = ({
   isSyncing,
   lastSyncedCount,
 }) => {
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const [method, setMethod] = useState<'apps_script' | 'drive_api'>(syncConfig.method || 'apps_script');
@@ -396,37 +411,56 @@ function createJsonResponse(data) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div
         className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col border border-slate-100 overflow-hidden"
         role="dialog"
         aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+        dir={isUrdu ? 'rtl' : 'ltr'}
       >
         {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-slate-100 bg-gradient-to-r from-teal-900 via-teal-800 to-emerald-900 text-white flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/10 shadow-inner">
-              <FolderSync className="w-6 h-6 text-teal-200" />
+        <div className="p-4 sm:p-5 border-b border-slate-100 bg-gradient-to-r from-teal-900 via-teal-800 to-emerald-900 text-white flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Back Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={isUrdu ? 'واپس جائیں' : 'Back'}
+              title={isUrdu ? 'واپس جائیں' : 'Back'}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition cursor-pointer active:scale-95 shrink-0"
+            >
+              <ArrowLeft className={`w-3.5 h-3.5 ${isUrdu ? 'rotate-180' : ''}`} />
+              <span>{isUrdu ? 'واپس' : 'Back'}</span>
+            </button>
+
+            <div className="w-10 h-10 rounded-2xl bg-white/10 hidden sm:flex items-center justify-center backdrop-blur-md border border-white/10 shadow-inner shrink-0">
+              <FolderSync className="w-5 h-5 text-teal-200" />
             </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-black tracking-tight flex items-center gap-2 truncate">
                 <span>{isUrdu ? 'کلاؤڈ ریپوزٹری سنک سیٹنگز' : 'Polio Tool Kit — Repository Sync'}</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/30 text-teal-100 border border-teal-400/30">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/30 text-teal-100 border border-teal-400/30 shrink-0">
                   Strict Scope
                 </span>
               </h2>
-              <p className="text-xs text-teal-100/90 font-medium">
+              <p className="text-[11px] text-teal-100/90 font-medium truncate">
                 {isUrdu
                   ? 'ماسٹر فولڈر "Polio Tool Kit" سے تمام ذیلی فولڈرز اور فائلز کا خودکار سنک'
                   : 'Recursive auto-sync strictly restricted to "Polio Tool Kit" master folder'}
               </p>
             </div>
           </div>
+          {/* Cross Button */}
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-teal-100 hover:text-white hover:bg-white/10 rounded-xl transition cursor-pointer"
-            aria-label="Close"
+            className="p-2 text-teal-100 hover:text-white hover:bg-white/10 rounded-xl transition cursor-pointer shrink-0"
+            aria-label={isUrdu ? 'بند کریں' : 'Close and return'}
+            title={isUrdu ? 'بند کریں' : 'Close and return'}
           >
             <X className="w-5 h-5" />
           </button>
@@ -698,9 +732,10 @@ function createJsonResponse(data) {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 rounded-xl border border-slate-200 transition cursor-pointer active:scale-95 shadow-xs"
           >
-            {isUrdu ? 'بند کریں' : 'Close'}
+            <ArrowLeft className={`w-3.5 h-3.5 ${isUrdu ? 'rotate-180' : ''}`} />
+            <span>{isUrdu ? 'واپس جائیں' : 'Back to App'}</span>
           </button>
 
           <div className="flex items-center gap-2">

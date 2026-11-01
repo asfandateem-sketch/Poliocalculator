@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
+  ArrowLeft,
   Plus,
   Edit3,
   Calendar,
@@ -49,6 +50,20 @@ export const AddUpdateModal: React.FC<AddUpdateModalProps> = ({
   editingUpdate,
   onSaved,
 }) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -166,18 +181,30 @@ export const AddUpdateModal: React.FC<AddUpdateModalProps> = ({
         dir={isUrdu ? 'rtl' : 'ltr'}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-800">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Back Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={isUrdu ? 'واپس جائیں' : 'Back'}
+              title={isUrdu ? 'واپس جائیں' : 'Back'}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition cursor-pointer active:scale-95 shrink-0"
+            >
+              <ArrowLeft className={`w-3.5 h-3.5 ${isUrdu ? 'rotate-180' : ''}`} />
+              <span>{isUrdu ? 'واپس' : 'Back'}</span>
+            </button>
+
+            <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-200 hidden sm:flex items-center justify-center text-teal-800 shrink-0">
               {editingUpdate ? <Edit3 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
             </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900">
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-lg font-black text-slate-900 truncate">
                 {editingUpdate
                   ? (isUrdu ? 'اعلامیہ میں ترمیم کریں' : 'Edit Campaign Dispatch')
                   : (isUrdu ? 'نیا مہماتی اعلامیہ شائع کریں' : 'Publish Campaign Dispatch')}
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-[11px] sm:text-xs text-slate-500 truncate">
                 {isUrdu
                   ? 'نیا فیلڈ شیڈول، مہماتی ہدایات یا ویڈیو لنک شامل کریں'
                   : 'Add verified campaign bulletins, directives, or video recordings'}
@@ -185,10 +212,13 @@ export const AddUpdateModal: React.FC<AddUpdateModalProps> = ({
             </div>
           </div>
 
+          {/* Cross Button */}
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer"
+            aria-label={isUrdu ? 'بند کریں' : 'Close and return'}
+            title={isUrdu ? 'بند کریں' : 'Close and return'}
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>

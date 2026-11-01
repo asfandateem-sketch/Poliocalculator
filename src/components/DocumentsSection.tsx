@@ -14,9 +14,11 @@ import {
   FolderSync,
   ExternalLink,
   Sparkles,
+  ShieldCheck,
+  ArrowLeft,
 } from 'lucide-react';
-import { MASTER_FOLDER_URL } from '../data/coreVideos';
 import { CustomDocumentViewer } from './CustomDocumentViewer';
+import { getDownloadUrl } from '../data/driveLiveConfig';
 
 interface DocumentItem {
   id: string;
@@ -258,7 +260,7 @@ export const DocumentsSection: React.FC<DocumentsSectionProps> = ({ targetDocId 
     const fileId = doc.driveFileId || doc.id?.replace(/^drive-sync-/, '');
     const isDocx = (doc.originalFilename || doc.name || '').endsWith('.docx');
     const defaultExt = isDocx ? '.docx' : '.pdf';
-    const downloadUrl = doc.downloadUrl || (fileId ? `/api/drive/download?id=${fileId}&type=document&filename=${encodeURIComponent(doc.originalFilename || doc.titleEn || doc.name || `document${defaultExt}`)}` : doc.driveUrl);
+    const downloadUrl = doc.downloadUrl || (fileId ? getDownloadUrl(fileId, doc.originalFilename || doc.titleEn || doc.name || `document${defaultExt}`, 'document') : doc.driveUrl);
     if (!downloadUrl) return;
 
     const rawTitle = (doc.titleEn || doc.name || 'polio_document').trim();
@@ -342,16 +344,10 @@ Generated from Polio Field Companion Toolkit
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <a
-              href={MASTER_FOLDER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200/80 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <HardDrive className="w-3.5 h-3.5 text-teal-700" />
-              <span>{isUrdu ? 'ڈرائیو فولڈر' : 'Open Drive'}</span>
-              <ExternalLink className="w-3 h-3 text-slate-400" />
-            </a>
+            <div className="text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-200/80 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-teal-700" />
+              <span>{isUrdu ? 'مستند محفوظ وسائل' : 'Verified Field Docs'}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -422,16 +418,6 @@ Generated from Polio Field Companion Toolkit
                       <span>{isUrdu ? 'ڈاؤنلوڈ' : 'Download'}</span>
                     </button>
                   </div>
-
-                  <a
-                    href={doc.driveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition cursor-pointer flex items-center gap-1 min-h-[32px]"
-                  >
-                    <span>{isUrdu ? 'ڈرائیو' : 'Drive'}</span>
-                    <ExternalLink className="w-3 h-3 text-slate-400" />
-                  </a>
                 </div>
               </div>
             ))}
@@ -512,23 +498,40 @@ Generated from Polio Field Companion Toolkit
           role="dialog"
           aria-modal="true"
           className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6"
+          onClick={closeDoc}
         >
-          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            {/* Modal Header */}
-            <div className="p-4 bg-teal-800 text-white flex items-center justify-between">
-              <div className="min-w-0 pr-3">
-                <span className="text-[11px] font-mono text-teal-200 font-bold uppercase tracking-wider">
-                  {selectedDoc.code} • {isUrdu ? selectedDoc.categoryUr : selectedDoc.categoryEn}
-                </span>
-                <h3 className={`text-sm sm:text-base font-bold break-words leading-snug ${isUrdu ? 'font-arabic' : ''}`}>
-                  {isUrdu ? selectedDoc.titleUr : selectedDoc.titleEn}
-                </h3>
+          <div
+            className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header: Both Back Button and Cross Button */}
+            <div className="p-3.5 sm:p-4 bg-teal-800 text-white flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0 pr-2">
+                <button
+                  type="button"
+                  onClick={closeDoc}
+                  aria-label={isUrdu ? 'واپس جائیں' : 'Go back'}
+                  title={isUrdu ? 'واپس جائیں' : 'Go back'}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-teal-900/70 hover:bg-teal-700 text-teal-100 font-bold text-xs border border-teal-700/60 transition cursor-pointer active:scale-95 shrink-0"
+                >
+                  <ArrowLeft className={`w-3.5 h-3.5 ${isUrdu ? 'rotate-180' : ''}`} />
+                  <span>{isUrdu ? 'واپس' : 'Back'}</span>
+                </button>
+                <div className="min-w-0">
+                  <span className="text-[10px] sm:text-[11px] font-mono text-teal-200 font-bold uppercase tracking-wider block">
+                    {selectedDoc.code} • {isUrdu ? selectedDoc.categoryUr : selectedDoc.categoryEn}
+                  </span>
+                  <h3 className={`text-xs sm:text-base font-bold truncate leading-snug ${isUrdu ? 'font-arabic' : ''}`}>
+                    {isUrdu ? selectedDoc.titleUr : selectedDoc.titleEn}
+                  </h3>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={closeDoc}
-                aria-label="Close"
-                className="p-1.5 rounded-lg text-teal-100 hover:text-white hover:bg-teal-700 cursor-pointer"
+                aria-label={isUrdu ? 'بند کریں اور واپس جائیں' : 'Close and go back'}
+                title={isUrdu ? 'بند کریں اور واپس جائیں' : 'Close and go back'}
+                className="p-1.5 rounded-lg text-teal-100 hover:text-white hover:bg-teal-700 cursor-pointer shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -603,8 +606,12 @@ Generated from Polio Field Companion Toolkit
           role="dialog"
           aria-modal="true"
           className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4"
+          onClick={() => setActiveDriveDoc(null)}
         >
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90vh] p-3 sm:p-4">
+          <div
+            className="bg-slate-900 border border-slate-800 w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90vh] p-3 sm:p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <CustomDocumentViewer
               document={activeDriveDoc}
               language={language}

@@ -35,6 +35,7 @@ import {
   RefreshCw,
   Edit3,
   Trash2,
+  X,
 } from 'lucide-react';
 
 interface UpdatesSectionProps {
@@ -449,6 +450,17 @@ export const UpdatesSection: React.FC<UpdatesSectionProps> = ({
                       <span>{isUrdu ? 'شیئر کریں' : 'Share Bulletin'}</span>
                     </>
                   )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleBackToList}
+                  aria-label={isUrdu ? 'بند کریں اور واپس جائیں' : 'Close and go back'}
+                  title={isUrdu ? 'بند کریں اور واپس جائیں' : 'Close and go back'}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer active:scale-95 transition shadow-2xs"
+                >
+                  <X className="w-3.5 h-3.5 text-slate-600" />
+                  <span>{isUrdu ? 'بند کریں' : 'Close'}</span>
                 </button>
               </div>
             </div>

@@ -16,6 +16,7 @@ import {
   ExternalLink,
   ArrowLeft,
 } from 'lucide-react';
+import { getStreamUrl, getDownloadUrl } from '../data/driveLiveConfig';
 
 interface CustomDocumentViewerProps {
   document: {
@@ -65,8 +66,8 @@ export const CustomDocumentViewer: React.FC<CustomDocumentViewerProps> = ({
     '';
 
   const docName = doc.name || doc.titleEn || (doc.code ? `${doc.code} - Operational Form` : 'Polio Document');
-  const streamSrc = doc.streamUrl || (fileId ? `/api/drive/stream?id=${fileId}&type=document` : '');
-  const downloadSrc = doc.downloadUrl || (fileId ? `/api/drive/download?id=${fileId}&type=document&filename=${encodeURIComponent(docName)}` : '');
+  const streamSrc = doc.streamUrl || (fileId ? getStreamUrl(fileId, 'document') : '');
+  const downloadSrc = doc.downloadUrl || (fileId ? getDownloadUrl(fileId, docName, 'document') : '');
 
   const [activeTab, setActiveTab] = useState<'stream' | 'sop'>('stream');
   const [zoomLevel, setZoomLevel] = useState<number>(100);

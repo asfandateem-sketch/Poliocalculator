@@ -15,14 +15,19 @@ const PORT = 3000;
 // Security Hardening: Anti-DDoS, Anti-SSRF, and HTTP Headers
 // -------------------------------------------------------------
 
-// Security HTTP headers
+// Security HTTP headers & Cross-Origin Resource Sharing (CORS)
 app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Range, Authorization');
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Range, Content-Length, Accept-Ranges');
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  // Protect against clickjacking while allowing iframe previews in development
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   next();
 });
 

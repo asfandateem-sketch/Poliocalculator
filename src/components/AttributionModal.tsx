@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLanguage } from '../LanguageContext';
 import { triggerHaptic } from '../haptics';
-import { X, Shield, Info, CheckCircle2, AlertTriangle, BookOpen } from 'lucide-react';
+import { X, ArrowLeft, Shield, Info, CheckCircle2, AlertTriangle, BookOpen } from 'lucide-react';
 
 interface AttributionModalProps {
   isOpen: boolean;
@@ -11,6 +11,20 @@ interface AttributionModalProps {
 export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen, onClose }) => {
   const { isUrdu } = useLanguage();
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -18,26 +32,44 @@ export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen, onCl
       role="dialog"
       aria-modal="true"
       className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
+      onClick={onClose}
     >
       <div
         className="liquid-glass-modal w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden border border-white/90 flex flex-col max-h-[90vh] liquid-shimmer"
         dir={isUrdu ? 'rtl' : 'ltr'}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 bg-gradient-to-r from-teal-800 via-teal-700 to-teal-800 text-white flex items-center justify-between border-b border-teal-600/30">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-teal-700/80 flex items-center justify-center flex-shrink-0">
+        <div className="p-3.5 sm:p-4 bg-gradient-to-r from-teal-800 via-teal-700 to-teal-800 text-white flex items-center justify-between gap-2 border-b border-teal-600/30">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Back Button */}
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                onClose();
+              }}
+              aria-label={isUrdu ? 'واپس جائیں' : 'Back'}
+              title={isUrdu ? 'واپس جائیں' : 'Back'}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-teal-900/60 hover:bg-teal-900 text-teal-100 font-bold text-xs border border-teal-700/60 transition cursor-pointer active:scale-95 shrink-0"
+            >
+              <ArrowLeft className={`w-3.5 h-3.5 ${isUrdu ? 'rotate-180' : ''}`} />
+              <span>{isUrdu ? 'واپس' : 'Back'}</span>
+            </button>
+
+            <div className="w-8 h-8 rounded-lg bg-teal-700/80 hidden sm:flex items-center justify-center flex-shrink-0">
               <Shield className="w-4 h-4 text-white" />
             </div>
-            <div>
-              <h3 className="text-sm sm:text-base font-bold leading-tight">
+            <div className="min-w-0">
+              <h3 className="text-xs sm:text-base font-bold leading-tight truncate">
                 {isUrdu ? 'پولیو فیلڈ ٹولز — معلومات و تفصیل' : 'Polio Field Tools — Operational Hub'}
               </h3>
-              <p className="text-[11px] text-teal-200">
+              <p className="text-[10px] sm:text-[11px] text-teal-200 truncate">
                 {isUrdu ? 'عملی فیلڈ اوزار اور رہنمائی' : 'Practical tools & resources for campaign workers'}
               </p>
             </div>
           </div>
+          {/* Cross Button */}
           <button
             type="button"
             onClick={() => {
@@ -45,7 +77,8 @@ export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen, onCl
               onClose();
             }}
             aria-label={isUrdu ? 'بند کریں' : 'Close'}
-            className="p-1.5 rounded-lg text-teal-100 hover:text-white hover:bg-teal-700 cursor-pointer"
+            title={isUrdu ? 'بند کریں' : 'Close'}
+            className="p-1.5 rounded-lg text-teal-100 hover:text-white hover:bg-teal-700 cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -115,16 +148,29 @@ export const AttributionModal: React.FC<AttributionModalProps> = ({ isOpen, onCl
         </div>
 
         {/* Footer */}
-        <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
+        <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={() => {
               triggerHaptic('light');
               onClose();
             }}
-            className="px-4 py-1.5 rounded-lg bg-teal-800 hover:bg-teal-700 text-white font-semibold text-xs cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold text-xs cursor-pointer active:scale-95"
           >
-            {isUrdu ? 'سمجھ آگیا (بند کریں)' : 'Understood (Close)'}
+            <ArrowLeft className={`w-3.5 h-3.5 ${isUrdu ? 'rotate-180' : ''}`} />
+            <span>{isUrdu ? 'واپس جائیں' : 'Back to App'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('light');
+              onClose();
+            }}
+            className="inline-flex items-center gap-1 px-4 py-1.5 rounded-lg bg-teal-800 hover:bg-teal-700 text-white font-semibold text-xs cursor-pointer active:scale-95"
+          >
+            <X className="w-3.5 h-3.5" />
+            <span>{isUrdu ? 'سمجھ آگیا (بند کریں)' : 'Understood (Close)'}</span>
           </button>
         </div>
       </div>

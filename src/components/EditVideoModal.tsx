@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { VideoItem, FolderDefinition } from '../types';
 import {
   X,
+  ArrowLeft,
   Sparkles,
   Save,
   Check,
@@ -31,6 +32,20 @@ export const EditVideoModal: React.FC<EditVideoModalProps> = ({
   isUrdu,
   onSave,
 }) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen || !video) return null;
 
   const [titleEn, setTitleEn] = useState(video.titleEn || '');
@@ -123,42 +138,61 @@ export const EditVideoModal: React.FC<EditVideoModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto animate-fade-in">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto animate-fade-in"
+      onClick={onClose}
+    >
       <div
         className="bg-white rounded-2xl sm:rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden my-6"
         onClick={(e) => e.stopPropagation()}
+        dir={isUrdu ? 'rtl' : 'ltr'}
       >
         {/* Header */}
-        <div className="p-4 sm:p-5 bg-gradient-to-r from-teal-800 via-teal-900 to-slate-900 text-white flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+        <div className="p-4 sm:p-5 bg-gradient-to-r from-teal-800 via-teal-900 to-slate-900 text-white flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Back Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={isUrdu ? 'واپس جائیں' : 'Back'}
+              title={isUrdu ? 'واپس جائیں' : 'Back'}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition cursor-pointer active:scale-95 shrink-0"
+            >
+              <ArrowLeft className={`w-3.5 h-3.5 ${isUrdu ? 'rotate-180' : ''}`} />
+              <span>{isUrdu ? 'واپس' : 'Back'}</span>
+            </button>
+
+            <div className="w-10 h-10 rounded-xl bg-white/10 hidden sm:flex items-center justify-center border border-white/20 shrink-0">
               <FileVideo className="w-5 h-5 text-teal-300" />
             </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-extrabold text-white leading-tight">
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-lg font-extrabold text-white leading-tight truncate">
                 {isUrdu ? 'ویڈیو تفصیلات میں ترمیم' : 'Edit Video Details'}
               </h3>
-              <p className="text-xs text-teal-200 font-mono">
+              <p className="text-[11px] text-teal-200 font-mono truncate">
                 ID: {video.driveFileId || video.id}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={handleAIEnhance}
               disabled={isEnhancing}
-              className="px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-extrabold flex items-center gap-1.5 shadow transition disabled:opacity-50 cursor-pointer"
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-extrabold flex items-center gap-1.5 shadow transition disabled:opacity-50 cursor-pointer"
               title="Generate clean title & description from filename using Gemini AI without inventing facts"
             >
               <Sparkles className={`w-3.5 h-3.5 ${isEnhancing ? 'animate-spin' : ''}`} />
-              <span>{isEnhancing ? (isUrdu ? 'اے آئی تیاری...' : 'AI Processing...') : (isUrdu ? 'اے آئی ریفائن' : 'AI Polish')}</span>
+              <span className="hidden sm:inline">{isEnhancing ? (isUrdu ? 'اے آئی تیاری...' : 'AI Processing...') : (isUrdu ? 'اے آئی ریفائن' : 'AI Polish')}</span>
             </button>
 
+            {/* Cross Button */}
             <button
               type="button"
               onClick={onClose}
+              aria-label={isUrdu ? 'بند کریں' : 'Close and return'}
+              title={isUrdu ? 'بند کریں' : 'Close and return'}
               className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
             >
               <X className="w-5 h-5" />

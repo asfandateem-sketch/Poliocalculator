@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { AlertCircle, RotateCcw } from 'lucide-react';
+import { AlertCircle, RotateCcw, FileText } from 'lucide-react';
 import { calculateVaccineWastageFromVials, VialWastageResult, BOPV_CONSTANTS } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
 import { useCalculationFeedback } from '../useCalculationFeedback';
+import { CalculationReceiptModal } from './CalculationReceiptModal';
 
 interface Props {
   compact?: boolean;
@@ -30,6 +31,7 @@ export const VaccineWastageCalculator: React.FC<Props> = React.memo(() => {
     wastagePercent: 5.0,
   }));
   const [error, setError] = useState<string>('');
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
 
   const computeResult = useCallback((vialsStr: string, vacStr: string, isExplicitSubmit = false) => {
     const trimmedVials = vialsStr.trim();
@@ -312,10 +314,80 @@ export const VaccineWastageCalculator: React.FC<Props> = React.memo(() => {
                   </span>
                 </div>
               </div>
+
+              {/* View Official Calculation Receipt / Slip Button */}
+              {result !== null && (
+                <button
+                  type="button"
+                  onClick={() => setIsReceiptOpen(true)}
+                  className="w-full mt-3 py-2 px-3 rounded-xl bg-teal-800/80 hover:bg-teal-700 text-teal-100 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-teal-600/50 cursor-pointer shadow-xs active:scale-95 touch-manipulation"
+                >
+                  <FileText className="w-3.5 h-3.5 text-teal-300" />
+                  <span>{isUrdu ? 'حساب کی تصدیقی پرچی / رسید دیکھیں' : 'View Wastage Reconciliation Slip & Receipt'}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Official Field Calculation Receipt Modal */}
+      {result !== null && (
+        <CalculationReceiptModal
+          isOpen={isReceiptOpen}
+          onClose={() => setIsReceiptOpen(false)}
+          isUrdu={isUrdu}
+          data={{
+            calculatorId: 'calc-3',
+            calculatorNumber: '03',
+            calculatorTitle: strings.title,
+            calculatorTitleUr: strings.title,
+            badge: strings.badge,
+            inputs: [
+              {
+                labelEn: 'Total bOPV Vials Issued',
+                labelUr: 'کل جاری کردہ وائلز',
+                value: `${result.vials.toLocaleString()} Vials (${result.totalDoses.toLocaleString()} doses)`,
+              },
+              {
+                labelEn: 'Children Vaccinated Recorded',
+                labelUr: 'ویکسین کیے گئے بچے',
+                value: `${result.vaccinated.toLocaleString()} Children`,
+              },
+            ],
+            results: [
+              {
+                labelEn: strings.wastedDosesLabel,
+                labelUr: strings.wastedDosesLabel,
+                value: `${result.wasted.toLocaleString()} Doses`,
+                isHighlight: true,
+              },
+              {
+                labelEn: 'Vaccine Wastage Rate',
+                labelUr: 'ویکسین کے ضیاع کی شرح',
+                value: `${result.wastagePercent}%`,
+                isHighlight: true,
+              },
+              {
+                labelEn: 'Field Wastage Benchmark Status',
+                labelUr: 'معیاری جانچ کی کیفیت',
+                value: result.wastagePercent <= 10
+                  ? (isUrdu ? 'بہترین کارکردگی (≤10%)' : 'OPTIMAL (≤10%)')
+                  : result.wastagePercent <= 15
+                  ? (isUrdu ? 'قابلِ قبول حد (10-15%)' : 'ACCEPTABLE (10-15%)')
+                  : (isUrdu ? 'انتباہ — زائد ضیاع (>15%)' : 'HIGH WASTAGE ALERT (>15%)'),
+              },
+              {
+                labelEn: 'Total Delivered Doses (Utilized)',
+                labelUr: 'کل پلائی گئی خوراکیں',
+                value: `${result.vaccinated.toLocaleString()} Doses (${(result.vaccinated * 2).toLocaleString()} drops)`,
+              },
+            ],
+            notesEn: 'National standard: Wastage Rate % = ((Total Doses Issued - Children Vaccinated) / Total Doses Issued) * 100. Target threshold ≤ 10%.',
+            notesUr: 'قومی معیار: ضیاع کی شرح = (کل خوراکیں - ویکسینیٹڈ بچے) تقسیم کل خوراکیں ضرب ۱۰۰۔ ہدف ۱۰ فیصد سے کم۔',
+          }}
+        />
+      )}
     </div>
   );
 });

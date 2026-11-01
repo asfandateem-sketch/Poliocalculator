@@ -17,6 +17,8 @@ import {
   getEffectiveDriveSyncConfig,
   saveEffectiveDriveSyncConfig,
   DRIVE_LAST_FETCH_TIMESTAMP_KEY,
+  getDownloadUrl,
+  getThumbnailProxyUrl,
 } from '../data/driveLiveConfig';
 import {
   Play,
@@ -76,9 +78,6 @@ export function extractDriveId(input: string): string | null {
 }
 
 export function resolveThumbnailUrl(video: VideoItem): string | null {
-  if (video.thumbnailUrl && video.thumbnailUrl.trim() && !video.thumbnailUrl.includes('drive.google.com/thumbnail')) {
-    return video.thumbnailUrl.trim();
-  }
   const fileId =
     video.driveFileId ||
     video.id?.replace(/^drive-sync-/, '') ||
@@ -86,7 +85,10 @@ export function resolveThumbnailUrl(video: VideoItem): string | null {
     video.driveUrl?.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
 
   if (fileId) {
-    return `/api/drive/thumbnail?id=${fileId}`;
+    return `https://lh3.googleusercontent.com/d/${fileId}=w640`;
+  }
+  if (video.thumbnailUrl && video.thumbnailUrl.trim() && !video.thumbnailUrl.includes('images.unsplash.com')) {
+    return video.thumbnailUrl.trim();
   }
   if (video.thumbnailLink && video.thumbnailLink.trim()) {
     return video.thumbnailLink.trim();
@@ -98,76 +100,120 @@ export const VideoThumbnail: React.FC<{
   video: VideoItem;
   className?: string;
 }> = ({ video, className = 'w-full h-full' }) => {
+  const fileId =
+    video.driveFileId ||
+    video.id?.replace(/^drive-sync-/, '') ||
+    video.embedUrl?.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1] ||
+    video.driveUrl?.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+
   const resolved = useMemo(() => resolveThumbnailUrl(video), [video]);
   const [currentSrc, setCurrentSrc] = useState<string | null>(resolved);
-  const [loadFailed, setLoadFailed] = useState(false);
+  const [failStage, setFailStage] = useState<number>(0);
 
   useEffect(() => {
     setCurrentSrc(resolveThumbnailUrl(video));
-    setLoadFailed(false);
+    setFailStage(0);
   }, [video]);
 
   const handleImgError = () => {
-    if (video.driveFileId && currentSrc?.includes('drive.google.com/thumbnail')) {
-      setCurrentSrc(`https://lh3.googleusercontent.com/d/${video.driveFileId}=w640`);
-      return;
+    if (fileId) {
+      if (failStage === 0) {
+        setFailStage(1);
+        setCurrentSrc(`https://drive.google.com/thumbnail?id=${fileId}&sz=w640`);
+        return;
+      }
+      if (failStage === 1) {
+        setFailStage(2);
+        setCurrentSrc(getThumbnailProxyUrl(fileId));
+        return;
+      }
     }
-    setLoadFailed(true);
+    setFailStage(3);
   };
 
-  if (!currentSrc || loadFailed) {
-    if (video.fileType === 'document') {
-      const ext = (video.extension || 'PDF').toUpperCase();
+  if (!currentSrc || failStage >= 3) {
+    const isDoc = video.fileType === 'document';
+    const isReligious =
+      video.folderId === 'religious_leaders_videos' ||
+      (video.category || '').toLowerCase().includes('religio');
+    const speaker = video.speakerEn || video.speakerUr || video.name;
+    const designation = video.designationEn || video.designationUr || '';
+    const title = video.titleEn || video.titleUr || video.name;
+
+    if (isDoc) {
+      const ext = (video.extension || video.originalFilename?.split('.').pop() || 'PDF').toUpperCase();
       return (
-        <div className={`relative flex items-center justify-center bg-gradient-to-br from-slate-900 via-sky-950 to-slate-900 ${className}`}>
-          <div className="absolute inset-0 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
-          <div className="flex flex-col items-center justify-center p-3 text-center z-10 space-y-1.5">
-            <div className="w-12 h-12 rounded-2xl bg-sky-500/25 border border-sky-400/40 flex items-center justify-center text-sky-300 font-extrabold text-xs shadow-inner">
-              <FileText className="w-6 h-6 text-sky-300" />
-            </div>
+        <div className={`relative flex flex-col justify-between p-4 bg-gradient-to-br from-slate-950 via-sky-950 to-slate-900 border border-sky-800/40 select-none ${className}`}>
+          <div className="absolute inset-0 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:16px_16px] opacity-15" />
+          <div className="flex items-center justify-between z-10">
             <span className="px-2 py-0.5 rounded-md bg-sky-400/20 text-sky-200 border border-sky-400/30 text-[10px] font-mono font-bold tracking-wider">
               {ext}
             </span>
+            <span className="text-[10px] font-medium text-sky-300/80">{video.fileSize || 'Official SOP'}</span>
           </div>
-        </div>
-      );
-    }
-
-    if (video.fileType === 'image') {
-      return (
-        <div className={`relative flex items-center justify-center bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 ${className}`}>
-          <div className="flex flex-col items-center justify-center p-3 text-center z-10 space-y-1">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/25 border border-emerald-400/40 flex items-center justify-center text-emerald-300 font-extrabold text-xs shadow-inner">
-              <ImageIcon className="w-6 h-6 text-emerald-300" />
+          <div className="z-10 my-auto text-center px-1">
+            <div className="w-10 h-10 mx-auto rounded-xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-300 mb-2 shadow-inner">
+              <FileText className="w-5 h-5 text-sky-300" />
             </div>
-            <span className="px-2 py-0.5 rounded-md bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 text-[10px] font-mono font-bold">
-              IMG
-            </span>
+            <p className="text-xs font-bold text-slate-100 line-clamp-2 leading-snug">{title}</p>
+          </div>
+          <div className="flex items-center justify-between z-10 text-[10px] text-sky-300/70 pt-1 border-t border-sky-900/40">
+            <span className="truncate max-w-[120px]">{speaker}</span>
+            <span>Pakistan PEI</span>
           </div>
         </div>
       );
     }
-
-    const initials = (video.speakerEn || 'PT')
-      .replace(/Dr\.|Prof\.|Doctor|Professor/gi, '')
-      .trim()
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((w) => w[0])
-      .join('')
-      .toUpperCase() || 'PT';
 
     return (
-      <div className={`relative flex items-center justify-center bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 ${className}`}>
-        <div className="absolute inset-0 bg-[radial-gradient(#14b8a6_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
-        <div className="flex flex-col items-center justify-center p-3 text-center z-10 space-y-1">
-          <div className="w-12 h-12 rounded-2xl bg-teal-500/25 border border-teal-400/40 flex items-center justify-center text-teal-300 font-extrabold text-sm shadow-inner">
-            {initials}
+      <div
+        className={`relative flex flex-col justify-between p-3.5 bg-gradient-to-br ${
+          isReligious
+            ? 'from-slate-950 via-amber-950/70 to-slate-900 border-amber-900/40'
+            : 'from-slate-950 via-teal-950/70 to-slate-900 border-teal-900/40'
+        } border select-none group ${className}`}
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(#14b8a6_1px,transparent_1px)] [background-size:16px_16px] opacity-15" />
+        
+        {/* Top bar with category & duration */}
+        <div className="flex items-center justify-between z-10 text-[10px]">
+          <span
+            className={`px-2 py-0.5 rounded-md font-bold border ${
+              isReligious
+                ? 'bg-amber-500/20 text-amber-200 border-amber-500/30'
+                : 'bg-teal-500/20 text-teal-200 border-teal-500/30'
+            }`}
+          >
+            {isReligious ? 'Religious Leader' : 'Medical Expert'}
+          </span>
+          <span className="px-1.5 py-0.5 rounded bg-black/60 text-slate-300 font-mono text-[10px]">
+            {video.duration || 'Video'}
+          </span>
+        </div>
+
+        {/* Center play icon badge */}
+        <div className="z-10 my-auto text-center px-1">
+          <div
+            className={`w-11 h-11 mx-auto rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 mb-2 ${
+              isReligious
+                ? 'bg-amber-500/25 border border-amber-400/40 text-amber-300'
+                : 'bg-teal-500/25 border border-teal-400/40 text-teal-300'
+            }`}
+          >
+            <Play className="w-5 h-5 ml-0.5 fill-current" />
           </div>
-          <p className="text-[11px] font-bold text-slate-200 line-clamp-1 max-w-[170px]">
-            {video.speakerEn}
-          </p>
+          <p className="text-xs font-bold text-slate-100 line-clamp-1 leading-snug">{speaker}</p>
+          {designation && (
+            <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5 max-w-[200px] mx-auto">
+              {designation}
+            </p>
+          )}
+        </div>
+
+        {/* Bottom bar */}
+        <div className="flex items-center justify-between z-10 text-[10px] text-slate-400 pt-1.5 border-t border-slate-800/60">
+          <span className="truncate max-w-[140px] text-slate-300 font-medium">{title}</span>
+          <span className="text-[9px] text-emerald-400/90 font-bold">Verified</span>
         </div>
       </div>
     );
@@ -176,7 +222,7 @@ export const VideoThumbnail: React.FC<{
   return (
     <img
       src={currentSrc}
-      alt={video.titleEn}
+      alt={video.titleEn || video.name}
       referrerPolicy="no-referrer"
       onError={handleImgError}
       className={`object-cover ${className}`}
@@ -459,6 +505,17 @@ export const VideosSection: React.FC = () => {
   const [activeFolderId, setActiveFolderId] = useState<FolderId | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
+
+  // Lock body scroll on mobile when video modal is open
+  useEffect(() => {
+    if (activeVideo) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [activeVideo]);
   const [editingVideo, setEditingVideo] = useState<VideoItem | null>(null);
   const [copiedVideoId, setCopiedVideoId] = useState<string | null>(null);
   const [isAddVideoModalOpen, setIsAddVideoModalOpen] = useState(false);
@@ -715,7 +772,7 @@ export const VideosSection: React.FC = () => {
     
     // Direct download proxy through server or official Google Drive export
     const directDownloadUrl = item.downloadUrl ||
-      (fileId ? `/api/drive/download?id=${fileId}&type=${typeParam}&filename=${encodeURIComponent(item.originalFilename || item.titleEn || item.name || 'polio_resource')}` : item.driveUrl || item.viewUrl);
+      (fileId ? getDownloadUrl(fileId, item.originalFilename || item.titleEn || item.name || 'polio_resource', typeParam) : item.driveUrl || item.viewUrl);
 
     if (!directDownloadUrl) return;
 
@@ -2053,11 +2110,11 @@ export const VideosSection: React.FC = () => {
           id="custom-video-player-modal"
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fade-in"
+          className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md overflow-y-auto flex flex-col sm:items-center sm:justify-center p-0 sm:p-4 animate-fade-in"
           onClick={() => setActiveVideo(null)}
         >
           <div
-            className="bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[94vh] p-3 sm:p-5"
+            className="bg-slate-900 border-0 sm:border sm:border-slate-800 w-full max-w-4xl rounded-none sm:rounded-3xl shadow-2xl flex flex-col min-h-screen sm:min-h-0 sm:max-h-[94vh] p-2 sm:p-5 overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <CustomVideoPlayer

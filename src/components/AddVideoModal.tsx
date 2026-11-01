@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { VideoItem, FolderDefinition, FolderId } from '../types';
 import { extractDriveId } from './VideosSection';
 import {
   X,
+  ArrowLeft,
   Plus,
   Sparkles,
   Check,
@@ -31,6 +32,20 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
   isUrdu,
   onAddVideo,
 }) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const [mode, setMode] = useState<'single' | 'batch'>('single');
@@ -238,19 +253,31 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 sm:p-5 bg-gradient-to-r from-teal-900 via-slate-900 to-teal-950 text-white flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-300">
+        <div className="p-4 sm:p-5 bg-gradient-to-r from-teal-900 via-slate-900 to-teal-950 text-white flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Back Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={isUrdu ? 'واپس جائیں' : 'Back'}
+              title={isUrdu ? 'واپس جائیں' : 'Back'}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition cursor-pointer active:scale-95 shrink-0"
+            >
+              <ArrowLeft className={`w-3.5 h-3.5 ${isUrdu ? 'rotate-180' : ''}`} />
+              <span>{isUrdu ? 'واپس' : 'Back'}</span>
+            </button>
+
+            <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-400/30 hidden sm:flex items-center justify-center text-teal-300 shrink-0">
               <Video className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-lg font-extrabold text-white flex items-center gap-2 truncate">
                 <span>{isUrdu ? 'نئی ویڈیو شامل کریں' : 'Add Campaign Video'}</span>
-                <span className="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] font-mono border border-teal-400/30">
+                <span className="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] font-mono border border-teal-400/30 shrink-0">
                   AI Ready
                 </span>
               </h3>
-              <p className="text-xs text-slate-300 mt-0.5">
+              <p className="text-[11px] text-slate-300 mt-0.5 truncate">
                 {isUrdu
                   ? 'ویڈیو لنک درج کریں، AI خودکار عنوان و تفصیل تیار کرے گا'
                   : 'Paste video link — AI automatically writes titles, speakers, and clinical summaries'}
@@ -258,10 +285,13 @@ export const AddVideoModal: React.FC<AddVideoModalProps> = ({
             </div>
           </div>
 
+          {/* Cross Button */}
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+            aria-label={isUrdu ? 'بند کریں' : 'Close and return'}
+            title={isUrdu ? 'بند کریں' : 'Close and return'}
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>

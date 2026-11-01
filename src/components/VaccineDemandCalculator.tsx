@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { Package, RotateCcw, Droplets } from 'lucide-react';
+import { Package, RotateCcw, Droplets, FileText } from 'lucide-react';
 import { calculateVaccineDemand } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
 import { useCalculationFeedback } from '../useCalculationFeedback';
+import { CalculationReceiptModal } from './CalculationReceiptModal';
 
 interface Props {
   compact?: boolean;
@@ -22,6 +23,7 @@ export const VaccineDemandCalculator: React.FC<Props> = React.memo(() => {
   const [totalDrops, setTotalDrops] = useState<number | null>(11000);
   const [coveredChildren, setCoveredChildren] = useState<number | null>(5000);
   const [error, setError] = useState<string>('');
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
 
   const DOSES_PER_VIAL = 20;
 
@@ -280,10 +282,76 @@ export const VaccineDemandCalculator: React.FC<Props> = React.memo(() => {
                   </span>
                 </div>
               </div>
+
+              {/* View Official Calculation Receipt / Slip Button */}
+              <button
+                type="button"
+                onClick={() => setIsReceiptOpen(true)}
+                className="w-full mt-3 py-2 px-3 rounded-xl bg-teal-800/80 hover:bg-teal-700 text-teal-100 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-teal-600/50 cursor-pointer shadow-xs active:scale-95 touch-manipulation"
+              >
+                <FileText className="w-3.5 h-3.5 text-teal-300" />
+                <span>{isUrdu ? 'حساب کی تصدیقی پرچی / رسید دیکھیں' : 'View Calculation Receipt & Slip'}</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Official Field Calculation Receipt Modal */}
+      <CalculationReceiptModal
+        isOpen={isReceiptOpen}
+        onClose={() => setIsReceiptOpen(false)}
+        isUrdu={isUrdu}
+        data={{
+          calculatorId: 'calc-2',
+          calculatorNumber: '02',
+          calculatorTitle: strings.title,
+          calculatorTitleUr: strings.title,
+          badge: strings.badge,
+          inputs: [
+            {
+              labelEn: strings.targetLabel,
+              labelUr: strings.targetLabel,
+              value: `${Number(targetChildren || 0).toLocaleString()} Children`,
+            },
+            {
+              labelEn: strings.bufferLabel,
+              labelUr: strings.bufferLabel,
+              value: `${bufferPct}% Buffer`,
+            },
+            {
+              labelEn: 'Vial Standard Size',
+              labelUr: 'وائل کا معیاری سائز',
+              value: '20 Doses / 40 Drops per Vial',
+            },
+          ],
+          results: [
+            {
+              labelEn: strings.vialsResultLabel,
+              labelUr: strings.vialsResultLabel,
+              value: `${vialsRequired !== null ? vialsRequired.toLocaleString() : '—'} Vials`,
+              isHighlight: true,
+            },
+            {
+              labelEn: 'Buffer Allowance Vials',
+              labelUr: 'حفاظتی بفر وائلز',
+              value: `+${bufferVials !== null ? bufferVials : 0} Vials`,
+            },
+            {
+              labelEn: 'Total Net Doses Required',
+              labelUr: 'کل درکار خوراکیں',
+              value: `${totalDoses !== null ? totalDoses.toLocaleString() : '—'} Doses`,
+            },
+            {
+              labelEn: strings.totalDropsResultLabel,
+              labelUr: strings.totalDropsResultLabel,
+              value: `${totalDrops !== null ? totalDrops.toLocaleString() : '—'} Drops`,
+            },
+          ],
+          notesEn: 'Formula: CEIL(Target × (1 + Buffer/100) ÷ 20). Requisition verified under WHO/EPI national logistics protocol.',
+          notesUr: 'فارمولا: کل بچے بمعہ بفر تقسیم ۲۰ خوراکیں۔ لاجسٹکس پروٹوکول کے مطابق تصدیق شدہ۔',
+        }}
+      />
     </div>
   );
 });

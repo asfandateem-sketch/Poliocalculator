@@ -152,6 +152,258 @@ export const TRUSTED_OFFICIAL_SOURCES: OfficialSourcePage[] = [
  */
 export const POLIO_UPDATES: PolioUpdate[] = [
   {
+    id: '2026-10-26-peshawar-fipv-campaign',
+    slug: 'ongoing-fipv-campaign-peshawar-high-risk-union-councils',
+    title: 'Ongoing fIPV Campaign Active Across Peshawar & High-Risk Union Councils',
+    titleUr: 'پشاور اور خیبر پختونخوا کے حساس علاقوں میں فریکشنل آئی پی وی (fIPV) مہم جاری',
+    date: '2026-10-26',
+    displayDate: '26 Oct 2026',
+    displayDateUr: '۲۶ اکتوبر ۲۰۲۶',
+    category: 'Campaigns',
+    categoryUr: 'پولیو مہمات',
+    location: 'Peshawar & High-Risk KP UCs',
+    locationUr: 'پشاور اور کے پی کی حساس یونین کونسلز',
+    featured: true,
+    summary:
+      'Targeted Fractional Inactivated Poliovirus Vaccine (fIPV) drive currently underway across priority UCs of Peshawar, administering 0.1 mL intradermal doses alongside bOPV drops to children aged 4 to 59 months.',
+    summaryUr:
+      'پشاور کی ترجیحی یونین کونسلوں میں ۴ سے ۵۹ ماہ کے بچوں کے لیے 0.1 ملی لیٹر فریکشنل آئی پی وی (انٹراڈرمل انجیکشن) اور ۲ قطرے بی او پی وی کی خصوصی حفاظتی مہم جاری ہے۔',
+    content: `
+**PESHAWAR (Provincial EOC Field Dispatch):** The Emergency Operations Centre (EOC) Khyber Pakhtunkhwa has mobilized dedicated clinical teams for the ongoing Fractional Inactivated Poliovirus Vaccine (fIPV) campaign across high-risk Union Councils in Peshawar and surrounding peri-urban zones.
+
+### Key Operational Highlights:
+- **Target Age Group:** Children aged 4 months to 59 months (under five years).
+- **Dual Immunity Protocol:** 1 fractional dose (0.1 mL intradermal) of Inactivated Poliovirus Vaccine (fIPV) administered via auto-disable / jet injectors, coupled with 2 oral drops of bivalent Oral Poliovirus Vaccine (bOPV).
+- **Core Priority Union Councils in Peshawar:** Shaheen Muslim Town, Larama, Wadpagga, Hayatabad, Tehkal, Badaber, Nahaqi, Chamkani, and Regi.
+- **Delivery Strategy:** Fixed centers at Basic Health Units (BHUs), Rural Health Centers (RHCs), and dedicated mobile outreach teams in community guest houses (Hujras) and schools.
+- **Cold-Chain Protocol:** Mandatory +2°C to +8°C carrier storage with conditioned ice packs. Strictly no freezing of fIPV vials (mandatory shake-test inspection before delivery).
+- **Finger Marking:** Dual recording protocol on tally sheets and indelible ink marking on left index finger.
+    `.trim(),
+    contentUr: `
+**پشاور (ای او سی خیبر پختونخوا باضابطہ فیلڈ اعلامیہ):** ایمرجنسی آپریشنز سینٹر (EOC) کے پی کے زیر اہتمام پشاور کی حساس ترین یونین کونسلوں میں فریکشنل ان ایکٹیویٹڈ پولیو ویکسین (fIPV) کی خصوصی فیلڈ مہم جاری ہے۔
+
+### اہم آپریشنل نکات:
+- **ہدف عمر:** ۴ ماہ سے ۵۹ ماہ (۵ سال سے کم) کے تمام بچے۔
+- **طریقہ کار:** 0.1 ملی لیٹر فریکشنل آئی پی وی انٹراڈرمل ٹیکہ اور ساتھ ۲ قطرے پولیو ویکسین (bOPV)۔
+- **پشاور کی ترجیحی یوسیز:** شاہین مسلم ٹاؤن، لژمہ، وڈپگہ، حیات آباد، تہکال، بڈھ بیر، نا بقی، چمکنی اور ریگی۔
+- **فیلڈ حکمت عملی:** بنیادی مراکز صحت (BHUs)، دیہی مراکز صحت (RHCs) اور حجروں/اسکولوں میں قائم فکسڈ و آؤٹ ریچ ٹیمیں۔
+- **کولڈ چین:** مثبت ۲ سے ۸ ڈگری سینٹی گریڈ؛ ویکسین کو ہرگز منجمد نہ ہونے دیں (شیک ٹیسٹ لازمی)۔
+- **نشان دہی:** ٹیلی شیٹ پر اندراج اور بائیں ہاتھ کی انگلی پر انمٹ سیاہی کا نشان۔
+    `.trim(),
+    sourceName: 'EOC Pakhtunkhwa',
+    sourceUrl: 'https://www.facebook.com/eocpakhtunkhwa',
+    facebookPostUrl: 'https://www.facebook.com/eocpakhtunkhwa',
+    factBox: {
+      campaignName: 'Peshawar fIPV & bOPV Integrated Drive',
+      dates: '24–30 Oct 2026',
+      location: 'Peshawar & High-Risk KP UCs',
+      targetChildren: '380,000+ Eligible Children (4–59m)',
+      frontlineWorkers: '1,450+ Trained Vaccinators & LHWs',
+      districtsCovered: 'Peshawar, Khyber, Kohat borders',
+      supervision: 'Provincial EOC KP & DHO Peshawar',
+      keyDirectives: [
+        'Administer exactly 0.1 mL fIPV intradermally on upper right arm',
+        'Provide 2 drops bOPV simultaneously to boost gut and humoral immunity',
+        'Confirm child age is between 4 and 59 months on EPI immunization cards',
+        'Maintain unbroken cold chain at +2°C to +8°C in conditioned vaccine carriers',
+      ],
+    },
+    keyFacts: [
+      {
+        labelEn: 'Target Age',
+        labelUr: 'ہدف عمر',
+        valueEn: '4 to 59 Months',
+        valueUr: '۴ تا ۵۹ ماہ',
+      },
+      {
+        labelEn: 'Dosage Form',
+        labelUr: 'خوراک کی قسم',
+        valueEn: '0.1 mL fIPV (Intradermal) + 2 Drops bOPV',
+        valueUr: '0.1 ملی لیٹر fIPV + ۲ قطرے bOPV',
+      },
+      {
+        labelEn: 'Target UCs',
+        labelUr: 'حساس یونین کونسلز',
+        valueEn: 'Peshawar High-Risk Corridors',
+        valueUr: 'پشاور کے ترجیحی بلاکس',
+      },
+      {
+        labelEn: 'Cold Chain',
+        labelUr: 'درجہ حرارت',
+        valueEn: '+2°C to +8°C (Do Not Freeze)',
+        valueUr: '+2 سے +8 سینٹی گریڈ (منجمد نہ کریں)',
+      },
+    ],
+    tags: ['fIPV Campaign', 'Peshawar', 'EOC KP', 'Intradermal', 'bOPV', 'Ongoing'],
+    tagsUr: ['ایف آئی پی وی', 'پشاور', 'ای او سی', 'حفاظتی ٹیکہ جات'],
+    relatedCalculatorIds: ['calc-1', 'calc-2', 'calc-4', 'calc-7'],
+    relatedPlatformCategory: 'calculators',
+  },
+  {
+    id: '2026-10-25-upcoming-national-opv-campaign-dates',
+    slug: 'neoc-upcoming-national-opv-polio-campaign-dates-schedule',
+    title: 'NEOC Alert: Upcoming National & Sub-National OPV Campaign Dates Announced',
+    titleUr: 'نیشنل ای او سی شیڈول: آئندہ قومی اور ذیلی قومی او پی وی (OPV) مہمات کی تاریخوں کا اعلان',
+    date: '2026-10-25',
+    displayDate: '25 Oct 2026',
+    displayDateUr: '۲۵ اکتوبر ۲۰۲۶',
+    category: 'Announcements',
+    categoryUr: 'اعلانات',
+    location: 'Pakistan (Nationwide)',
+    locationUr: 'پاکستان (ملک بھر میں)',
+    featured: true,
+    summary:
+      'National Emergency Operations Centre (NEOC) finalizes official schedule for upcoming nationwide and sub-national OPV campaigns targeting 45.4M children across all four provinces, GB, and AJK.',
+    summaryUr:
+      'نیشنل ایمرجنسی آپریشنز سینٹر (NEOC) نے ملک بھر کے ۴ کروڑ ۵۴ لاکھ بچوں کے لیے آئندہ قومی اور ذیلی قومی پولیو مہمات کے سرکاری شیڈول کی توثیق کر دی۔',
+    content: `
+**ISLAMABAD (National EOC Official Communiqué):** The National Task Force for Polio Eradication and the National Emergency Operations Centre (NEOC) have finalized dates for upcoming immunization rounds to halt wild poliovirus transmission during the critical winter low-transmission season.
+
+### Confirmed Upcoming Campaign Calendar:
+1. **Nationwide NID Round 1:**
+   - **Dates:** 28 October – 03 November 2026 (5 days campaign + 2 days catch-up sweep).
+   - **Coverage:** All 4 provinces (Punjab, Sindh, Khyber Pakhtunkhwa, Balochistan), Azad Jammu & Kashmir, and Gilgit-Baltistan.
+   - **Target:** 45.4 Million children under 5 years of age.
+   - **Workforce:** 400,000+ frontline health workers, Sehat Muhafiz mobile teams, and transit vaccinators.
+
+2. **High-Risk Sub-National Immunization Days (SNID):**
+   - **Dates:** 25 November – 01 December 2026.
+   - **Focus:** 115 designated high-risk districts, core viral reservoirs (historic corridors), and mobile/migratory settlements along transit routes.
+
+3. **Winter Consolidation National Round (NID Round 2):**
+   - **Dates:** 16 – 22 December 2026.
+   - **Strategic Goal:** End-of-year consolidation to ensure zero unimmunized pockets before the peak seasonal surge.
+
+### Frontline Directives for Supervisors & Field Staff:
+- Complete pre-campaign house counting and microplan verification 7 days before campaign day 1.
+- Ensure 100% attendance at daily evening review meetings chaired by Assistant Commissioners and DHOs.
+- Transit teams must maintain round-the-clock coverage at railway stations, bus terminals, toll plazas, and border crossing points.
+    `.trim(),
+    contentUr: `
+**اسلام آباد (قومی اعلامیہ برائے انسداد پولیو):** نیشنل ایمرجنسی آپریشنز سینٹر (NEOC) نے وائرس کے پھیلاؤ کو روکنے کے لیے سردیوں کے اہم سیزن میں آئندہ ملک گیر پولیو مہمات کی حتمی تاریخیں جاری کر دی ہیں۔
+
+### باضابطہ مہماتی شیڈول:
+۱. **پہلا ملک گیر قومی راؤنڈ (NID):**
+- **تاریخیں:** ۲۸ اکتوبر تا ۰۳ نومبر ۲۰۲۶ (۵ دن مہم + ۲ دن کیچ اپ)۔
+- **دائرہ کار:** چاروں صوبے (کے پی، پنجاب، سندھ، بلوچستان) سمیت گلگت بلتستان اور آزاد کشمیر۔
+- **ہدف:** ۴ کروڑ ۵۴ لاکھ بچے (عمر ۵ سال سے کم)۔
+- **ورک فورس:** ۴ لاکھ سے زائد فرنٹ لائن ورکرز اور ٹرانزٹ ٹیمیں۔
+
+۲. **سب نیشنل مہم (SNID - ہائی رسک اضلاع):**
+- **تاریخیں:** ۲۵ نومبر تا ۰۱ دسمبر ۲۰۲۶۔
+- **توجہ:** ۱۱۵ حساس ترین اضلاع اور نقل مکانی کرنے والی آبادیاں۔
+
+۳. **سال کے اختتام کا فیصلہ کن راؤنڈ (NID 2):**
+- **تاریخیں:** ۱۶ تا ۲۲ دسمبر ۲۰۲۶۔
+- **مقصد:** سال ۲۰۲۶ کے اختتام پر پولیو وائرس کے خاتمے کو حتمی بنانا۔
+
+### فیلڈ ورکرز کے لیے لازمی ہدایات:
+- مہم سے ۷ دن قبل گھروں کی گنتی اور مائیکرو پلانز کی باضابطہ تصدیق۔
+- اسسٹنٹ کمشنر اور ڈی ایچ او کی زیر صدارت شام کے جائزہ اجلاس میں سو فیصد شرکت۔
+- ٹرانزٹ پوائنٹس، بس اڈوں اور موٹروے ٹول پلازوں پر ۲۴ گھنٹے فیلڈ ڈیوٹی۔
+    `.trim(),
+    sourceName: 'Pakistan Polio Eradication Initiative',
+    sourceUrl: 'https://www.facebook.com/polioeradicationinitiative',
+    facebookPostUrl: 'https://www.facebook.com/polioeradicationinitiative',
+    factBox: {
+      campaignName: 'National Immunization Days (NID) Schedule',
+      dates: '28 Oct – 03 Nov 2026 & 25 Nov – 01 Dec 2026',
+      location: 'All Provinces & High-Risk Districts',
+      targetChildren: '45.4 Million Children (<5 Years)',
+      frontlineWorkers: '400,000+ Sehat Muhafiz Vaccinators',
+      districtsCovered: 'All 159 Districts Nationwide',
+      supervision: 'National EOC (NEOC) & Provincial EOCs',
+      keyDirectives: [
+        'Administer 2 drops of bOPV to every child under 5 years',
+        'Mark left pinky nail bed with indelible ink marker',
+        'Daily evening sweep of Not Available (NA) and Refusal houses',
+        'Inspect transit hubs continuously for incoming travelling children',
+      ],
+    },
+    keyFacts: [
+      {
+        labelEn: 'Phase 1 NID',
+        labelUr: 'پہلا قومی راؤنڈ',
+        valueEn: '28 Oct – 03 Nov 2026',
+        valueUr: '۲۸ اکتوبر تا ۰۳ نومبر ۲۰۲۶',
+      },
+      {
+        labelEn: 'Phase 2 SNID',
+        labelUr: 'دوسرا ذیلی راؤنڈ',
+        valueEn: '25 Nov – 01 Dec 2026',
+        valueUr: '۲۵ نومبر تا ۰۱ دسمبر ۲۰۲۶',
+      },
+      {
+        labelEn: 'National Target',
+        labelUr: 'قومی ہدف',
+        valueEn: '45.4M Children Under 5',
+        valueUr: '۴ کروڑ ۵۴ لاکھ بچے',
+      },
+      {
+        labelEn: 'Frontline Mobilization',
+        labelUr: 'فیلڈ عملہ',
+        valueEn: '400,000+ Health Workers',
+        valueUr: '۴ لاکھ سے زائد صحت محافظ',
+      },
+    ],
+    tags: ['Upcoming Dates', 'OPV Schedule', 'NEOC', 'NID 2026', 'National Campaign'],
+    tagsUr: ['آئندہ تاریخیں', 'او پی وی شیڈول', 'قومی مہم', 'این ای او سی'],
+    relatedCalculatorIds: ['calc-1', 'calc-2', 'calc-3', 'calc-4'],
+    relatedPlatformCategory: 'calculators',
+  },
+  {
+    id: '2026-10-24-peshawar-fipv-cold-chain-review',
+    slug: 'peshawar-dho-eoc-kp-fipv-cold-chain-logistics-readiness-review',
+    title: 'Field Audit: DHO Peshawar & EOC KP Inspect fIPV Cold-Chain & Injection Quality',
+    titleUr: 'فیلڈ جائزہ: ڈی ایچ او پشاور اور ای او سی کے پی کا کولڈ چین اور fIPV ٹیکہ جات کے معیار کا معائنہ',
+    date: '2026-10-24',
+    displayDate: '24 Oct 2026',
+    displayDateUr: '۲۴ اکتوبر ۲۰۲۶',
+    category: 'Activities',
+    categoryUr: 'سرگرمیاں',
+    location: 'District Peshawar, KP',
+    locationUr: 'ضلع پشاور، خیبر پختونخوا',
+    featured: false,
+    summary:
+      'Senior health officials carry out spot checks at civil dispensaries and mobile vaccination sites in Peshawar to audit vaccine vial monitors (VVM), auto-disable syringe supply, and needle safety disposal.',
+    summaryUr:
+      'صوبائی و ضلعی حکام نے پشاور کے مختلف مراکز صحت کا اچانک دورہ کر کے fIPV ویکسین وائل مانیٹر (VVM)، سرنجوں کی فراہمی اور سیفٹی باکس کے استعمال کی جانچ کی۔',
+    content: `
+**PESHAWAR (District Field Review):** District Health Officer (DHO) Peshawar accompanied by technical partners from WHO and UNICEF inspected frontline vaccination sessions in Union Councils across Peshawar.
+
+### Key Audit Findings & Protocols:
+- **Vaccine Vial Monitor (VVM):** 100% of examined fIPV and bOPV vials were verified in Stage 1/Usable condition.
+- **Safety Syringes & Waste Disposal:** Verified immediate disposal of auto-disable needles into yellow puncture-proof safety boxes without recapping.
+- **Tally Verification:** Cross-matched house markings with daily tally sheets and area supervisor counters.
+    `.trim(),
+    contentUr: `
+**پشاور (فیلڈ جائزہ سرگرمی):** ڈسٹرکٹ ہیلتھ آفیسر پشاور نے عالمی ادارہ صحت اور یونیسف کے نمائندوں کے ہمراہ پشاور کی یونین کونسلوں میں جاری مہماتی سیشنز کا تفصیلی معائنہ کیا۔
+
+### جائزے کے اہم نکات:
+- **ویکسین وائل مانیٹر (VVM):** تمام معائنہ شدہ وائلز کا اسٹیج ۱ اور ۲ پر مکمل محفوظ ہونا ثابت ہوا۔
+- **سرنجوں کی محفوظ تلفی:** استعمال شدہ سرنجوں کو بغیر ری کیپ کیے فوری طور پر حفاظتی باکس میں ڈالنے کی تصدیق۔
+- **ٹیلی شیٹ موازنہ:** گھروں پر نشانات اور ایریا سپروائزر کی ٹیلی شیٹس کا براہ راست موازنہ۔
+    `.trim(),
+    sourceName: 'Khyber Pakhtunkhwa Polio Programme',
+    sourceUrl: 'https://www.facebook.com/profile.php?id=100077497336541',
+    facebookPostUrl: 'https://www.facebook.com/profile.php?id=100077497336541',
+    factBox: {
+      campaignName: 'Peshawar Cold-Chain & Quality Review',
+      dates: 'Oct 2026',
+      location: 'Peshawar District Facilities',
+      supervision: 'DHO Peshawar, WHO & UNICEF',
+      keyDirectives: [
+        'Inspect VVM color square before every vaccination session',
+        'Mandatory use of puncture-resistant safety boxes for syringes',
+        'Record child mother name and father CNIC for catch-up tracking',
+      ],
+    },
+    tags: ['Quality Audit', 'Peshawar', 'Cold Chain', 'fIPV', 'Safety Box'],
+    tagsUr: ['کوالٹی آڈٹ', 'پشاور', 'کولڈ چین', 'سیفٹی باکس'],
+    relatedCalculatorIds: ['calc-3', 'calc-5'],
+    relatedPlatformCategory: 'activities',
+  },
+  {
     id: '2026-09-18-kp-campaign-launch',
     slug: 'eoc-pakhtunkhwa-september-polio-campaign-launch',
     title: 'EOC KP: September Polio Campaign Launched Across Khyber Pakhtunkhwa',

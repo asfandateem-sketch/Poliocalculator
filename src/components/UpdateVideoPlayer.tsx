@@ -1,6 +1,7 @@
 import React from 'react';
 import { Video, ExternalLink, HardDrive, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
+import { getStreamUrl } from '../data/driveLiveConfig';
 
 interface UpdateVideoPlayerProps {
   videoUrl: string;
@@ -18,7 +19,7 @@ export const UpdateVideoPlayer: React.FC<UpdateVideoPlayerProps> = ({
 
   const url = videoUrl.trim();
 
-  // 1. Google Drive In-App Video Embed (Plays directly on the website with zero errors)
+  // 1. Google Drive In-App Video Embed & Direct HTML5 Stream
   const driveMatch =
     url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) ||
     url.match(/[?&]id=([a-zA-Z0-9_-]+)/) ||
@@ -26,6 +27,7 @@ export const UpdateVideoPlayer: React.FC<UpdateVideoPlayerProps> = ({
 
   if (url.includes('drive.google.com') || (driveMatch && driveMatch[1])) {
     const fileId = driveMatch ? driveMatch[1] : '';
+    const streamUrl = fileId ? getStreamUrl(fileId, 'video') : '';
     const previewUrl = fileId
       ? `https://drive.google.com/file/d/${fileId}/preview`
       : url.replace(/\/view(\?.*)?$/, '/preview');
@@ -33,14 +35,26 @@ export const UpdateVideoPlayer: React.FC<UpdateVideoPlayerProps> = ({
     return (
       <div className="space-y-2 select-none">
         <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-slate-200/90 shadow-md">
-          <iframe
-            src={previewUrl}
-            title={title || 'Official Google Drive Campaign Video'}
-            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-            allowFullScreen
-            loading="lazy"
-            className="w-full h-full border-0"
-          />
+          {streamUrl ? (
+            <video
+              src={streamUrl}
+              controls
+              playsInline
+              preload="metadata"
+              className="w-full h-full object-contain"
+            >
+              Your browser does not support HTML5 video.
+            </video>
+          ) : (
+            <iframe
+              src={previewUrl}
+              title={title || 'Official Google Drive Campaign Video'}
+              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+              allowFullScreen
+              loading="lazy"
+              className="w-full h-full border-0"
+            />
+          )}
         </div>
         <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 flex-wrap gap-2">
           <span className="flex items-center gap-1.5 font-semibold text-teal-800">

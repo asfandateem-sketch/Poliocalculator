@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { Award, RotateCcw, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Award, RotateCcw, CheckCircle, Clock, AlertCircle, FileText } from 'lucide-react';
 import { calculateCoverage } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
 import { useCalculationFeedback } from '../useCalculationFeedback';
+import { CalculationReceiptModal } from './CalculationReceiptModal';
 
 interface Props {
   compact?: boolean;
@@ -21,6 +22,7 @@ export const CampaignCoverageCalculator: React.FC<Props> = React.memo(() => {
   const [vaccinatedResult, setVaccinatedResult] = useState<number | null>(4750);
   const [remainingChildren, setRemainingChildren] = useState<number | null>(250);
   const [error, setError] = useState<string>('');
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
 
   const calculate = useCallback(() => {
     setError('');
@@ -287,10 +289,80 @@ export const CampaignCoverageCalculator: React.FC<Props> = React.memo(() => {
                   </span>
                 </div>
               </div>
+
+              {/* View Official Calculation Receipt / Slip Button */}
+              {coveragePct !== null && (
+                <button
+                  type="button"
+                  onClick={() => setIsReceiptOpen(true)}
+                  className="w-full mt-3 py-2 px-3 rounded-xl bg-teal-800/80 hover:bg-teal-700 text-teal-100 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-teal-600/50 cursor-pointer shadow-xs active:scale-95 touch-manipulation"
+                >
+                  <FileText className="w-3.5 h-3.5 text-teal-300" />
+                  <span>{isUrdu ? 'حساب کی تصدیقی پرچی / رسید دیکھیں' : 'View Campaign Coverage Receipt & Slip'}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Official Field Calculation Receipt Modal */}
+      {coveragePct !== null && (
+        <CalculationReceiptModal
+          isOpen={isReceiptOpen}
+          onClose={() => setIsReceiptOpen(false)}
+          isUrdu={isUrdu}
+          data={{
+            calculatorId: 'calc-4',
+            calculatorNumber: '04',
+            calculatorTitle: strings.title,
+            calculatorTitleUr: strings.title,
+            badge: strings.badge,
+            inputs: [
+              {
+                labelEn: strings.targetLabel,
+                labelUr: strings.targetLabel,
+                value: `${Number(targetChildren || 0).toLocaleString()} Target Children`,
+              },
+              {
+                labelEn: strings.vaccinatedLabel,
+                labelUr: strings.vaccinatedLabel,
+                value: `${Number(vaccinatedChildren || 0).toLocaleString()} Vaccinated Children`,
+              },
+            ],
+            results: [
+              {
+                labelEn: strings.coverageAchievedLabel,
+                labelUr: strings.coverageAchievedLabel,
+                value: `${coveragePct.toFixed(1)}%`,
+                isHighlight: true,
+              },
+              {
+                labelEn: 'National Campaign Target Status',
+                labelUr: 'قومی مہماتی معیار کی کیفیت',
+                value: coveragePct >= 95.0
+                  ? (isUrdu ? 'ہدف کامیابی سے حاصل ہوا (≥95%)' : 'TARGET ACHIEVED (≥95%)')
+                  : coveragePct >= 85.0
+                  ? (isUrdu ? 'قابلِ قبول حد (85-94.9%)' : 'ACCEPTABLE (85-94.9%)')
+                  : (isUrdu ? 'انتباہ — فالو اپ درکار (<85%)' : 'CRITICAL DEFICIT ALERT (<85%)'),
+                isHighlight: true,
+              },
+              {
+                labelEn: strings.vaccinatedLabelResult,
+                labelUr: strings.vaccinatedLabelResult,
+                value: `${vaccinatedResult !== null ? vaccinatedResult.toLocaleString() : '—'} Children`,
+              },
+              {
+                labelEn: strings.remainingLabelResult,
+                labelUr: strings.remainingLabelResult,
+                value: `${remainingChildren !== null ? remainingChildren.toLocaleString() : 0} Children`,
+              },
+            ],
+            notesEn: 'Standard: Coverage % = (Children Vaccinated / Target Children) * 100. National NEOC benchmark is ≥ 95%.',
+            notesUr: 'معیار: کوریج = ویکسینیٹڈ بچے تقسیم کل ہدف ضرب ۱۰۰۔ قومی معیار ۹۵ فیصد یا زائد ہے۔',
+          }}
+        />
+      )}
     </div>
   );
 });

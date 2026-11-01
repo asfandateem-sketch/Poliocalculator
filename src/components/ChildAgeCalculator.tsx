@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Calendar, RotateCcw, CheckCircle2, XCircle } from 'lucide-react';
+import { Calendar, RotateCcw, CheckCircle2, XCircle, FileText } from 'lucide-react';
 import { calculateChildAge, ChildAgeResult } from '../calculatorEngine';
 import { useLanguage } from '../LanguageContext';
 import { InfoTooltip } from './InfoTooltip';
 import { useCalculationFeedback } from '../useCalculationFeedback';
+import { CalculationReceiptModal } from './CalculationReceiptModal';
 
 interface Props {
   compact?: boolean;
@@ -23,6 +24,7 @@ export const ChildAgeCalculator: React.FC<Props> = React.memo(() => {
 
   const [campaignDate, setCampaignDate] = useState<string>(todayString);
   const [dob, setDob] = useState<string>(defaultDob);
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [result, setResult] = useState<ChildAgeResult | null>(() => {
     try {
       const [y, m, d] = defaultDob.split('-').map(Number);
@@ -283,10 +285,72 @@ export const ChildAgeCalculator: React.FC<Props> = React.memo(() => {
                   </span>
                 </div>
               </div>
+
+              {/* View Official Calculation Receipt / Slip Button */}
+              {result && (
+                <button
+                  type="button"
+                  onClick={() => setIsReceiptOpen(true)}
+                  className="w-full mt-3 py-2 px-3 rounded-xl bg-teal-800/80 hover:bg-teal-700 text-teal-100 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-teal-600/50 cursor-pointer shadow-xs active:scale-95 touch-manipulation"
+                >
+                  <FileText className="w-3.5 h-3.5 text-teal-300" />
+                  <span>{isUrdu ? 'حساب کی تصدیقی پرچی / رسید دیکھیں' : 'View Age Verification Slip & Receipt'}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Official Field Calculation Receipt Modal */}
+      {result && (
+        <CalculationReceiptModal
+          isOpen={isReceiptOpen}
+          onClose={() => setIsReceiptOpen(false)}
+          isUrdu={isUrdu}
+          data={{
+            calculatorId: 'calc-1',
+            calculatorNumber: '01',
+            calculatorTitle: strings.title,
+            calculatorTitleUr: strings.title,
+            badge: strings.badge,
+            inputs: [
+              {
+                labelEn: strings.dobLabel,
+                labelUr: strings.dobLabel,
+                value: result.formattedDob,
+              },
+              {
+                labelEn: 'Campaign Reference Date',
+                labelUr: 'مہم کی حوالہ تاریخ',
+                value: campaignDate || todayString,
+              },
+            ],
+            results: [
+              {
+                labelEn: strings.under5Status,
+                labelUr: strings.under5Status,
+                value: result.isUnder5
+                  ? (isUrdu ? 'اہل برائے پولیو ویکسینیشن (< 5 سال)' : 'ELIGIBLE FOR VACCINATION (< 5 Years)')
+                  : (isUrdu ? 'اہل نہیں (عمر 5 سال یا زائد)' : 'NOT ELIGIBLE (Age ≥ 5 Years)'),
+                isHighlight: true,
+              },
+              {
+                labelEn: strings.exactAgeLabel,
+                labelUr: strings.exactAgeLabel,
+                value: result.ageString,
+              },
+              {
+                labelEn: 'EPI Target Eligibility',
+                labelUr: 'قومی ہدف کی شمولیت',
+                value: result.isUnder5 ? 'YES - Include in Target' : 'NO - Do Not Record as Target',
+              },
+            ],
+            notesEn: 'Criteria: Child must be strictly under 59 months and 29 days (< 5.0 years) on the campaign date. Verified under NEOC Pakistan standard guidelines.',
+            notesUr: 'معیار: مہم کی تاریخ تک بچے کی عمر 5 سال (59 ماہ اور 29 دن) سے کم ہونی چاہیے۔ قومی انسداد پولیو رہنمائی کے مطابق تصدیق شدہ۔',
+          }}
+        />
+      )}
     </div>
   );
 });
